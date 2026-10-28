@@ -10,9 +10,14 @@
 % The maggidshiur version of a source sheet includes notes that are left out
 % of the talmid version, which is the default.
 \newif\ifshiur@maggidshiur
+% A Hebrew-only version (translations=false) leaves out the English
+% translations of Hebrew sources.
+\newif\ifshiur@translations
+\shiur@translationstrue
 \DeclareKeys[shiur]{
 	maggidshiur .if = shiur@maggidshiur,
 	talmid .code = \shiur@maggidshiurfalse,
+	translations .if = shiur@translations,
 }
 \ProcessKeyOptions[shiur]
 
@@ -85,14 +90,19 @@
 % the number of slides the current mekor needs, set by \shiur@parts
 \newcounter{shiur@parts}
 \newif\ifshiur@inmekor
+% whether the current mekor has a hebrew mekorlang, which makes an english one
+% after it a translation
+\newif\ifshiur@hashebrew
 \ifbool{shiur@beamer}{
 	% #1 body
-	\newcommand{\shiur@frame}[1]{\frame{\setcounter{shiur@parts}{1}\shiur@inmekortrue#1}}
+	\newcommand{\shiur@frame}[1]{%
+		\frame{\setcounter{shiur@parts}{1}\global\shiur@hashebrewfalse\shiur@inmekortrue#1}%
+	}
 	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\shiur@frame{#1}\vspace{0.5em}}{}
 	\NewDocumentEnvironment{mekor*}{+b}{\shiur@frame{#1}\vspace{0.5em}}{}
 }{
-	\NewDocumentEnvironment{mekor}{}{\refstepcounter{mekor}}{\vspace{0.5em}}
-	\NewDocumentEnvironment{mekor*}{}{}{\vspace{0.5em}}
+	\NewDocumentEnvironment{mekor}{}{\refstepcounter{mekor}\global\shiur@hashebrewfalse}{\vspace{0.5em}}
+	\NewDocumentEnvironment{mekor*}{}{\global\shiur@hashebrewfalse}{\vspace{0.5em}}
 }
 
 % How the heading of a mekorlang differs between articles and beamer: the
@@ -199,10 +209,16 @@
 % \begin{mekorlang}[subtitle]{language}{title}
 \NewDocumentEnvironment{mekorlang}{O{} m m +b}{%
 	\ifstrequal{#2}{hebrew}
-		{\begin{hebrew}\shiur@hebrewblock{\shiur@mekorlang{\hebrewnumeral{\themekor}}{#1}{#3}{#4}}\end{hebrew}}
-		{\shiur@mekorlang{\themekor}{#1}{#3}{#4}}%
-	\par
+		{\global\shiur@hashebrewtrue
+		\begin{hebrew}\shiur@hebrewblock{\shiur@mekorlang{\hebrewnumeral{\themekor}}{#1}{#3}{#4}}\end{hebrew}\par}
+		{\ifboolexpr{not bool{shiur@translations} and bool{shiur@hashebrew}}
+			{}
+			{\shiur@mekorlang{\themekor}{#1}{#3}{#4}\par}}%
 }{}
+
+% Text for only one of the bilingual and Hebrew-only versions.
+% #1 text with translations, #2 text without them
+\newcommand{\iftranslations}[2]{\ifbool{shiur@translations}{#1}{#2}}
 
 %                         ***********
 %                         ** NOTES **
