@@ -25,8 +25,14 @@
 
 \RequirePackage{etoolbox}
 % bidi patches beamer's navigation code, which needs pgf, and beamerarticle
-% doesn't load it
-\ifshiur@beamerarticle\RequirePackage{pgf}\fi
+% doesn't load it. It also replaces itemize and description with beamer's,
+% whose helpers aren't defined in article mode, so keep the article's (they are
+% restored once hebrew has loaded bidi).
+\ifshiur@beamerarticle
+	\RequirePackage{pgf}
+	\let\shiur@itemize\itemize
+	\let\shiur@description\@@description
+\fi
 \RequirePackage{polyglossia}
 \RequirePackage{changepage}
 \RequirePackage{graphicx}
@@ -60,6 +66,10 @@
 
 \setmainlanguage[variant=british]{english}
 \setotherlanguage{hebrew}
+\ifshiur@beamerarticle
+	\let\itemize\shiur@itemize
+	\let\@@description\shiur@description
+\fi
 
 \newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
 
