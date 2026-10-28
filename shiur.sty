@@ -102,6 +102,16 @@
 % heading, with an ellipsis where the text was cut.
 \newcommand{\mekorbreak}{}
 \newcommand{\shiur@ellipsis}{...}
+% The ellipsis at a break replaces any punctuation there, so "him." reads "him...".
+% #1 text
+\ExplSyntaxOn
+\cs_new_protected:Npn \shiur@dropstop #1
+	{
+		\tl_set:Nn \shiur@parttext {#1}
+		\regex_replace_once:nnN { [.,;:]+\s*\Z } { } \shiur@parttext
+		\shiur@parttext
+	}
+\ExplSyntaxOff
 \ifbool{shiur@beamer}{
 	\newcounter{shiur@part}
 	% #1 text
@@ -121,7 +131,8 @@
 	% #1 text, #2 what follows it
 	\newcommand{\shiur@part}[2]{%
 		\expandafter\only\expandafter<\the\value{shiur@part}>{%
-			\ifnumgreater{\value{shiur@part}}{1}{\shiur@ellipsis}{}#1\unskip#2}%
+			\ifnumgreater{\value{shiur@part}}{1}{\shiur@ellipsis}{}%
+			\ifblank{#2}{#1}{\shiur@dropstop{#1}}\unskip#2}%
 	}
 	% Notes around a source go on its first and last slides.
 	\newcommand{\shiur@firstslide}[1]{\ifshiur@inmekor\only<1>{#1}\else#1\fi}
