@@ -72,9 +72,14 @@
 % taking a new number.
 
 \newcounter{mekor}
+% the number of slides the current mekor needs, set by \shiur@parts
+\newcounter{shiur@parts}
+\newif\ifshiur@inmekor
 \ifbool{shiur@beamer}{
-	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\frame{#1}\vspace{0.5em}}{}
-	\NewDocumentEnvironment{mekor*}{+b}{\frame{#1}\vspace{0.5em}}{}
+	% #1 body
+	\newcommand{\shiur@frame}[1]{\frame{\setcounter{shiur@parts}{1}\shiur@inmekortrue#1}}
+	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\shiur@frame{#1}\vspace{0.5em}}{}
+	\NewDocumentEnvironment{mekor*}{+b}{\shiur@frame{#1}\vspace{0.5em}}{}
 }{
 	\NewDocumentEnvironment{mekor}{}{\refstepcounter{mekor}}{\vspace{0.5em}}
 	\NewDocumentEnvironment{mekor*}{}{}{\vspace{0.5em}}
@@ -92,12 +97,49 @@
 	\newcommand{\shiur@hebrewblock}[1]{#1}
 }
 
+% \mekorbreak splits a long source over several slides. Articles ignore it. In
+% beamer, slide k of the mekor's frame shows part k of each mekorlang under its
+% heading, with an ellipsis where the text was cut.
+\newcommand{\mekorbreak}{}
+\newcommand{\shiur@ellipsis}{...}
+\ifbool{shiur@beamer}{
+	\newcounter{shiur@part}
+	% #1 text
+	\newcommand{\shiur@parts}[1]{%
+		\setcounter{shiur@part}{0}%
+		\shiur@nextpart\relax#1\mekorbreak\shiur@stop
+	}
+	% #1 this part, #2 the parts after it (the \relax keeps braces around a part)
+	\long\def\shiur@nextpart#1\mekorbreak#2\shiur@stop{%
+		\stepcounter{shiur@part}%
+		\ifnumgreater{\value{shiur@part}}{\value{shiur@parts}}
+			{\setcounter{shiur@parts}{\value{shiur@part}}}{}%
+		\ifblank{#2}
+			{\ifnumequal{\value{shiur@part}}{1}{#1}{\shiur@part{#1}{}}}
+			{\shiur@part{#1}{\shiur@ellipsis}\shiur@nextpart\relax#2\shiur@stop}%
+	}
+	% #1 text, #2 what follows it
+	\newcommand{\shiur@part}[2]{%
+		\expandafter\only\expandafter<\the\value{shiur@part}>{%
+			\ifnumgreater{\value{shiur@part}}{1}{\shiur@ellipsis}{}#1\unskip#2}%
+	}
+	% Notes around a source go on its first and last slides.
+	\newcommand{\shiur@firstslide}[1]{\ifshiur@inmekor\only<1>{#1}\else#1\fi}
+	\newcommand{\shiur@lastslide}[1]{%
+		\ifshiur@inmekor\expandafter\only\expandafter<\the\value{shiur@parts}>{#1}\else#1\fi
+	}
+}{
+	\let\shiur@parts\@firstofone
+	\let\shiur@firstslide\@firstofone
+	\let\shiur@lastslide\@firstofone
+}
+
 % #1 number, #2 subtitle, #3 title, #4 text
 \newcommand{\shiur@mekorlang}[4]{%
 	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}\textbf{#3}%
 	\ifstrempty{#2}{}{\newline\shiur@subtitlefont\textit{#2}}%
 	\par\vspace{0.5em}\noindent
-	#4\par\vspace{1em}%
+	\shiur@parts{#4}\par\vspace{1em}%
 }
 
 % \begin{mekorlang}[subtitle]{language}{title}
@@ -127,8 +169,8 @@
 	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 }
 \NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
-\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@note{1em}{5em}{#1}{#2}}{}
-\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@note{5em}{1em}{#1}{#2}}{}
+\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@firstslide{\shiur@note{1em}{5em}{#1}{#2}}}{}
+\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@lastslide{\shiur@note{5em}{1em}{#1}{#2}}}{}
 
 % beamerarticle loads amsmath, which has a \boxed command
 \ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
