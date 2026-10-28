@@ -109,24 +109,55 @@
 
 % \mekorbreak splits a long source over several slides. Articles ignore it. In
 % beamer, slide k of the mekor's frame shows part k of each mekorlang under its
-% heading, with an ellipsis where the text was cut.
-\newcommand{\mekorbreak}{}
+% heading, with an ellipsis on both sides of the cut. \mekorbreak* cuts without
+% one, for a break between sentences or paragraphs.
+\NewDocumentCommand{\mekorbreak}{s}{\ignorespaces}
 \newcommand{\shiur@ellipsis}{...}
-% The ellipsis at a break replaces any punctuation there, so "him." reads "him...".
-% #1 text
 \ExplSyntaxOn
-\cs_new_protected:Npn \shiur@dropstop #1
+% A part without the star of the break before it, and without the spaces and
+% paragraph breaks around it, which would add an empty paragraph.
+% #1 text
+\cs_new_protected:Npn \shiur@trimpart #1
 	{
 		\tl_set:Nn \shiur@parttext {#1}
-		\regex_replace_once:nnN { [.,;:]+\s*\Z } { } \shiur@parttext
+		\regex_replace_once:nnN { \A \c{relax}? \*? (?: \s | \c{par} )* } { } \shiur@parttext
+		\regex_replace_once:nnN { (?: \s | \c{par} )* \Z } { } \shiur@parttext
+	}
+% The ellipsis at a break replaces any punctuation there, so "him." reads "him...".
+% #1 text
+\cs_new_protected:Npn \shiur@dropstop #1
+	{
+		\shiur@trimpart {#1}
+		\regex_replace_once:nnN { [.,;:]+ \Z } { } \shiur@parttext
 		\shiur@parttext
+	}
+\cs_new_protected:Npn \shiur@trimmed #1
+	{
+		\shiur@trimpart {#1}
+		\shiur@parttext
+	}
+% A clean cut doesn't leave a slide ending in a comma.
+% #1 text
+\cs_new_protected:Npn \shiur@dropcomma #1
+	{
+		\shiur@trimpart {#1}
+		\regex_replace_once:nnN { [,;]+ \Z } { } \shiur@parttext
+		\shiur@parttext
+	}
+% #1 the text after a break, #2 if the break is \mekorbreak*, #3 if not
+\cs_new_protected:Npn \shiur@ifstarred #1
+	{
+		\regex_match:nnTF { \A \* } {#1} { \use_i:nn } { \use_ii:nn }
 	}
 \ExplSyntaxOff
 \ifbool{shiur@beamer}{
 	\newcounter{shiur@part}
+	% whether the break before the current part is marked with an ellipsis
+	\newif\ifshiur@midbreak
 	% #1 text
 	\newcommand{\shiur@parts}[1]{%
 		\setcounter{shiur@part}{0}%
+		\shiur@midbreakfalse
 		\shiur@nextpart\relax#1\mekorbreak\shiur@stop
 	}
 	% #1 this part, #2 the parts after it (the \relax keeps braces around a part)
@@ -134,15 +165,17 @@
 		\stepcounter{shiur@part}%
 		\ifnumgreater{\value{shiur@part}}{\value{shiur@parts}}
 			{\setcounter{shiur@parts}{\value{shiur@part}}}{}%
+		\edef\shiur@before{\ifshiur@midbreak\noexpand\shiur@ellipsis\fi}%
 		\ifblank{#2}
-			{\ifnumequal{\value{shiur@part}}{1}{#1}{\shiur@part{#1}{}}}
-			{\shiur@part{#1}{\shiur@ellipsis}\shiur@nextpart\relax#2\shiur@stop}%
+			{\ifnumequal{\value{shiur@part}}{1}{#1}{\shiur@part{\shiur@trimmed{#1}}{}}}
+			{\shiur@ifstarred{#2}
+				{\shiur@part{\shiur@dropcomma{#1}}{}\shiur@midbreakfalse}
+				{\shiur@part{\shiur@dropstop{#1}}{\shiur@ellipsis}\shiur@midbreaktrue}%
+			\shiur@nextpart\relax#2\shiur@stop}%
 	}
 	% #1 text, #2 what follows it
 	\newcommand{\shiur@part}[2]{%
-		\expandafter\only\expandafter<\the\value{shiur@part}>{%
-			\ifnumgreater{\value{shiur@part}}{1}{\shiur@ellipsis}{}%
-			\ifblank{#2}{#1}{\shiur@dropstop{#1}}\unskip#2}%
+		\expandafter\only\expandafter<\the\value{shiur@part}>{\shiur@before#1#2}%
 	}
 	% Notes around a source go on its first and last slides.
 	\newcommand{\shiur@firstslide}[1]{\ifshiur@inmekor\only<1>{#1}\else#1\fi}
