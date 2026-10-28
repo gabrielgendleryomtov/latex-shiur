@@ -45,6 +45,10 @@
 \RequirePackage{xparse}
 \RequirePackage{environ}
 
+% the same package serves articles and beamer presentations
+\newbool{beamer}
+\@ifclassloaded{beamer}{\booltrue{beamer}}{\boolfalse{beamer}}
+
 % ------------------------------------------------------------------------------
 
 %                         *****************
@@ -102,6 +106,48 @@
 \newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
 
 \newcounter{mekor}
+\ifbool{beamer}{
+\NewEnviron{mekor}{
+	\refstepcounter{mekor}
+	\frame
+	{
+	\BODY
+	}
+	\vspace{0.5em}
+}
+
+\NewEnviron{mekor*}{
+	\frame
+	{
+	\BODY
+	}
+	\vspace{0.5em}
+}
+
+\NewEnviron{mekorlang}[3][]{
+	\ifstrequal{#2}{hebrew}{
+		\begin{hebrew}
+		\begin{flushright}
+		\booltrue{langisheb}
+		%\noindent\textbf{\llap{\hebrewnumeral{\themekor}.\hspace{1em}}}%
+		\noindent\textbf{\hebrewnumeral{\themekor}.\hspace{1em}}%
+	}{
+		%\noindent\textbf{\llap{\themekor.\hspace{2em}}}%
+		%\noindent\textbf{{\themekor}.\hspace{2em}}%
+		\noindent\textbf{\themekor.\hspace{1em}}%
+	}\noindent\textbf{#3}
+	\ifstrempty{#1}{}{\newline\small\textit{#1}}
+	\par\vspace{0.5em}\noindent
+	\BODY
+	\vspace{1em}
+	\ifbool{langisheb}{
+		\end{flushright}
+		\end{hebrew}
+		\boolfalse{langisheb}
+	}{}
+	\par
+}
+}{
 \NewEnviron{mekor}{
 	\refstepcounter{mekor}
 	\BODY
@@ -126,12 +172,14 @@
 	}{}
 	\par
 }
+}
 
 %work on where page breaks can go
 %make the removal of the space at the start of the paragraph automatic
 %structure of notes
 %get the hidden piece more generalised
 
+\ifbool{beamer}{}{
 \NewEnviron{note}[1][english]{
 	\ifbool{maggidshiur}{
     	\begin{adjustwidth}{3em}{3em}\em
@@ -149,6 +197,26 @@
     	\end{adjustwidth}
 	}{}
 }
+}
+\ifbool{beamer}{
+\NewEnviron{gnote}[1][english]{
+	\ifbool{maggidshiur}{
+    	\begin{adjustwidth}{3em}{3em}\em
+    	\ifstrequal{#1}{hebrew}{
+    		\begin{hebrew}
+    		\booltrue{langisheb}
+    	}{}
+    %	\ifbool{maggidshiur}{
+    		\BODY
+    %	}{}
+    	\ifbool{langisheb}{
+    		\end{hebrew}
+    		\boolfalse{langisheb}
+    	}{}
+    	\end{adjustwidth}
+	}{}
+}
+}{}
 
 \NewEnviron{prenote}[1][english]{
 	\ifbool{maggidshiur}{
@@ -186,6 +254,7 @@
 	}{}
 }
 
+\ifbool{beamer}{}{
 \NewEnviron{boxed}
     {\begin{center}
     \begin{tabular}{|p{0.9\textwidth}|}
@@ -197,6 +266,7 @@
     \end{tabular} 
     \end{center}
     }
+}
 
 % macros
 
