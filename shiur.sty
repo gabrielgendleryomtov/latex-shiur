@@ -1,98 +1,56 @@
-%%Identification
-%%The package identifies itself and the LaTeX version needed
-\NeedsTeXFormat{LaTeX2e}
-\def\styauthor{Gabriel Gendler Yom-Tov}
-\def\styauthormail{shiurtex@thm.mozmail.com}
-\def\fileversion{1.0}
-\def\filedate{2023/12/09}
-\ProvidesPackage{shiur}[\filedate\space Version \fileversion\space by \styauthor\space commands for dappei mekorot]
+% shiur: source sheets (dappei mekorot) for articles and beamer presentations.
+% Gabriel Gendler Yom-Tov <shiurtex@thm.mozmail.com>
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
+\ProvidesPackage{shiur}[2026/10/28 v2.0 source sheets for articles and beamer]
 
-%%Required packages and preliminary definitions, needed by the options
-\RequirePackage[utf8]{inputenc}
-\RequirePackage{hyperref}
+%                         *************
+%                         ** OPTIONS **
+%                         *************
+
+% The maggidshiur version of a source sheet includes notes that are left out
+% of the talmid version, which is the default.
+\newif\ifshiur@maggidshiur
+\DeclareKeys[shiur]{
+	maggidshiur .if = shiur@maggidshiur,
+	talmid .code = \shiur@maggidshiurfalse,
+}
+\ProcessKeyOptions[shiur]
 
 \RequirePackage{etoolbox}
-
-% whether to print the mekorot with their translations side by side or one after
-% the other.
-% I strongly recommend the latter and I will not implement the former for now.
-
-\newbool{sidebyside}
-\boolfalse{sidebyside}
-\DeclareOption{sidebyside}{\booltrue{sidebyside}}
-\DeclareOption{stacked}{\boolfalse{sidebyside}}
-
-% there are various reasons a maggid shiur might want a different source sheet.
-% by default there will be notes that are hidden from the talmidim. There will
-% also be an option to have additional mekorot hidden from the talmidim.
-
-\newbool{maggidshiur}
-\boolfalse{maggidshiur}
-\DeclareOption{maggidshiur}{\booltrue{maggidshiur}}
-\DeclareOption{talmid}{\boolfalse{maggidshiur}}
-
-\ProcessOptions\relax
-
 \RequirePackage{polyglossia}
-\RequirePackage{fontspec}
 \RequirePackage{changepage}
 \RequirePackage{graphicx}
-\RequirePackage{xparse}
 
 % the same package serves articles and beamer presentations
-\newbool{beamer}
-\@ifclassloaded{beamer}{\booltrue{beamer}}{\boolfalse{beamer}}
-
-% ------------------------------------------------------------------------------
+\newif\ifshiur@beamer
+\@ifclassloaded{beamer}{\shiur@beamertrue}{}
 
 %                         *****************
 %                         ** PAGE LAYOUT **
 %                         *****************
 
-% We set the parameters in terms of \paperwidth and \paperheight
-% so that the options
+% Margins are relative to the paper size, so the class's paper options all work.
+\ifbool{shiur@beamer}{
+	\newcommand{\makeTitle}{\maketitle}
+}{
+	\RequirePackage[hmargin=1in, top=1in, bottom=1.2in, headheight=15pt,
+		headsep=15pt, footskip=29pt, marginparwidth=.5in, marginparsep=5pt]{geometry}
 
-% a4paper
-% a5paper
-% b5paper
-% letterpaper
-% legalpaper
-% executivepaper
-% landscape
-
-% will all work:
-
-\setlength{\textwidth}{\paperwidth}
-\addtolength{\textwidth}{-2in}
-\setlength{\oddsidemargin}{0pt}
-\setlength{\evensidemargin}{0pt}
-
-\setlength{\headheight}{15pt}
-\setlength{\headsep}{15pt}
-\setlength{\topmargin}{0in}
-\addtolength{\topmargin}{-\headheight}
-\addtolength{\topmargin}{-\headsep}
-\setlength{\footskip}{29pt}
-\setlength{\textheight}{\paperheight}
-\addtolength{\textheight}{-2.2in}
-
-%\renewcommand{\baselinestretch}{1.5} 
-
-\setlength{\marginparwidth}{.5in}
-\setlength{\marginparsep}{5pt}
-
-\RequirePackage{fancyhdr}
-\renewcommand{\headrulewidth}{0pt}
-\fancyhf{}
-\fancyhead[R]{\begin{hebrew}בס״ד\end{hebrew}}
-\fancyfoot[L]{\thepage}
-\def\makeTitle{\maketitle \thispagestyle{fancy} \pagestyle{fancy}}
+	\RequirePackage{fancyhdr}
+	\renewcommand{\headrulewidth}{0pt}
+	\fancyhf{}
+	\fancyhead[R]{\begin{hebrew}בס״ד\end{hebrew}}
+	\fancyfoot[L]{\thepage}
+	\newcommand{\makeTitle}{\maketitle\thispagestyle{fancy}\pagestyle{fancy}}
+}
 
 \setcounter{secnumdepth}{0}
 \setlength{\parindent}{0mm}
 \setlength{\parskip}{0.5em}
 
-% ------------------------------------------------------------------------------
+%                         ***************
+%                         ** LANGUAGES **
+%                         ***************
 
 \setmainlanguage[variant=british]{english}
 \setotherlanguage{hebrew}
@@ -108,7 +66,7 @@
 % taking a new number.
 
 \newcounter{mekor}
-\ifbool{beamer}{
+\ifbool{shiur@beamer}{
 	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\frame{#1}\vspace{0.5em}}{}
 	\NewDocumentEnvironment{mekor*}{+b}{\frame{#1}\vspace{0.5em}}{}
 }{
@@ -118,7 +76,7 @@
 
 % How the heading of a mekorlang differs between articles and beamer: the
 % number sits in the margin of an article, but inline on a slide.
-\ifbool{beamer}{
+\ifbool{shiur@beamer}{
 	\newcommand{\shiur@number}[1]{#1}
 	\newcommand{\shiur@subtitlefont}{\small}
 	\newcommand{\shiur@hebrewblock}[1]{\begin{flushright}#1\end{flushright}}
@@ -151,7 +109,7 @@
 % Notes for the maggid shiur, which are left out of the talmid version.
 % #1 left and #2 right indentation, #3 language, #4 text
 \newcommand{\shiur@note}[4]{%
-	\ifbool{maggidshiur}{%
+	\ifbool{shiur@maggidshiur}{%
 		\begin{adjustwidth}{#1}{#2}\em
 		\ifstrequal{#3}{hebrew}{\begin{hebrew}#4\end{hebrew}}{#4}%
 		\end{adjustwidth}%
@@ -159,14 +117,14 @@
 }
 
 % beamer already has a \note command, so slides use gnote instead
-\ifbool{beamer}{}{
+\ifbool{shiur@beamer}{}{
 	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 }
 \NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 \NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@note{1em}{5em}{#1}{#2}}{}
 \NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@note{5em}{1em}{#1}{#2}}{}
 
-\ifbool{beamer}{}{
+\ifbool{shiur@beamer}{}{
 	\NewDocumentEnvironment{boxed}{+b}
 		{\begin{center}
 		\begin{tabular}{|p{0.9\textwidth}|}
@@ -180,8 +138,13 @@
 		{}
 }
 
-% macros
+%                         ************
+%                         ** MACROS **
+%                         ************
 
-\def\hdot{ḥ}
-\def\Hdot{Ḥ}
-\def\sectionsymbol{§}
+% provided rather than defined, since other packages of mine define them too
+\providecommand{\hdot}{ḥ}
+\providecommand{\Hdot}{Ḥ}
+\providecommand{\sectionsymbol}{§}
+
+\RequirePackage{hyperref}
