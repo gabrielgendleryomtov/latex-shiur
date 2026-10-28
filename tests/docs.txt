@@ -6,3 +6,4 @@ tests/examples/shared-talmid.tex
 tests/examples/shared-maggidshiur.tex
 tests/examples/shared-beamer.tex
 tests/examples/article-hebrew.tex
+tests/examples/article-accessible.tex
