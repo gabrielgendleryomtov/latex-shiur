@@ -244,23 +244,33 @@
 %                         ** NOTES **
 %                         ***********
 
-% Notes for the maggid shiur, which are left out of the talmid version.
-% #1 left and #2 right indentation, #3 language, #4 text
-\newcommand{\shiur@note}[4]{%
+% Notes for the maggid shiur, which are left out of the talmid version. Every
+% kind of note looks the same: upright text beside a grey bar on the side where
+% its lines start (bidi puts it on the right for Hebrew). Where a note sits
+% already says whether it introduces a source or follows one; in beamer, a
+% prenote goes on the first slide of a split source and a postnote on the last.
+\RequirePackage{xcolor}
+\RequirePackage{framed}
+\newenvironment{shiur@notebar}
+	{\def\FrameCommand{\hspace{1em}{\color{black!50}\vrule width 1.5pt}\hspace{0.8em}}%
+	\MakeFramed{\advance\hsize-\width\FrameRestore}}
+	{\endMakeFramed}
+% #1 language, #2 text
+\newcommand{\shiur@note}[2]{%
 	\ifbool{shiur@maggidshiur}{%
-		\begin{adjustwidth}{#1}{#2}\em
-		\ifstrequal{#3}{hebrew}{\begin{hebrew}#4\end{hebrew}}{#4}%
-		\end{adjustwidth}%
+		\ifstrequal{#1}{hebrew}
+			{\begin{hebrew}\begin{shiur@notebar}#2\end{shiur@notebar}\end{hebrew}}
+			{\begin{shiur@notebar}#2\end{shiur@notebar}}%
 	}{}%
 }
 
 % beamer and beamerarticle already have a \note command, so they use gnote instead
 \ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
-	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
+	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{#1}{#2}}{}
 }
-\NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
-\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@firstslide{\shiur@note{1em}{5em}{#1}{#2}}}{}
-\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@lastslide{\shiur@note{5em}{1em}{#1}{#2}}}{}
+\NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{#1}{#2}}{}
+\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@firstslide{\shiur@note{#1}{#2}}}{}
+\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@lastslide{\shiur@note{#1}{#2}}}{}
 
 % beamerarticle loads amsmath, which has a \boxed command
 \ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
