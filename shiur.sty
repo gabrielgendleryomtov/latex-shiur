@@ -16,14 +16,20 @@
 }
 \ProcessKeyOptions[shiur]
 
+% The same package serves articles and beamer presentations. An article that
+% loads beamerarticle first can share its body with a beamer presentation.
+\newif\ifshiur@beamer
+\@ifclassloaded{beamer}{\shiur@beamertrue}{}
+\newif\ifshiur@beamerarticle
+\@ifpackageloaded{beamerarticle}{\shiur@beamerarticletrue}{}
+
 \RequirePackage{etoolbox}
+% bidi patches beamer's navigation code, which needs pgf, and beamerarticle
+% doesn't load it
+\ifshiur@beamerarticle\RequirePackage{pgf}\fi
 \RequirePackage{polyglossia}
 \RequirePackage{changepage}
 \RequirePackage{graphicx}
-
-% the same package serves articles and beamer presentations
-\newif\ifshiur@beamer
-\@ifclassloaded{beamer}{\shiur@beamertrue}{}
 
 %                         *****************
 %                         ** PAGE LAYOUT **
@@ -116,15 +122,16 @@
 	}{}%
 }
 
-% beamer already has a \note command, so slides use gnote instead
-\ifbool{shiur@beamer}{}{
+% beamer and beamerarticle already have a \note command, so they use gnote instead
+\ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
 	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 }
 \NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 \NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@note{1em}{5em}{#1}{#2}}{}
 \NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@note{5em}{1em}{#1}{#2}}{}
 
-\ifbool{shiur@beamer}{}{
+% beamerarticle loads amsmath, which has a \boxed command
+\ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
 	\NewDocumentEnvironment{boxed}{+b}
 		{\begin{center}
 		\begin{tabular}{|p{0.9\textwidth}|}
