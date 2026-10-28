@@ -1,0 +1,274 @@
+% Manual for the shiur package. Compile with XeLaTeX (twice).
+\documentclass[11pt]{article}
+\usepackage[maggidshiur]{shiur}
+\usepackage{fancyvrb}
+\usepackage{booktabs}
+\newfontfamily{\hebrewfont}{FreeSerif}
+% code listings use a monospaced font that has Hebrew
+\newfontfamily{\codefont}{FreeMono}
+\fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
+\newcommand{\cs}[1]{\texttt{\char`\\#1}}
+\newcommand{\env}[1]{\texttt{#1}}
+
+\title{The \texttt{shiur} package\\[0.3em]\large Source sheets (\emph{dappei mekorot}) for handouts and slides}
+\author{Gabriel Gendler Yom-Tov\\\small\texttt{shiurtex@thm.mozmail.com}}
+\date{Version 2.0, 28 October 2026}
+
+\begin{document}
+
+\makeTitle
+
+\section{Introduction}
+
+\texttt{shiur} typesets Jewish source sheets: numbered sources, each in Hebrew with an
+English translation, with notes for the person giving the class (the \emph{maggid shiur}).
+From one file of content it can produce:
+\begin{itemize}
+\item a handout for participants (\emph{talmid}), and one with the teacher's notes
+	(\emph{maggid shiur});
+\item a bilingual handout and a Hebrew-only one;
+\item a large-print handout;
+\item beamer slides, with long sources split over several slides.
+\end{itemize}
+Each version is a two- or three-line wrapper file around the shared content, so a
+correction made once appears in every version.
+
+The package needs XeLaTeX and a font with Hebrew. It loads \texttt{polyglossia} (with
+English as the main language and Hebrew as the other), \texttt{geometry},
+\texttt{fancyhdr}, \texttt{framed}, \texttt{xcolor} and \texttt{hyperref}, among others.
+
+\section{A first source sheet}
+
+\begin{Verbatim}
+\documentclass[11pt]{article}
+\usepackage{shiur}
+\newfontfamily{\hebrewfont}{FreeSerif}
+
+\title{Wheat from the clouds}
+\author{A. Teacher}
+\date{}
+
+\begin{document}
+\makeTitle
+
+\begin{mekor}
+\begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
+בעי ר׳ זירא: חיטין שירדו בעבים מהו?
+\end{mekorlang}
+\begin{mekorlang}{english}{B. Mena\hdot ot 69b}
+R. Zeira asked: ``if wheat descended in clouds, what is the law?''
+\end{mekorlang}
+\end{mekor}
+
+\end{document}
+\end{Verbatim}
+
+\cs{newfontfamily}\verb|{\hebrewfont}| chooses the Hebrew font for handouts; in beamer,
+which uses sans serif, set \verb|\hebrewfontsf| instead. \cs{makeTitle} prints the title
+and starts the page style, with \foreignlanguage{hebrew}{בס״ד} at the top right of each page.
+
+The source above comes out like this:
+
+\begin{mekor}
+\begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
+בעי ר׳ זירא: חיטין שירדו בעבים מהו?
+\end{mekorlang}
+\begin{mekorlang}{english}{B. Mena\hdot ot 69b}
+R. Zeira asked: ``if wheat descended in clouds, what is the law?''
+\end{mekorlang}
+\end{mekor}
+
+\section{Sources}
+
+\subsection{\env{mekor} and \env{mekor*}}
+
+A \env{mekor} holds one source and gives it the next number. A \env{mekor*} holds a
+source that continues the previous one, and takes no new number. On slides, each
+\env{mekor} is a frame.
+
+\subsection{\env{mekorlang}}
+
+\begin{Verbatim}
+\begin{mekorlang}[subtitle]{language}{title}
+  text
+\end{mekorlang}
+\end{Verbatim}
+
+Each language of a source is a \env{mekorlang}: \texttt{hebrew} is set right to left with
+Hebrew numerals, and any other language left to right with arabic numerals. The number of
+the source goes in the margin of a handout. The optional subtitle, in italics under the
+title, usually names the author or the translation:
+
+\begin{Verbatim}
+\begin{mekorlang}[\attribution{R. Asher Weiss}{Jerusalem}{5780}]
+  {english}{Min\hdot at Asher}
+\end{Verbatim}
+
+\cs{attribution}\verb|{who}{where}{when}| joins its non-empty parts with commas, giving
+``\attribution{R. Asher Weiss}{Jerusalem}{5780}''.
+
+\section{Notes}
+
+Notes are the maggid shiur's commentary: questions to ask, points to make, transitions.
+They are printed only in the \texttt{maggidshiur} version, beside a grey bar on the side
+where their lines start.
+
+\begin{Verbatim}
+\begin{note}
+Why does R. Zeira ask about wheat rather than any other food?
+\end{note}
+
+\begin{note}[hebrew]
+הערה בעברית.
+\end{note}
+\end{Verbatim}
+
+\begin{note}
+Why does R. Zeira ask about wheat rather than any other food?
+\end{note}
+
+\begin{note}[hebrew]
+הערה בעברית.
+\end{note}
+
+The optional argument is the language of the note, English by default. There are four note
+environments, which all look the same:
+\begin{description}
+\item[\env{note}] a note anywhere;
+\item[\env{gnote}] the same, for documents that load beamer or \texttt{beamerarticle},
+	which define their own \cs{note};
+\item[\env{prenote}] a note introducing a source;
+\item[\env{postnote}] a note following a source.
+\end{description}
+The difference between the last two matters only on slides: when a source is split over
+several slides (see ``\nameref{sec:slides}''), its \env{prenote} goes on the first slide and its
+\env{postnote} on the last.
+
+\section{Options}
+
+\begin{center}
+\begin{tabular}{@{}lp{0.62\textwidth}@{}}
+\toprule
+Option & Effect \\
+\midrule
+\texttt{talmid} & Leave out the notes. This is the default. \\
+\texttt{maggidshiur} & Print the notes. \\
+\texttt{translations=false} & Leave out each English \env{mekorlang} that follows a
+	Hebrew one in the same source. Sources written in English, with no Hebrew before
+	them, stay. \\
+\texttt{accessible} & Set the handout in large print: 18\,pt type, with every other size
+	scaled to match, and unjustified text (ragged right for English, ragged left for
+	Hebrew). Slides are unchanged. \\
+\texttt{accessible=}\textit{size} & The same, at another size, e.g.\ \texttt{accessible=20pt}. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+When one version needs text that another doesn't, \cs{iftranslations}\verb|{A}{B}| typesets
+\textit{A} in the bilingual version and \textit{B} in the Hebrew-only one:
+
+\begin{Verbatim}
+\iftranslations{\begin{note}A note about the translation.\end{note}}{}
+\end{Verbatim}
+
+\section{One body, several versions}
+
+Put everything from \verb|\begin{document}| to \verb|\end{document}| in a body file,
+and give each version a small file of its own. If the versions differ only in options, the
+body can hold the whole document, preamble included, and each version passes its options
+before reading it:
+
+\begin{Verbatim}
+% shiur_hebrew.tex
+\PassOptionsToPackage{translations=false}{shiur}
+\input{shiur_body}
+\end{Verbatim}
+
+\begin{Verbatim}
+% shiur_notes.tex
+\PassOptionsToPackage{maggidshiur}{shiur}
+\input{shiur_body}
+\end{Verbatim}
+
+\subsection{Handouts and slides from one body}
+
+A handout and a beamer presentation need different document classes, so each keeps its own
+preamble and reads the body with \cs{input}. The handout loads \texttt{beamerarticle}
+before \texttt{shiur}, so the body can use beamer's commands in both:
+
+\begin{Verbatim}
+% shiur.tex: the handout
+\documentclass[11pt]{article}
+\usepackage{beamerarticle}
+\usepackage[talmid]{shiur}
+\newfontfamily{\hebrewfont}{FreeSerif}
+\title{Wheat from the clouds}
+\author{A. Teacher}
+\date{}
+\input{shiur_body}
+\end{Verbatim}
+
+\begin{Verbatim}
+% shiur_slides.tex: the presentation
+\documentclass{beamer}
+\usepackage{shiur}
+\newfontfamily{\hebrewfontsf}{FreeSerif}
+\title{Wheat from the clouds}
+\author{A. Teacher}
+\date{}
+\input{shiur_body}
+\end{Verbatim}
+
+In the body:
+\begin{itemize}
+\item use \env{gnote} rather than \env{note}, since beamer has its own \cs{note};
+\item \verb|\mode<presentation>{...}| holds material for the slides only, such as a frame of
+	photographs, and \verb|\mode<article>{...}| material for the handout only;
+\item \cs{makeTitle} makes a title page on the handout and a title frame on the slides.
+\end{itemize}
+
+\subsection{Splitting a long source over several slides}
+\label{sec:slides}
+
+A source too long for one slide can be split with \cs{mekorbreak}, placed at the same point
+in each language. The handout ignores it and prints the source whole. On the slides, the
+source stays one frame, with one slide for each part. Every slide repeats the headings, and
+an ellipsis marks each side of a cut, replacing any punctuation there:
+
+\begin{Verbatim}
+\begin{mekor}
+\begin{mekorlang}{hebrew}{תהלים קיז}
+הַלְלוּ אֶת־יְהֹוָה כׇּל־גּוֹיִם שַׁבְּחוּהוּ כׇּל־הָאֻמִּים:
+\mekorbreak
+כִּי גָבַר עָלֵינוּ חַסְדּוֹ וֶאֱמֶת־יְהֹוָה לְעוֹלָם הַלְלוּ־יָהּ:
+\end{mekorlang}
+\begin{mekorlang}{english}{Psalm 117}
+Praise the Lord, all you nations; extol Him, all you peoples.
+\mekorbreak
+For great is His steadfast love toward us...
+\end{mekorlang}
+\end{mekor}
+\end{Verbatim}
+
+\cs{mekorbreak*} splits without the ellipses, where nothing is cut, for example where a
+question ends and its answer begins.
+
+\section{Other commands}
+
+\begin{description}
+\item[\cs{hdot}, \cs{Hdot}] \hdot\ and \Hdot, for transliteration (\Hdot anukah).
+\item[\cs{sectionsymbol}] \sectionsymbol.
+\item[\env{boxed}] a paragraph in a box, on handouts only.
+\end{description}
+
+The package used to come with a separate \texttt{shiurbeamer} package for slides.
+\texttt{shiur} now detects the beamer class itself; \texttt{shiurbeamer} still works, and
+simply loads \texttt{shiur}.
+
+\section{Licence}
+
+Copyright 2023--2026 Gabriel Gendler Yom-Tov. This work may be distributed and/or modified
+under the conditions of the \LaTeX\ Project Public License, either version 1.3c of this
+license or (at your option) any later version.
+
+\end{document}

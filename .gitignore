@@ -11,3 +11,4 @@
 *.toc
 .DS_Store
 tests/docs.local
+!doc/shiur-doc.pdf
