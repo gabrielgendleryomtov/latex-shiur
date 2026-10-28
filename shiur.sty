@@ -13,11 +13,6 @@
 
 \RequirePackage{etoolbox}
 
-% the first conditional tracks whether we are in hebrew or english
-
-\newbool{langisheb}
-\boolfalse{langisheb}
-
 % whether to print the mekorot with their translations side by side or one after
 % the other.
 % I strongly recommend the latter and I will not implement the former for now.
@@ -43,7 +38,6 @@
 \RequirePackage{changepage}
 \RequirePackage{graphicx}
 \RequirePackage{xparse}
-\RequirePackage{environ}
 
 % the same package serves articles and beamer presentations
 \newbool{beamer}
@@ -105,167 +99,85 @@
 
 \newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
 
+%                         *************
+%                         ** SOURCES **
+%                         *************
+
+% A mekor holds one source, usually as a hebrew and an english mekorlang. In
+% beamer each mekor is a frame. mekor* continues the previous source without
+% taking a new number.
+
 \newcounter{mekor}
 \ifbool{beamer}{
-\NewEnviron{mekor}{
-	\refstepcounter{mekor}
-	\frame
-	{
-	\BODY
-	}
-	\vspace{0.5em}
-}
-
-\NewEnviron{mekor*}{
-	\frame
-	{
-	\BODY
-	}
-	\vspace{0.5em}
-}
-
-\NewEnviron{mekorlang}[3][]{
-	\ifstrequal{#2}{hebrew}{
-		\begin{hebrew}
-		\begin{flushright}
-		\booltrue{langisheb}
-		%\noindent\textbf{\llap{\hebrewnumeral{\themekor}.\hspace{1em}}}%
-		\noindent\textbf{\hebrewnumeral{\themekor}.\hspace{1em}}%
-	}{
-		%\noindent\textbf{\llap{\themekor.\hspace{2em}}}%
-		%\noindent\textbf{{\themekor}.\hspace{2em}}%
-		\noindent\textbf{\themekor.\hspace{1em}}%
-	}\noindent\textbf{#3}
-	\ifstrempty{#1}{}{\newline\small\textit{#1}}
-	\par\vspace{0.5em}\noindent
-	\BODY
-	\vspace{1em}
-	\ifbool{langisheb}{
-		\end{flushright}
-		\end{hebrew}
-		\boolfalse{langisheb}
-	}{}
-	\par
-}
+	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\frame{#1}\vspace{0.5em}}{}
+	\NewDocumentEnvironment{mekor*}{+b}{\frame{#1}\vspace{0.5em}}{}
 }{
-\NewEnviron{mekor}{
-	\refstepcounter{mekor}
-	\BODY
-	\vspace{0.5em}
+	\NewDocumentEnvironment{mekor}{}{\refstepcounter{mekor}}{\vspace{0.5em}}
+	\NewDocumentEnvironment{mekor*}{}{}{\vspace{0.5em}}
 }
 
-\NewEnviron{mekorlang}[3][]{
-	\ifstrequal{#2}{hebrew}{
-		\begin{hebrew}
-		\booltrue{langisheb}
-		\noindent\textbf{\llap{\hebrewnumeral{\themekor}.\hspace{1em}}}%
-	}{
-		\noindent\textbf{\llap{\themekor.\hspace{1em}}}%
-	}\noindent\textbf{{#3}}
-	\ifstrempty{#1}{}{\newline \textit{#1}}
-	\par\vspace{0.5em}\noindent
-	{\BODY}
-	\vspace{1em}
-	\ifbool{langisheb}{
-		\end{hebrew}
-		\boolfalse{langisheb}
-	}{}
-	\par
-}
-}
-
-%work on where page breaks can go
-%make the removal of the space at the start of the paragraph automatic
-%structure of notes
-%get the hidden piece more generalised
-
-\ifbool{beamer}{}{
-\NewEnviron{note}[1][english]{
-	\ifbool{maggidshiur}{
-    	\begin{adjustwidth}{3em}{3em}\em
-    	\ifstrequal{#1}{hebrew}{
-    		\begin{hebrew}
-    		\booltrue{langisheb}
-    	}{}
-    %	\ifbool{maggidshiur}{
-    		\BODY
-    %	}{}
-    	\ifbool{langisheb}{
-    		\end{hebrew}
-    		\boolfalse{langisheb}
-    	}{}
-    	\end{adjustwidth}
-	}{}
-}
-}
+% How the heading of a mekorlang differs between articles and beamer: the
+% number sits in the margin of an article, but inline on a slide.
 \ifbool{beamer}{
-\NewEnviron{gnote}[1][english]{
-	\ifbool{maggidshiur}{
-    	\begin{adjustwidth}{3em}{3em}\em
-    	\ifstrequal{#1}{hebrew}{
-    		\begin{hebrew}
-    		\booltrue{langisheb}
-    	}{}
-    %	\ifbool{maggidshiur}{
-    		\BODY
-    %	}{}
-    	\ifbool{langisheb}{
-    		\end{hebrew}
-    		\boolfalse{langisheb}
-    	}{}
-    	\end{adjustwidth}
-	}{}
+	\newcommand{\shiur@number}[1]{#1}
+	\newcommand{\shiur@subtitlefont}{\small}
+	\newcommand{\shiur@hebrewblock}[1]{\begin{flushright}#1\end{flushright}}
+}{
+	\newcommand{\shiur@number}[1]{\llap{#1}}
+	\newcommand{\shiur@subtitlefont}{}
+	\newcommand{\shiur@hebrewblock}[1]{#1}
 }
+
+% #1 number, #2 subtitle, #3 title, #4 text
+\newcommand{\shiur@mekorlang}[4]{%
+	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}\textbf{#3}%
+	\ifstrempty{#2}{}{\newline\shiur@subtitlefont\textit{#2}}%
+	\par\vspace{0.5em}\noindent
+	#4\par\vspace{1em}%
+}
+
+% \begin{mekorlang}[subtitle]{language}{title}
+\NewDocumentEnvironment{mekorlang}{O{} m m +b}{%
+	\ifstrequal{#2}{hebrew}
+		{\begin{hebrew}\shiur@hebrewblock{\shiur@mekorlang{\hebrewnumeral{\themekor}}{#1}{#3}{#4}}\end{hebrew}}
+		{\shiur@mekorlang{\themekor}{#1}{#3}{#4}}%
+	\par
 }{}
 
-\NewEnviron{prenote}[1][english]{
-	\ifbool{maggidshiur}{
-    	\begin{adjustwidth}{1em}{5em}\em
-    	\ifstrequal{#1}{hebrew}{
-    		\begin{hebrew}
-    		\booltrue{langisheb}
-    	}{}
-    %	\ifbool{maggidshiur}{
-    		\BODY
-    %	}{}
-    	\ifbool{langisheb}{
-    		\end{hebrew}
-    		\boolfalse{langisheb}
-    	}{}
-    	\end{adjustwidth}
-	}{}
+%                         ***********
+%                         ** NOTES **
+%                         ***********
+
+% Notes for the maggid shiur, which are left out of the talmid version.
+% #1 left and #2 right indentation, #3 language, #4 text
+\newcommand{\shiur@note}[4]{%
+	\ifbool{maggidshiur}{%
+		\begin{adjustwidth}{#1}{#2}\em
+		\ifstrequal{#3}{hebrew}{\begin{hebrew}#4\end{hebrew}}{#4}%
+		\end{adjustwidth}%
+	}{}%
 }
 
-\NewEnviron{postnote}[1][english]{
-	\ifbool{maggidshiur}{
-    	\begin{adjustwidth}{5em}{1em}\em
-    	\ifstrequal{#1}{hebrew}{
-    		\begin{hebrew}
-    		\booltrue{langisheb}
-    	}{}
-    %	\ifbool{maggidshiur}{
-    		\BODY
-    %	}{}
-    	\ifbool{langisheb}{
-    		\end{hebrew}
-    		\boolfalse{langisheb}
-    	}{}
-    	\end{adjustwidth}
-	}{}
+% beamer already has a \note command, so slides use gnote instead
+\ifbool{beamer}{}{
+	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
 }
+\NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{3em}{3em}{#1}{#2}}{}
+\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@note{1em}{5em}{#1}{#2}}{}
+\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@note{5em}{1em}{#1}{#2}}{}
 
 \ifbool{beamer}{}{
-\NewEnviron{boxed}
-    {\begin{center}
-    \begin{tabular}{|p{0.9\textwidth}|}
-    \hline\\
-    
-    \BODY
-    
-    \\\\\hline
-    \end{tabular} 
-    \end{center}
-    }
+	\NewDocumentEnvironment{boxed}{+b}
+		{\begin{center}
+		\begin{tabular}{|p{0.9\textwidth}|}
+		\hline\\
+
+		#1
+
+		\\\\\hline
+		\end{tabular}
+		\end{center}}
+		{}
 }
 
 % macros
