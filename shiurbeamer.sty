@@ -1,0 +1,234 @@
+%%Identification
+%%The package identifies itself and the LaTeX version needed
+\NeedsTeXFormat{LaTeX2e}
+\def\styauthor{Gabriel Gendler Yom-Tov}
+\def\styauthormail{shiurtex@thm.mozmail.com}
+\def\fileversion{1.0}
+\def\filedate{2023/12/09}
+\ProvidesPackage{shiurbeamer}[\filedate\space Version \fileversion\space by \styauthor\space commands for dappei mekorot]
+
+%%Required packages and preliminary definitions, needed by the options
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{hyperref}
+
+\RequirePackage{etoolbox}
+
+% the first conditional tracks whether we are in hebrew or english
+
+\newbool{langisheb}
+\boolfalse{langisheb}
+
+% whether to print the mekorot with their translations side by side or one after
+% the other.
+% I strongly recommend the latter and I will not implement the former for now.
+
+\newbool{sidebyside}
+\boolfalse{sidebyside}
+\DeclareOption{sidebyside}{\booltrue{sidebyside}}
+\DeclareOption{stacked}{\boolfalse{sidebyside}}
+
+% there are various reasons a maggid shiur might want a different source sheet.
+% by default there will be notes that are hidden from the talmidim. There will
+% also be an option to have additional mekorot hidden from the talmidim.
+
+\newbool{maggidshiur}
+\boolfalse{maggidshiur}
+\DeclareOption{maggidshiur}{\booltrue{maggidshiur}}
+\DeclareOption{talmid}{\boolfalse{maggidshiur}}
+
+\ProcessOptions\relax
+
+\RequirePackage{polyglossia}
+\RequirePackage{fontspec}
+\RequirePackage{changepage}
+\RequirePackage{graphicx}
+\RequirePackage{xparse}
+\RequirePackage{environ}
+
+% Beamer vs article options
+
+\def\@getcl@ss#1.cls#2\relax{\def\@currentclass{#1}}
+\def\@getclass{\expandafter\@getcl@ss\@filelist\relax}
+
+\@getclass
+\typeout{shiur.sty says: this document uses \@currentclass\space class}
+
+% ------------------------------------------------------------------------------
+
+%                         *****************
+%                         ** PAGE LAYOUT **
+%                         *****************
+
+% We set the parameters in terms of \paperwidth and \paperheight
+% so that the options
+
+% a4paper
+% a5paper
+% b5paper
+% letterpaper
+% legalpaper
+% executivepaper
+% landscape
+
+% will all work:
+
+\setlength{\textwidth}{\paperwidth}
+\addtolength{\textwidth}{-2in}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+
+\setlength{\headheight}{15pt}
+\setlength{\headsep}{15pt}
+\setlength{\topmargin}{0in}
+\addtolength{\topmargin}{-\headheight}
+\addtolength{\topmargin}{-\headsep}
+\setlength{\footskip}{29pt}
+\setlength{\textheight}{\paperheight}
+\addtolength{\textheight}{-2.2in}
+
+\setlength{\marginparwidth}{.5in}
+\setlength{\marginparsep}{5pt}
+
+\RequirePackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\fancyhf{}
+\fancyhead[R]{\begin{hebrew}בס״ד\end{hebrew}}
+\fancyfoot[L]{\thepage}
+\def\makeTitle{\maketitle \thispagestyle{fancy} \pagestyle{fancy}}
+
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0mm}
+\setlength{\parskip}{0.5em}
+
+% ------------------------------------------------------------------------------
+
+\setmainlanguage[variant=british]{english}
+\setotherlanguage{hebrew}
+
+\newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
+
+%\newcounter{mekor}
+%\NewEnviron{mekor}{
+%	\refstepcounter{mekor}
+%	\BODY
+%	\vspace{0.5em}
+%}
+
+\newcounter{mekor}
+\NewEnviron{mekor}{
+	\refstepcounter{mekor}
+	\frame
+	{
+	\BODY
+	}
+	\vspace{0.5em}
+}
+
+\NewEnviron{mekor*}{
+	\frame
+	{
+	\BODY
+	}
+	\vspace{0.5em}
+}
+
+\NewEnviron{mekorlang}[3][]{
+	\ifstrequal{#2}{hebrew}{
+		\begin{hebrew}
+		\begin{flushright}
+		\booltrue{langisheb}
+		%\noindent\textbf{\llap{\hebrewnumeral{\themekor}.\hspace{1em}}}%
+		\noindent\textbf{\hebrewnumeral{\themekor}.\hspace{1em}}%
+	}{
+		%\noindent\textbf{\llap{\themekor.\hspace{2em}}}%
+		%\noindent\textbf{{\themekor}.\hspace{2em}}%
+		\noindent\textbf{\themekor.\hspace{1em}}%
+	}\noindent\textbf{#3}
+	\ifstrempty{#1}{}{\newline\small\textit{#1}}
+	\par\vspace{0.5em}\noindent
+	\BODY
+	\vspace{1em}
+	\ifbool{langisheb}{
+		\end{flushright}
+		\end{hebrew}
+		\boolfalse{langisheb}
+	}{}
+	\par
+}
+
+%work on where page breaks can go
+%make the removal of the space at the start of the paragraph automatic
+%structure of notes
+%get the hidden piece more generalised
+
+\NewEnviron{gnote}[1][english]{
+	\ifbool{maggidshiur}{
+    	\begin{adjustwidth}{3em}{3em}\em
+    	\ifstrequal{#1}{hebrew}{
+    		\begin{hebrew}
+    		\booltrue{langisheb}
+    	}{}
+    %	\ifbool{maggidshiur}{
+    		\BODY
+    %	}{}
+    	ֿֿֿ\ifbool{langisheb}{
+    		\end{hebrew}
+    		\boolfalse{langisheb}
+    	}{}
+    	\end{adjustwidth}
+	}{}
+}
+
+\NewEnviron{prenote}[1][english]{
+	\ifbool{maggidshiur}{
+    	\begin{adjustwidth}{1em}{5em}\em
+    	\ifstrequal{#1}{hebrew}{
+    		\begin{hebrew}
+    		\booltrue{langisheb}
+    	}{}
+    %	\ifbool{maggidshiur}{
+    		\BODY
+    %	}{}
+    	ֿֿֿ\ifbool{langisheb}{
+    		\end{hebrew}
+    		\boolfalse{langisheb}
+    	}{}
+    	\end{adjustwidth}
+	}{}
+}
+
+\NewEnviron{postnote}[1][english]{
+	\ifbool{maggidshiur}{
+    	\begin{adjustwidth}{5em}{1em}\em
+    	\ifstrequal{#1}{hebrew}{
+    		\begin{hebrew}
+    		\booltrue{langisheb}
+    	}{}
+    %	\ifbool{maggidshiur}{
+    		\BODY
+    %	}{}
+    	ֿֿֿ\ifbool{langisheb}{
+    		\end{hebrew}
+    		\boolfalse{langisheb}
+    	}{}
+    	\end{adjustwidth}
+	}{}
+}
+
+%\NewEnviron{boxed}
+%    {\begin{center}
+%    \begin{tabular}{|p{0.9\textwidth}|}
+%    \hline\\
+%    
+%    \BODY
+%    
+%    \\\\\hline
+%    \end{tabular} 
+%    \end{center}
+%    }
+
+% macros
+
+\def\hdot{ḥ}
+\def\Hdot{Ḥ}
+\def\sectionsymbol{§}
