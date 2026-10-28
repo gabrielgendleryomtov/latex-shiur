@@ -1,0 +1,4 @@
+# Committed example documents, relative to the repo root.
+tests/examples/article-maggidshiur.tex
+tests/examples/article-talmid.tex
+tests/examples/beamer.tex

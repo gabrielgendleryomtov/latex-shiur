@@ -10,3 +10,4 @@
 *.snm
 *.toc
 .DS_Store
+tests/docs.local

@@ -1,0 +1,38 @@
+\documentclass[british]{beamer}
+\title{Example slides}
+\author{Test Author}
+\date{}
+\usepackage[maggidshiur]{shiurbeamer}
+\newfontfamily{\hebrewfontsf}{FreeSerif}
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{mekor}
+\begin{mekorlang}{hebrew}{ויקרא ב א}
+וְנֶפֶשׁ כִּי־תַקְרִיב קׇרְבַּן מִנְחָה לַיהֹוָה סֹלֶת יִהְיֶה קׇרְבָּנוֹ:
+\end{mekorlang}
+\begin{mekorlang}[Adapted from Sefaria]{english}{Leviticus 2:1}
+When a person presents an offering of meal to God.
+\end{mekorlang}
+\end{mekor}
+
+\begin{mekor*}
+\begin{mekorlang}{english}{An unnumbered source}
+Text of an unnumbered source on its own frame.
+\end{mekorlang}
+\end{mekor*}
+
+\frame{
+\begin{gnote}
+A gnote inside a frame.
+\end{gnote}
+\begin{prenote}
+A prenote.
+\end{prenote}
+\begin{postnote}
+A postnote.
+\end{postnote}
+}
+
+\end{document}
