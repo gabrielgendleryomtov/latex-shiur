@@ -2,3 +2,6 @@
 tests/examples/article-maggidshiur.tex
 tests/examples/article-talmid.tex
 tests/examples/beamer.tex
+tests/examples/shared-talmid.tex
+tests/examples/shared-maggidshiur.tex
+tests/examples/shared-beamer.tex
