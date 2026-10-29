@@ -27,6 +27,9 @@
 %                            Mishneh Torah, Laws of Shofar, Sukkah and Lulav 2:6
 %   \shulchanaruch{oh}{605:1}   שו״ע או״ח סי׳ תר״ה סע׳ א׳ / Shulḥan Arukh, Oraḥ Ḥayyim 605:1
 %   \tur{oh}{605}            טור או״ח סי׳ תר״ה / Tur, Oraḥ Ḥayyim 605
+%   \mishnahberurah{605:3}   משנה ברורה סי׳ תר״ה ס״ק ג׳ / Mishnah Brurah 605:3
+%   and \beityosef, \darkeimoshe, \bach, \shakh, \taz, \magenavraham and
+%   \arukhhashulchan; \declaretursefer declares more
 %   \sham                    שם / ad loc
 % Numbers follow the usual Hebrew convention: geresh for one letter (ח׳),
 % gershayim before the last of several (ל״ח). Ranges take an en dash, the
@@ -495,7 +498,9 @@
 %                         ******************************
 
 % A siman and its se'if: 605, 605:1, 658:1-2 or 605:1-606:2. In Hebrew,
-% סי׳ תר״ה סע׳ א׳; in English, 605:1.
+% סי׳ תר״ה סע׳ א׳ (or ס״ק, or another sub-unit, in \l__mm_subunit_tl); in English,
+% 605:1.
+\tl_new:N \l__mm_subunit_tl
 \cs_new_protected:Npn \__mm_siman_ref:n #1
 	{
 		\__mm_if_hebrew:TF
@@ -511,7 +516,7 @@
 					{ \seq_clear:N \l__mm_to_seq }
 				סי׳ \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_from_seq { 1 } }
 				\int_compare:nNnT { \seq_count:N \l__mm_from_seq } > 1
-					{ \nobreakspace סע׳ \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_from_seq { 2 } } }
+					{ \nobreakspace \l__mm_subunit_tl \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_from_seq { 2 } } }
 				\seq_if_empty:NF \l__mm_to_seq
 					{
 						\__mm_dash:
@@ -519,33 +524,87 @@
 							{
 								% into another siman
 								סי׳ \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_to_seq { 1 } }
-								\nobreakspace סע׳ \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_to_seq { 2 } }
+								\nobreakspace \l__mm_subunit_tl \nobreakspace \__mm_number:n { \seq_item:Nn \l__mm_to_seq { 2 } }
 							}
 							{ \__mm_number:n { \seq_item:Nn \l__mm_to_seq { 1 } } }
 					}
 			}
 			{ \__mm_tanakh_ref:n {#1} }
 	}
-% #1 Hebrew name, #2 English name, #3 section key, #4 reference
-\cs_new_protected:Npn \__mm_code:nnnn #1 #2 #3 #4
+% #1 Hebrew name, #2 English name, #3 Hebrew sub-unit, #4 section key (empty
+% for a work on one section, which isn't named), #5 reference
+\cs_new_protected:Npn \__mm_code:nnnnn #1 #2 #3 #4 #5
 	{
 		\group_begin:
-		\__mm_lookup:Nnn \g__mm_section_prop {#3} { }
-		\__mm_if_hebrew:TF { #1 \nobreakspace \l__mm_he_tl } { #2, ~ \l__mm_en_tl }
+		\__mm_nohyphenation:
+		\tl_set:Nn \l__mm_subunit_tl {#3}
+		\tl_if_blank:nTF {#4}
+			{ \__mm_if_hebrew:TF {#1} {#2} }
+			{
+				\__mm_lookup:Nnn \g__mm_section_prop {#4} { }
+				\__mm_if_hebrew:TF { #1 \nobreakspace \l__mm_he_tl } { #2, ~ \l__mm_en_tl }
+			}
 		\nobreakspace
-		\__mm_siman_ref:n {#4}
+		\__mm_siman_ref:n {#5}
 		\group_end:
 	}
-\NewDocumentCommand \shulchanaruch { m m }
+
+% \declaretursefer[keys]{\command}{Hebrew name}{English name} declares a work
+% arranged by the Tur's four sections, simanim and se'ifim. Keys:
+%   seifkatan     its sub-unit is the se'if katan (ס״ק), as in commentaries
+%   subunit=...   any other Hebrew sub-unit, such as אות
+%   section=oh    it covers one section only: the command then takes just the
+%                 reference, and the section isn't named
+% A declared command takes {section}{reference}, as \shulchanaruch{oh}{605:1},
+% or just {reference} for a one-section work, as \mishnahberurah{605:3}.
+\tl_new:N \l__mm_decl_subunit_tl
+\tl_new:N \l__mm_decl_section_tl
+\keys_define:nn { mareimekomot / tursefer }
 	{
-		\__mm_code:nnnn { שו״ע } { Shul \__mm_h: an \nobreakspace Arukh } {#1} {#2}
-		\__mm_remember:n { \shulchanaruch {#1} {#2} }
+		seifkatan .code:n = \tl_set:Nn \l__mm_decl_subunit_tl { ס״ק },
+		seifkatan .value_forbidden:n = true,
+		subunit .tl_set:N = \l__mm_decl_subunit_tl,
+		section .tl_set:N = \l__mm_decl_section_tl,
 	}
-\NewDocumentCommand \tur { m m }
+\NewDocumentCommand \declaretursefer { O{} m m m }
 	{
-		\__mm_code:nnnn { טור } { Tur } {#1} {#2}
-		\__mm_remember:n { \tur {#1} {#2} }
+		% no group: the command must outlive the declaration
+		\tl_set:Nn \l__mm_decl_subunit_tl { סע׳ }
+		\tl_clear:N \l__mm_decl_section_tl
+		\keys_set:nn { mareimekomot / tursefer } {#1}
+		\__mm_declare:NnnVV #2 {#3} {#4} \l__mm_decl_subunit_tl \l__mm_decl_section_tl
 	}
+% #1 command, #2 Hebrew name, #3 English name, #4 sub-unit, #5 section or empty
+\cs_new_protected:Npn \__mm_declare:Nnnnn #1 #2 #3 #4 #5
+	{
+		\tl_if_blank:nTF {#5}
+			{
+				\DeclareDocumentCommand #1 { m m }
+					{
+						\__mm_code:nnnnn {#2} {#3} {#4} {##1} {##2}
+						\__mm_remember:n { #1 {##1} {##2} }
+					}
+			}
+			{
+				\DeclareDocumentCommand #1 { m }
+					{
+						\__mm_code:nnnnn {#2} {#3} {#4} { } {##1}
+						\__mm_remember:n { #1 {##1} }
+					}
+			}
+	}
+\cs_generate_variant:Nn \__mm_declare:Nnnnn { NnnVV }
+
+\declaretursefer{\tur}{טור}{Tur}
+\declaretursefer{\shulchanaruch}{שו״ע}{Shul\__mm_h: an \nobreakspace Arukh}
+\declaretursefer{\beityosef}{בית\nobreakspace יוסף}{Beit\nobreakspace Yosef}
+\declaretursefer[subunit=אות]{\darkeimoshe}{דרכי\nobreakspace משה}{Darkei\nobreakspace Moshe}
+\declaretursefer{\bach}{ב״ח}{Bach}
+\declaretursefer[seifkatan]{\shakh}{ש״ך}{Shakh}
+\declaretursefer[seifkatan]{\taz}{ט״ז}{Taz}
+\declaretursefer[seifkatan, section=oh]{\magenavraham}{מגן\nobreakspace אברהם}{Magen\nobreakspace Avraham}
+\declaretursefer[seifkatan, section=oh]{\mishnahberurah}{משנה\nobreakspace ברורה}{Mishnah\nobreakspace Brurah}
+\declaretursefer{\arukhhashulchan}{ערוך\nobreakspace השולחן}{Arukh\nobreakspace haShul\__mm_h: an}
 
 %                         ************
 %                         ** AD LOC **
