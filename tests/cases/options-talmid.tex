@@ -1,21 +1,21 @@
-% The default (talmid) handout leaves out every kind of note.
+% The default (talmid) handout leaves out every note, wherever it is.
 \documentclass{article}
 \usepackage{shiur}
 \setshiurfont{hebrew}{FreeSerif}
 \title{Notes}\author{}\date{}
 \begin{document}
 \maketitle
-\begin{hearah}A prenote.\end{hearah}
+\begin{hearah}A note before the source.\end{hearah}
 \begin{mekor}
 \begin{mekorlang}{english}{Source}The source.\end{mekorlang}
 \end{mekor}
 \begin{hearah}A note.\end{hearah}
 \begin{hearah}[hebrew]הערה.\end{hearah}
-\begin{hearah}A postnote.\end{hearah}
+\begin{hearah}A note after the source.\end{hearah}
 \end{document}
 
 %! expect: The source.
-%! absent: prenote
+%! absent: A note before the source.
 %! absent: A note.
 %! absent: הערה
-%! absent: postnote
+%! absent: A note after the source.
