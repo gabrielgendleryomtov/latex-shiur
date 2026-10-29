@@ -1,0 +1,82 @@
+% A sample source sheet showing the three Hebrew font roles. Needs Taamey Frank
+% CLM, Taamey David CLM and Noto Rashi Hebrew installed; compile with XeLaTeX
+% (twice) and commit the PDF, so readers see it without the fonts.
+\documentclass[11pt]{article}
+\usepackage[maggidshiur]{shiur}
+\usepackage{fancyvrb}
+\setshiurfont{mikra}{Taamey Frank CLM}
+\setshiurfont{hebrew}{Taamey David CLM}
+\setshiurfont{rashi}{Noto Rashi Hebrew}
+\hypersetup{hidelinks}
+\newfontfamily{\codefont}{FreeMono}
+\fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
+
+\title{The light of the first day}
+\author{A sample source sheet for the \texttt{shiur} package}
+\date{}
+
+\begin{document}
+
+\makeTitle
+
+\begin{note}
+This sheet shows the three Hebrew roles, each in its own font: Tanakh (\texttt{mikra}) in
+Taamey Frank CLM, which places trop well; rabbinic text (\texttt{hebrew}) in Taamey David
+CLM; and a commentary in Rashi script (\texttt{rashi}) in Noto Rashi Hebrew. Notes like this
+one appear only in the maggid shiur's version.
+\end{note}
+
+\begin{mekor}
+\begin{mekorlang}{mikra}{בראשית א א-ג}
+בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹהִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ׃
+וְהָאָ֗רֶץ הָיְתָ֥ה תֹ֙הוּ֙ וָבֹ֔הוּ וְחֹ֖שֶׁךְ עַל־פְּנֵ֣י תְה֑וֹם וְר֣וּחַ אֱלֹהִ֔ים מְרַחֶ֖פֶת עַל־פְּנֵ֥י הַמָּֽיִם׃
+וַיֹּ֥אמֶר אֱלֹהִ֖ים יְהִ֣י א֑וֹר וַֽיְהִי־אֽוֹר׃
+\end{mekorlang}
+\begin{mekorlang}{english}{Genesis 1:1--3}
+In the beginning God created the heavens and the earth. And the earth was without form and
+void, and darkness was on the face of the deep, and the spirit of God hovered over the face of
+the waters. And God said, ``Let there be light'', and there was light.
+\end{mekorlang}
+\end{mekor}
+
+\begin{mekor}
+\begin{mekorlang}{rashi}{רש״י על בראשית א א}
+בראשית - אמר רבי יצחק: לא היה צריך להתחיל את התורה אלא מהחודש הזה לכם, שהיא מצוה ראשונה שנצטוו ישראל. ומה טעם פתח בבראשית? משום כח מעשיו הגיד לעמו לתת להם נחלת גוים.
+\end{mekorlang}
+\begin{mekorlang}{english}{Rashi on Genesis 1:1}
+``In the beginning'' -- Rabbi Yitz\hdot ak said: the Torah need only have begun from ``This
+month shall be for you'', the first commandment that Israel were given. Why, then, does it
+begin with creation? Because ``He told His people the power of His works, to give them the
+inheritance of the nations''.
+\end{mekorlang}
+\end{mekor}
+
+\begin{note}
+Why would the Torah need a reason to begin with creation at all?
+\end{note}
+
+\begin{mekor}
+\begin{mekorlang}{hebrew}{בבלי חגיגה י״ב ע״א}
+אמר רבי אלעזר: אור שברא הקדוש ברוך הוא ביום ראשון - אדם צופה בו מסוף העולם ועד סופו.
+\end{mekorlang}
+\begin{mekorlang}{english}{B. \Hdot agigah 12a}
+Rabbi Elazar said: with the light that the Holy One, blessed be He, created on the first day,
+a person could see from one end of the world to the other.
+\end{mekorlang}
+\end{mekor}
+
+\section{How this sheet was made}
+
+Each source names its role as its language, and the preamble chooses the fonts:
+
+\begin{Verbatim}
+\setshiurfont{mikra}{Taamey Frank CLM}
+\setshiurfont{hebrew}{Taamey David CLM}
+\setshiurfont{rashi}{Noto Rashi Hebrew}
+
+\begin{mekorlang}{mikra}{בראשית א א-ג} ...
+\begin{mekorlang}{rashi}{רש״י על בראשית א א} ...
+\begin{mekorlang}{hebrew}{בבלי חגיגה י״ב ע״א} ...
+\end{Verbatim}
+
+\end{document}

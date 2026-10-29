@@ -90,6 +90,7 @@ Hebrew has three roles, used as the language of a source or note: `hebrew` for m
 \setshiurfont{rashi}{Noto Rashi Hebrew}
 ```
 
+See [`doc/shiur-fonts.pdf`](doc/shiur-fonts.pdf) for a sample sheet using all three.
 A role left unset uses the first installed font from a list (for `mikra`: Taamey Frank CLM,
 Taamey David CLM, Ezra SIL, SBL Hebrew, Keter YG), then the `hebrew` font, and finally
 FreeSerif. Documents that define `\hebrewfont` themselves keep it.

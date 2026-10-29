@@ -292,7 +292,11 @@ Role & Fonts tried, in order \\
 If none of a role's fonts is installed, \texttt{mikra} and \texttt{rashi} use the
 \texttt{hebrew} font, and \texttt{hebrew} ends with FreeSerif, which comes with \TeX\ Live.
 Documents that set \verb|\hebrewfont| (or \verb|\hebrewfontsf| in beamer) with
-\cs{newfontfamily} keep that font as the \texttt{hebrew} one.
+\cs{newfontfamily} keep that font as the \texttt{hebrew} one. A \texttt{mikra} or
+\texttt{rashi} font that lacks some punctuation, as Rashi fonts often do, borrows it from
+the \texttt{hebrew} font.
+
+The sample sheet \texttt{shiur-fonts.pdf}, next to this manual, shows all three roles in use.
 
 \subsection{Fonts for trop}
 
