@@ -1,0 +1,20 @@
+% A package's or document's own declaration of a work replaces the earlier one,
+% under all of its keys.
+\begin{filecontents}[force]{references-sefer-override.sty}
+\ProvidesPackage{references-sefer-override}
+\RequirePackage{mareimekomot}
+\declaresefer[english={ #T #N:#N}]{igrotmoshe}{אג״מ}{IM}{ #T ח״#N סי׳ #N}
+\end{filecontents}
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{references-sefer-override}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+A: \sefer{igrotmoshe}{oh}{4}{10} | \sefer{Igros Moshe}{yd}{1}{62}
+
+\declaresefer{im, igrotmoshe}{אגרות משה}{Igrot Moshe}{, #T #N}
+B: \sefer{igrosmoshe}{eh}{2} | \sefer{im}{eh}{3}
+\end{document}
+
+%! expect: A: IM Oraḥ Ḥayyim 4:10 | IM Yoreh De’ah 1:62
+%! expect: B: Igrot Moshe, Even haEzer 2 | Igrot Moshe, Even haEzer 3

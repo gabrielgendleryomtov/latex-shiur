@@ -313,6 +313,10 @@ is declared like this:
 \declaresefer[english={, #T #N:#N}]{igrotmoshe}{+texthebrew(אגרות משה)}{Igrot Moshe}
   { #T +texthebrew(חלק) #N +texthebrew(סי׳) #N}
 \end{Verbatim}
+A later declaration replaces an earlier one, so a document or a package of your own can cite a
+built-in work in its own style; it takes over every key of the work it replaces (\texttt{igrosmoshe}
+as well as \texttt{igrotmoshe}).
+
 Text for \verb|#S| is printed as it is written, so a source's Hebrew and English headings each
 give it in their own language: \verb|\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}| gives
 \sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}.

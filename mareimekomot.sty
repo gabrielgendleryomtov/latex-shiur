@@ -134,6 +134,7 @@
 		\str_set_eq:NN #1 \l__mm_loose_str
 	}
 \cs_generate_variant:Nn \str_if_eq:nnF { nV }
+\cs_generate_variant:Nn \__mm_normalise:Nn { Ne }
 \cs_new_protected:Npn \__mm_book:nnn { \__mm_name:Nnnn \g__mm_book_prop }
 \cs_new_protected:Npn \__mm_tractate:nnn { \__mm_name:Nnnn \g__mm_tractate_prop }
 \cs_new_protected:Npn \__mm_hilkhot:nnn { \__mm_name:Nnnn \g__mm_hilkhot_prop }
@@ -799,6 +800,8 @@
 %   \sefer{igrotmoshe}{yd}{1}{62}   אגרות משה יו״ד חלק א׳ סי׳ ס״ב /
 %                                   Igrot Moshe, Yoreh De'ah 1:62
 % \sefer* leaves out the name, and whatever comes before the first placeholder.
+% A later declaration of a work, in a document or another package, replaces the
+% earlier one, under all of the earlier one's keys as well as its own.
 \prop_new:N \g__mm_sefer_prop
 \tl_new:N \l__mm_he_template_tl
 \tl_new:N \l__mm_en_template_tl
@@ -831,8 +834,24 @@
 		\__mm_template:NNn \l__mm_en_template_tl \l__mm_en_slots_str {#2}
 		\str_if_eq:VVF \l__mm_he_slots_str \l__mm_en_slots_str
 			{ \msg_error:nnn { mareimekomot } { template-mismatch } {#2} }
-		% the work is stored under its first key, which all its keys lead to
-		\__mm_normalise:Nn \l__mm_id_str { \clist_item:nn {#2} { 1 } }
+		% The work is stored under an id, which all its keys lead to: its first key,
+		% or, once the package has loaded, the id of the work it replaces, so that a
+		% document's or package's own Igrot Moshe takes every key of the built-in one
+		\str_clear:N \l__mm_id_str
+		\bool_if:NF \g__mm_loading_bool
+			{
+				\clist_map_inline:nn {#2}
+					{
+						\__mm_normalise:Nn \l__mm_key_str {##1}
+						\prop_get:NVNT \g__mm_sefer_prop \l__mm_key_str \l__mm_names_tl
+							{
+								\str_set:NV \l__mm_id_str \l__mm_names_tl
+								\clist_map_break:
+							}
+					}
+			}
+		\str_if_empty:NT \l__mm_id_str
+			{ \__mm_normalise:Ne \l__mm_id_str { \clist_item:nn {#2} { 1 } } }
 		\clist_map_inline:nn {#2}
 			{
 				\__mm_normalise:Nn \l__mm_key_str {##1}
