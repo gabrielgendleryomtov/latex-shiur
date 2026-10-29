@@ -1,0 +1,453 @@
+% Manual for the mareimekomot package. Compile with XeLaTeX (twice).
+\documentclass[11pt]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+\setotherlanguage{hebrew}
+\setmainfont{FreeSerif}
+\newfontfamily{\hebrewfont}{FreeSerif}[Script=Hebrew]
+\setmonofont{FreeMono}
+\newfontfamily{\hebrewfonttt}{FreeMono}[Script=Hebrew]
+\usepackage{mareimekomot}
+\usepackage[margin=1in]{geometry}
+\usepackage{fancyvrb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage[hidelinks]{hyperref}
+\fvset{fontsize=\small, frame=single, framesep=2mm}
+\newcommand{\cs}[1]{\texttt{\char`\\#1}}
+% long command names don't hyphenate
+\setlength{\emergencystretch}{3em}
+
+\ExplSyntaxOn
+% \row{code}: the code, then what it gives in English and in Hebrew
+\str_new:N \l__doc_code_str
+\NewDocumentCommand \row { m }
+	{ \__doc_code:n {#1} & #1 & \texthebrew {#1} \\ }
+\cs_new_protected:Npn \__doc_code:n #1
+	{
+		\str_set:Nn \l__doc_code_str {#1}
+		% \detokenize's space after a command name
+		\regex_replace_all:nnN { (\\[A-Za-z]+) \x20 } { \1 } \l__doc_code_str
+		\texttt { \l__doc_code_str }
+	}
+% \namelist{book}: a table of the names mareimekomot.sty declares with
+% \__mm_book:nnn {keys} {Hebrew} {English}, read from the package itself
+\ior_new:N \g__doc_ior
+\seq_new:N \l__doc_match_seq
+\tl_new:N \l__doc_rows_tl
+\tl_new:N \l__doc_he_tl
+\tl_new:N \l__doc_en_tl
+\cs_generate_variant:Nn \tl_set_rescan:Nnn { Nne }
+\NewDocumentCommand \namelist { m }
+	{
+		\tl_clear:N \l__doc_rows_tl
+		\ior_open:Nn \g__doc_ior { mareimekomot.sty }
+		\ior_str_map_inline:Nn \g__doc_ior
+			{
+				\regex_extract_once:nnNT
+					{ \A \s* \\__mm_ #1 :nnn \s* \{ ([^\}]*) \} \s* \{ (.*) \} \s* \{ (.*) \} \s* \Z }
+					{##1} \l__doc_match_seq
+					{
+						\tl_set_rescan:Nne \l__doc_he_tl { \ExplSyntaxOn } { \seq_item:Nn \l__doc_match_seq { 3 } }
+						\tl_set_rescan:Nne \l__doc_en_tl { \ExplSyntaxOn } { \seq_item:Nn \l__doc_match_seq { 4 } }
+						\tl_put_right:Ne \l__doc_rows_tl
+							{
+								\exp_not:N \texttt { \tl_trim_spaces:e { \seq_item:Nn \l__doc_match_seq { 2 } } } &
+								\exp_not:V \l__doc_en_tl &
+								\exp_not:N \texthebrew { \exp_not:V \l__doc_he_tl } \exp_not:N \\
+							}
+					}
+			}
+		\ior_close:N \g__doc_ior
+		\begin{longtable}
+			{ @{} >{\raggedright\arraybackslash}p{0.38\linewidth}
+				>{\raggedright\arraybackslash}p{0.36\linewidth}
+				>{\raggedright\arraybackslash}p{0.20\linewidth} @{} }
+		\toprule
+		Keys & English & Hebrew \\
+		\midrule
+		\endhead
+		\l__doc_rows_tl
+		\bottomrule
+		\end{longtable}
+	}
+\ExplSyntaxOff
+
+\newenvironment{examples}
+	{\begin{center}\small\begin{tabular}{@{}lll@{}}\toprule Command & English & Hebrew \\ \midrule}
+	{\bottomrule\end{tabular}\end{center}}
+
+\title{The \texttt{mareimekomot} package\\[0.3em]\large References to rabbinic texts, in Hebrew and English}
+\author{Gabriel Gendler Yom-Tov\\\small\texttt{shiurtex@thm.mozmail.com}}
+\date{Version 1.0, 29 October 2026}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+\texttt{mareimekomot} (\texthebrew{מראי מקומות}, ``references'') writes references to Tanakh,
+Talmud, halakhah, Midrash and later works. A reference is written once and comes out in the
+language of the text around it:
+\begin{examples}
+\row{\tanach{gen}{37:18-20}}
+\row{\bavli{menachot}{69b}}
+\row{\shulchanaruch{oh}{605:1}}
+\row{\sefer{bereshitrabbah}{38:13}}
+\end{examples}
+So a book or paper can cite the same way in its Hebrew and English passages, and a bilingual
+source sheet can give each source one heading that serves both languages. The package was
+written for the \texttt{shiur} package, which typesets source sheets and loads it, but it needs
+nothing from \texttt{shiur} and works in any document.
+
+The printed English follows one transliteration: \textit{ḥ} for \texthebrew{ח} and
+\textit{kh} for \texthebrew{כ} (Menaḥot, Berakhot), and \textit{e} for a vocal shva (Seforno,
+Keli Yakar). The keys you type are matched loosely, so any usual spelling works
+(section~\ref{sec:keys}).
+
+\subsection{Loading}
+
+The package needs XeLaTeX or LuaLaTeX, and \texttt{polyglossia} with Hebrew as one of the
+languages, and a font with Hebrew:
+\begin{Verbatim}
+\usepackage{polyglossia}
+\setdefaultlanguage{english}
+\setotherlanguage{hebrew}
+\newfontfamily{\hebrewfont}{FreeSerif}[Script=Hebrew]
+\usepackage{mareimekomot}
+\end{Verbatim}
+A reference is Hebrew wherever the current language is \texttt{hebrew}: inside
+\verb|\texthebrew{...}| or a \texttt{hebrew} environment, or throughout a document whose main
+language is Hebrew. Everywhere else it is English. Without Hebrew loaded, everything comes out
+in English.
+
+\subsection{Options}
+
+Two settings change the style. They can be given as package options or, at any point in a
+document, with \cs{mareimekomotsetup}:
+\begin{Verbatim}
+\usepackage[sham=full, daf=short]{mareimekomot}
+\mareimekomotsetup{sham=full}
+\end{Verbatim}
+\begin{description}
+\item[\texttt{sham=short} or \texttt{full}] Whether \cs{sham} (``ad loc'') also gives the
+reference it stands for, as ``ad loc (\bavli{menachot}{69b})'' (section~\ref{sec:sham}). The
+default is \texttt{short}.
+\item[\texttt{daf=long} or \texttt{short}] Whether a daf in Hebrew is
+\texthebrew{\bavli*{69b}} (\texttt{long}, the default) or the traditional
+\texthebrew{\mareimekomotsetup{daf=short}\bavli*{69b}} with a colon for the second side and a
+full stop for the first.
+\end{description}
+
+\section{Keys and spelling}\label{sec:keys}
+
+Books, tractates, sections, commentaries and works are named by keys, written in English
+letters: \texttt{gen}, \texttt{menachot}, \texttt{oh}, \texttt{rashi}, \texttt{tanchuma}. The
+full lists are in the appendix. Keys are matched loosely, so that whatever transliteration
+you use works:
+\begin{itemize}
+\item case, spaces, hyphens, full stops and apostrophes don't matter: \texttt{Bava Metzia},
+	\texttt{bava-metzia}, \texttt{bavametzia};
+\item \textit{ch}, \textit{kh} and \textit{h} are the same, as are \textit{tz}, \textit{ts}
+	and \textit{z}, and \textit{y} and \textit{i}: \texttt{menachot}, \texttt{menakhot},
+	\texttt{menahot};
+\item doubled letters count as single, and a final \textit{h} doesn't matter:
+	\texttt{sukkah}, \texttt{sukka}, \texttt{suka};
+\item a numeral at either end can be a number or Roman: \texttt{samuelii}, \texttt{2sam},
+	\texttt{samuel2}.
+\end{itemize}
+Some names have more keys, for forms that differ by more than that: \texttt{berachot} and
+\texttt{brachot}, \texttt{tosafot} and \texttt{tosfot}. A key the package doesn't know is an
+error, which names it.
+
+Commands whose names have \texthebrew{ח} or \texthebrew{כ} can be spelt with \textit{ch} or
+\textit{kh}: \cs{tanach} and \cs{tanakh}, \cs{shulchanaruch} and \cs{shulkhanarukh},
+\cs{aruchhashulchan} and \cs{arukhhashulkhan}, \cs{shach} and \cs{shakh}, and \cs{bach},
+\cs{bakh} and \cs{bah}.
+
+\section{Tanakh}
+
+\cs{tanach}\verb|{book}{reference}| takes a chapter (\texttt{14}), a verse (\texttt{37:18}), or
+a range within a chapter (\texttt{37:18-20}) or across chapters (\texttt{37:18-38:2}, or
+\texttt{37-38}). The starred form leaves out the book, for an addition such as
+``(+\tanach*{gen}{39:1})'':
+\begin{examples}
+\row{\tanach{gen}{37:18-20}}
+\row{\tanach{exodus}{14}}
+\row{\tanach{kings ii}{4:1-5:3}}
+\row{\tanach*{gen}{39:1}}
+\end{examples}
+A commentary on a verse goes in the optional argument (section~\ref{sec:commentaries}):
+\begin{examples}
+\row{\tanach[rashi]{gen}{18:7}}
+\row{\tanach[onkelos]{deut}{6:5}}
+\end{examples}
+
+\section{Talmud and Mishnah}
+
+\cs{bavli}\verb|{tractate}{daf}| takes a daf as \texttt{69b}, \texttt{69}, \texttt{69b-70a} or
+\texttt{9a-b}, and \cs{bavli*}\verb|{daf}| gives the daf alone. \cs{mishnah} and \cs{yerushalmi}
+take a chapter and its mishnah or halakhah, written like a verse:
+\begin{examples}
+\row{\bavli{menachot}{69b}}
+\row{\bavli{yoma}{9a-b}}
+\row{\bavli*{127b}}
+\row{\mishnah{sukkah}{4:1}}
+\row{\yerushalmi{berachot}{1:1-3}}
+\end{examples}
+A commentary on a daf goes in \cs{bavli}'s optional argument. In Hebrew, a commentary is on the
+Bavli anyway, so \texthebrew{בבלי} is left out:
+\begin{examples}
+\row{\bavli[tosafot]{menachot}{69b}}
+\row{\bavli*[rashi]{70a}}
+\end{examples}
+
+\section{Codes}
+
+\cs{rambam}\verb|{laws}{reference}| takes a set of laws of the Mishneh Torah, by a key such as
+\texttt{shofar}, \texttt{teshuvah} or \texttt{yesodeihatorah} (all 83 are in the appendix), and a
+chapter and law:
+\begin{center}
+\verb|\rambam{shofar}{2:6}|\\[0.3em]
+\rambam{shofar}{2:6}\\
+\texthebrew{\rambam{shofar}{2:6}}
+\end{center}
+
+The Tur, the Shulḥan Arukh and the works arranged by them take a section (\texttt{oh},
+\texttt{yd}, \texttt{eh} or \texttt{hm}) and a siman, optionally with a se'if
+(\texttt{605:1}), a range of se'ifim (\texttt{658:1-2}), or a range across simanim
+(\texttt{605:1-606:2}). Besides \cs{tur} and \cs{shulchanaruch} the package has
+\cs{beityosef}, \cs{darkeimoshe}, \cs{bach} and \cs{aruchhashulchan}, and the commentaries
+\cs{shach}, \cs{taz}, \cs{magenavraham} and \cs{mishnahberurah}, whose sub-unit is the se'if
+katan. The Magen Avraham and the Mishnah Berurah cover Oraḥ Ḥayyim only, so they take just the
+reference:
+\begin{examples}
+\row{\shulchanaruch{oh}{605:1}}
+\row{\tur{yd}{114}}
+\row{\shach{yd}{114:3}}
+\row{\darkeimoshe{oh}{605:3}}
+\row{\mishnahberurah{605:3}}
+\end{examples}
+\cs{declaretursefer}\verb|[options]{\command}{Hebrew}{English}| declares more such works:
+\begin{Verbatim}[commandchars=+\(\)]
+\declaretursefer[seifkatan]{\pitcheiteshuvah}{+texthebrew(פתחי תשובה)}{Pitchei Teshuvah}
+\declaretursefer[seifkatan, section=oh]{\shaarhatziyun}
+  {+texthebrew(שער הציון)}{Shaar haTziyun}
+\end{Verbatim}
+Its options are \texttt{seifkatan}, for a sub-unit of \texthebrew{ס״ק} rather than
+\texthebrew{סע׳}; \texttt{subunit=}, for any other (the Darkei Moshe's is \texthebrew{אות});
+and \texttt{section=}, for a work on one section only, whose command then takes just the
+reference.
+
+\section{Midrash and other works}\label{sec:sefer}
+
+\cs{sefer}\verb|{key}{...}| cites any other work, by its key and the parts of the reference,
+one argument each. \cs{sefer*} leaves out the work's name. The package knows these:
+\begin{center}
+\small\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{@{}lll@{}}
+\toprule
+Key & Arguments & Example \\
+\midrule
+\texttt{bereshitrabbah}, \ldots & chapter:section & \sefer{bereshitrabbah}{38:13} \\
+\texttt{tanchuma} & parashah, section & \sefer{tanchuma}{noach}{1} \\
+\texttt{sifra} & parashah, chapter:section & \sefer{sifra}{emor}{13:1} \\
+\texttt{sifreidevarim} & piska & \sefer{sifreidevarim}{32} \\
+\texttt{mekhilta} & parashah, masekhta, parashah & \sefer{mekhilta}{yitro}{BaḤodesh}{7} \\
+\texttt{pirkeiderabbieliezer} & chapter & \sefer{pirkeiderabbieliezer}{35} \\
+\texttt{midrashtehillim} & psalm:section & \sefer{midrashtehillim}{23:1} \\
+\texttt{midrashaggadah} & book, chapter & \sefer{midrashaggadah}{gen}{18} \\
+\texttt{yalkutshimoni} & book, remez & \sefer{yalkutshimoni}{gen}{110} \\
+\texttt{igrotmoshe} & section, volume, siman & \sefer{igrotmoshe}{yd}{1}{62} \\
+\midrule
+\texttt{mishnah}, \texttt{yerushalmi} & tractate, chapter:mishnah & \sefer{mishnah}{sukkah}{4:1} \\
+\texttt{rambam} & laws, chapter:law & \sefer{rambam}{teshuvah}{3:4} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The ten Rabbot are \texttt{bereshitrabbah}, \texttt{shemotrabbah}, \texttt{vayikrarabbah},
+\texttt{bamidbarrabbah}, \texttt{devarimrabbah}, \texttt{shirhashirimrabbah},
+\texttt{ruthrabbah}, \texttt{eichahrabbah}, \texttt{koheletrabbah} and \texttt{estherrabbah}. The Sifrei is \texttt{sifreibamidbar} or
+\texttt{sifreidevarim}.
+A parashah is named by a key such as \texttt{noach}, \texttt{lechlecha} or
+\texttt{vezothaberachah}. Hebrew has its own forms, so that
+\verb|\sefer{igrotmoshe}{yd}{1}{62}| is
+\begin{center}
+\texthebrew{\sefer{igrotmoshe}{yd}{1}{62}}
+\end{center}
+The commands \cs{mishnah}, \cs{yerushalmi} and \cs{rambam} are short for
+\verb|\sefer{mishnah}|, \verb|\sefer{yerushalmi}| and \verb|\sefer{rambam}|.
+
+\subsection{Declaring a work}
+
+\begin{Verbatim}
+\declaresefer[english={template}]{keys}{Hebrew}{English}{template}
+\end{Verbatim}
+declares a work, anywhere before it is used. The template is what follows the work's name,
+with a placeholder for each argument of \cs{sefer}, which takes them in order:
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+Placeholder & Argument & English & Hebrew \\
+\midrule
+\verb|#N| & a number or range (\texttt{4}, \texttt{10-12}) & 4, \tanach*{gen}{10-12} & \texthebrew{ד׳, \tanach*{gen}{10-12}} \\
+\verb|#R| & a chapter and verse, as in \cs{tanach} (\texttt{38:13}) & \tanach*{gen}{38:13} & \texthebrew{\tanach*{gen}{38:13}} \\
+\verb|#D| & a daf, as in \cs{bavli} (\texttt{69b}) & 69b & \texthebrew{\bavli*{69b}} \\
+\verb|#T| & a section of the Tur (\texttt{oh}) & Oraḥ Ḥayyim & \texthebrew{או״ח} \\
+\verb|#B| & a book of Tanakh (\texttt{gen}) & Genesis & \texthebrew{בראשית} \\
+\verb|#M| & a tractate (\texttt{shabbat}) & Shabbat & \texthebrew{שבת} \\
+\verb|#P| & a parashah (\texttt{noach}) & Noaḥ & \texthebrew{נח} \\
+\verb|#H| & a set of laws of the Mishneh Torah (\texttt{shofar}) & \multicolumn{2}{l}{as in \cs{rambam}} \\
+\verb|#S| & any text, or \verb|{Hebrew}{English}| & \multicolumn{2}{l}{as written} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The template serves both languages. When English is written differently, \texttt{english=}
+gives it its own template, with the same placeholders in the same order. Spaces in a template
+are printed, so it usually starts with one; a space before \verb|#N|, \verb|#R| or \verb|#D|
+doesn't break across lines, so a number stays with its label. The package declares Igrot Moshe
+like this:
+\begin{Verbatim}[commandchars=+\(\)]
+\declaresefer[english={, #T #N:#N}]{igrotmoshe, igrosmoshe}
+  {+texthebrew(אגרות משה)}{Igrot Moshe}{ #T +texthebrew(חלק) #N +texthebrew(סי׳) #N}
+\end{Verbatim}
+Text for \verb|#S| is printed as it is written, or given as \verb|{Hebrew}{English}| for each
+language, as with the Mekhilta's masekhta:
+\begin{Verbatim}[commandchars=+\(\)]
+\sefer{mekhilta}{yitro}{{+texthebrew(בחדש)}{BaḤodesh}}{7}
+\end{Verbatim}
+gives
+\begin{center}
+\sefer{mekhilta}{yitro}{{בחדש}{BaḤodesh}}{7}\\
+\texthebrew{\sefer{mekhilta}{yitro}{{בחדש}{BaḤodesh}}{7}}
+\end{center}
+A placeholder other than these, or an English template whose placeholders differ from the
+Hebrew one's, is an error.
+
+\section{Commentaries}\label{sec:commentaries}
+
+\cs{tanach} and \cs{bavli} take a commentary in their optional argument. The package knows
+\texttt{rashi}, \texttt{ramban}, \texttt{ibnezra}, \texttt{rashbam}, \texttt{radak},
+\texttt{sforno}, \texttt{chizkuni}, \texttt{orhachaim}, \texttt{baalhaturim},
+\texttt{kliyakar}, \texttt{malbim}, \texttt{onkelos} and \texttt{yonatan}, mostly on verses,
+and \texttt{tosafot}, \texttt{rif}, \texttt{rabbeinuchananel}, \texttt{rashba},
+\texttt{ritva}, \texttt{ran}, \texttt{meiri} and \texttt{maharsha}, mostly on a daf; any of
+them works on either. \cs{declarecommentary}\verb|{keys}{Hebrew}{English}| adds more:
+\begin{Verbatim}[commandchars=+\(\)]
+\declarecommentary{haamekdavar}{+texthebrew(העמק דבר)}{Ha'amek Davar}
+\end{Verbatim}
+
+The words a comment opens with go in the same optional argument: \texttt{dh=} for Hebrew,
+printed after \texthebrew{ד״ה}, and \texttt{sv=} for English, printed after \textit{s.v.}
+Either alone serves both languages, and words with a comma go in braces:
+\begin{Verbatim}[commandchars=+\(\)]
+\bavli[tosafot, dh=+texthebrew(ואם תאמר), sv=ve'im tomar]{menachot}{69b}
+\end{Verbatim}
+gives
+\begin{center}
+\bavli[tosafot, sv=ve'im tomar]{menachot}{69b}\\
+\texthebrew{\bavli[tosafot, dh=ואם תאמר]{menachot}{69b}}
+\end{center}
+
+\section{Ad loc}\label{sec:sham}
+
+\cs{sham} gives \texthebrew{\sham} or ``\sham''. With a commentary, \verb|\sham[rashi]| gives
+``\sham[rashi]'' or \mbox{\texthebrew{\sham[rashi]}}. With \texttt{sham=full}, it also gives the
+reference it stands for, the last one made: ``Rashi ad loc (\bavli{menachot}{69b})''.
+
+A commentary's reference stands for its verse or daf, so after
+\verb|\tanach[rashi]{gen}{18:7}|, \verb|\sham[ibnezra]| is Ibn Ezra on the same verse.
+\cs{bavli*} and \cs{tanach*} don't change what \cs{sham} stands for, and within the parentheses
+of a full \cs{sham} the reference isn't made again.
+
+A document that cites a source with no reference of the package's (a responsum declared
+nowhere, say) and then writes \cs{sham} would make it point at the wrong source. Packages that
+divide a document into sources can prevent that (section~\ref{sec:packages}); \texttt{shiur}
+does.
+
+\section{Restyling and overriding}
+
+A later declaration replaces an earlier one. So a document, or a package of your own loaded
+after \texttt{mareimekomot}, can cite a built-in work in its own style, and the last
+declaration wins. A declaration that names any key of an existing work or commentary replaces
+it under all its keys, so redeclaring \texttt{igrotmoshe} changes \texttt{igrosmoshe} too, and
+redeclaring \texttt{nachmanides} changes \verb|\tanach[ramban]|:
+\begin{Verbatim}[commandchars=+\(\)]
+% "Mishnah Sukkah 4:1" rather than "M. Sukkah 4:1"
+\declaresefer{mishnah}{+texthebrew(משנה)}{Mishnah}{\nobreakspace#M #R}
+\declarecommentary{nachmanides}{+texthebrew(רמב״ן)}{Nachmanides}
+\declaretursefer{\tur}{+texthebrew(טור)}{Arba'ah Turim}
+\end{Verbatim}
+While the package itself loads, two of its names whose keys match alike is an error, which
+keeps the built-in lists consistent; after that, a clash is a deliberate replacement.
+
+\section{Numbers and line breaks}
+
+Hebrew numbers take a geresh when they are one letter and gershayim before the last letter
+when they are more (\texthebrew{ח׳, ל״ח, תר״ה}); 15 and 16 are \texthebrew{ט״ו} and
+\texthebrew{ט״ז}. A chapter and verse is \texthebrew{ל״ז, י״ח} in Hebrew and 37:18 in
+English, and a range takes an en dash.
+
+A reference never hyphenates. It breaks only between the words of a long name, as in the
+Mishneh Torah's, and at the dash of a range. Not every font has an en dash or \textit{ḥ}
+(Taamey Frank CLM has no en dash, Trebuchet MS no \textit{ḥ}), so the package checks the font
+in use: a range without an en dash takes a hyphen, and a missing \textit{ḥ} is made from
+\textit{h} and a dot below.
+
+\section{For package writers}\label{sec:packages}
+
+Three commands let a package that divides a document into units (sources, sections) keep
+\cs{sham} from pointing past a unit with no reference:
+\begin{description}
+\item[\cs{mareimekomot@startunit}] at the start of a unit;
+\item[\cs{mareimekomot@endunit}] at its end: if no reference (or \cs{sham}) was made in the unit,
+	\cs{sham} is cleared;
+\item[\cs{mareimekomot@forget}] clears \cs{sham} at once.
+\end{description}
+A cleared \cs{sham} gives plain ``ad loc'', with nothing in parentheses, even with
+\texttt{sham=full}.
+
+\clearpage
+\appendix
+\section{Lists of names}
+
+The tables below are read from \texttt{mareimekomot.sty} when this manual is compiled, so they
+are always the package's own. Any key in a row names that row.
+
+\subsection{Books of Tanakh}
+\namelist{book}
+
+\subsection{Tractates}
+For \cs{bavli}, \cs{mishnah} and \cs{yerushalmi}, and \verb|#M|. The second part has the
+tractates with Mishnah but no Bavli.
+\namelist{tractate}
+
+\subsection{Sections of the Tur}
+For the Tur and the works arranged by it, and \verb|#T|.
+\namelist{section}
+
+\subsection{Laws of the Mishneh Torah}
+For \cs{rambam} and \verb|#H|, in order.
+\namelist{hilkhot}
+
+\subsection{Parashot}
+For \verb|#P|.
+\namelist{parashah}
+
+\subsection{Commentaries}
+For the optional argument of \cs{tanach} and \cs{bavli}, and \cs{sham}.
+\namelist{commentary}
+
+\section{Licence}
+
+Copyright 2023--2026 Gabriel Gendler Yom-Tov. This work may be distributed and/or modified under
+the conditions of the \LaTeX{} Project Public License, either version 1.3c of this license or (at
+your option) any later version. The latest version of this license is in
+\url{https://www.latex-project.org/lppl.txt}.
+
+\end{document}
