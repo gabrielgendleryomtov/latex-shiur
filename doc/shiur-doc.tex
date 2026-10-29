@@ -12,6 +12,8 @@
 \fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
 \newcommand{\cs}[1]{\texttt{\char`\\#1}}
 \newcommand{\env}[1]{\texttt{#1}}
+% long command names don't hyphenate
+\setlength{\emergencystretch}{2em}
 
 \title{The \texttt{shiur} package\\[0.3em]\large Source sheets (\emph{dappei mekorot}) for handouts and slides}
 \author{Gabriel Gendler Yom-Tov\\\small\texttt{shiurtex@thm.mozmail.com}}
@@ -191,193 +193,37 @@ the end of verse 22 and go on with verse 23, write \verb|\dilug \pasuk|, or \ver
 
 The references in headings come from the \texttt{mareimekomot} package, which \texttt{shiur}
 loads and which works in other documents too, such as papers and books. A reference is written
-once and comes out in the language around it, so a source's Hebrew and English headings use the
-same command:
+once and comes out in the language around it, so a \env{mekor}'s heading serves all its
+languages:
 \begin{center}
 \begin{tabular}{@{}lll@{}}
 \toprule
 Command & English & Hebrew \\
 \midrule
 \verb|\tanach{gen}{37:18-20}| & \tanach{gen}{37:18-20} & \texthebrew{\tanach{gen}{37:18-20}} \\
-\verb|\tanach{exodus}{14}| & \tanach{exodus}{14} & \texthebrew{\tanach{exodus}{14}} \\
-\verb|\tanach*{gen}{39:1}| & \tanach*{gen}{39:1} & \texthebrew{\tanach*{gen}{39:1}} \\
 \verb|\tanach[rashi]{gen}{18:7}| & \tanach[rashi]{gen}{18:7} & \texthebrew{\tanach[rashi]{gen}{18:7}} \\
 \verb|\bavli{menachot}{69b}| & \bavli{menachot}{69b} & \texthebrew{\bavli{menachot}{69b}} \\
-\verb|\bavli{yoma}{9a-b}| & \bavli{yoma}{9a-b} & \texthebrew{\bavli{yoma}{9a-b}} \\
-\verb|\bavli*{127b}| & \bavli*{127b} & \texthebrew{\bavli*{127b}} \\
+\verb|\bavli[tosafot]{yoma}{9a}| & \bavli[tosafot]{yoma}{9a} & \texthebrew{\bavli[tosafot]{yoma}{9a}} \\
 \verb|\mishnah{sukkah}{4:1}| & \mishnah{sukkah}{4:1} & \texthebrew{\mishnah{sukkah}{4:1}} \\
-\verb|\yerushalmi{berachot}{1:1}| & \yerushalmi{berachot}{1:1} & \texthebrew{\yerushalmi{berachot}{1:1}} \\
 \verb|\shulchanaruch{oh}{605:1}| & \shulchanaruch{oh}{605:1} & \texthebrew{\shulchanaruch{oh}{605:1}} \\
-\verb|\tur{yd}{114}| & \tur{yd}{114} & \texthebrew{\tur{yd}{114}} \\
-\verb|Rashi \sham| & Rashi \sham & \texthebrew{רש״י \sham} \\
-\bottomrule
-\end{tabular}
-\end{center}
-A Tanakh reference is a chapter (\texttt{14}), a verse (\texttt{37:18}), or a range within a
-chapter (\texttt{37:18-20}) or across chapters (\texttt{37:18-38:2}); the starred form leaves
-out the book's name, for an addition such as ``(+\tanach*{gen}{39:1})'', and \verb|\bavli*| gives a
-daf alone. A daf is \texttt{69b},
-\texttt{69}, \texttt{69b-70a} or \texttt{9a-b}. Books and tractates are named in English, ignoring
-case, spaces and hyphens, with common short forms: \texttt{gen}, \texttt{kings ii},
-\texttt{avoda zara}, \texttt{menachot}; the full lists are in \texttt{mareimekomot.sty}. Write
-them in whatever transliteration you use: \textit{ch}, \textit{kh} and \textit{h} count alike,
-as do \textit{tz}, \textit{ts} and \textit{z}, and \textit{y} and \textit{i}, and doubled
-letters and a final \textit{h} don't matter, so \texttt{menachot}, \texttt{menakhot} and
-\texttt{menahot} are the same. Commands with \texthebrew{ח} or \texthebrew{כ} in their names
-can be spelt either way too: \cs{tanach} or \cs{tanakh}, \cs{shulchanaruch} or
-\cs{shulkhanarukh}. The English printed is transliterated with \textit{\hdot} for
-\texthebrew{ח} and \textit{kh} for \texthebrew{כ} (Mena\hdot ot, Berakhot).
-
-A commentary on a verse is named in the optional argument: \texttt{rashi}, \texttt{ramban},
-\texttt{ibnezra}, \texttt{rashbam}, \texttt{radak}, \texttt{sforno}, \texttt{chizkuni},
-\texttt{orhachaim}, \texttt{baalhaturim}, \texttt{kliyakar}, \texttt{malbim}, \texttt{onkelos}
-or \texttt{yonatan}. \verb|\sham| after one stands for the verse, so ``Ibn Ezra \verb|\sham|''
-can follow it. A commentary on a daf works the same way, with \texttt{rashi}, \texttt{tosafot},
-\texttt{rif}, \texttt{rabbeinuchananel}, \texttt{ramban}, \texttt{rashba}, \texttt{ritva},
-\texttt{ran}, \texttt{meiri} or \texttt{maharsha}: \verb|\bavli[tosafot]{menachot}{69b}| gives
-\bavli[tosafot]{menachot}{69b} and \texthebrew{\bavli[tosafot]{menachot}{69b}}.
-The words a comment opens with go in the same optional argument, \texttt{dh=} for Hebrew and
-\texttt{sv=} for English; either alone serves both languages, and words with a comma go in
-braces:
-\begin{Verbatim}[commandchars=+\(\)]
-\bavli[tosafot, dh=+texthebrew(ואם תאמר), sv=ve'im tomar]{menachot}{69b}
-\end{Verbatim}
-gives
-\begin{center}
-\bavli[tosafot, sv=ve'im tomar]{menachot}{69b}\\
-\texthebrew{\bavli[tosafot, dh=ואם תאמר]{menachot}{69b}}
-\end{center}
-\verb|\sham[rashi]| gives
-``\sham[rashi]'' and \texthebrew{\sham[rashi]}, so ``Rashi ad loc'' can head a \env{mekor}
-too.
-
-\cs{declarecommentary} adds commentaries, for verses and dafim alike, in the preamble:
-\begin{Verbatim}[commandchars=+\(\)]
-\declarecommentary{haamekdavar}{+texthebrew(העמק דבר)}{Ha'amek Davar}
-\end{Verbatim}
-
-\verb|\rambam{shofar}{2:6}| gives
-\begin{center}
-\rambam{shofar}{2:6}\\
-\texthebrew{\rambam{shofar}{2:6}}
-\end{center}
-Mishnah and Yerushalmi references, and the Mishneh Torah's, are
-a chapter and its mishnah, halakhah or law, written like a Tanakh reference; the Shul\hdot an
-Arukh's and the Tur's are a siman, optionally with a se'if (\texttt{605:1}) or a range of
-se'ifim (\texttt{658:1-2}), in one of the four sections \texttt{oh}, \texttt{yd}, \texttt{eh} and
-\texttt{hm}. The Mishneh Torah's sets of laws are named by short keys such as \texttt{shofar},
-\texttt{teshuvah} or \texttt{yesodeihatorah}; all 83, with their keys, are listed in
-\texttt{mareimekomot.sty}.
-
-Works arranged by the Tur's four sections work the same way. Besides \cs{tur} and
-\cs{shulchanaruch}, the package has \cs{beityosef}, \cs{darkeimoshe}, \cs{bach},
-\cs{aruchhashulchan}, and the commentaries \cs{shach}, \cs{taz}, \cs{magenavraham} and
-\cs{mishnahberurah}, whose sub-unit is the se'if katan:
-\begin{center}
-\begin{tabular}{@{}lll@{}}
-\toprule
-Command & English & Hebrew \\
-\midrule
-\verb|\shach{yd}{114:3}| & \shach{yd}{114:3} & \texthebrew{\shach{yd}{114:3}} \\
-\verb|\darkeimoshe{oh}{605:3}| & \darkeimoshe{oh}{605:3} & \texthebrew{\darkeimoshe{oh}{605:3}} \\
 \verb|\mishnahberurah{605:3}| & \mishnahberurah{605:3} & \texthebrew{\mishnahberurah{605:3}} \\
-\bottomrule
-\end{tabular}
-\end{center}
-The Magen Avraham and the Mishnah Berurah cover Ora\hdot\ \Hdot ayyim only, so they take just the
-reference, and don't name the section. \cs{declaretursefer} declares more such works, in the
-preamble:
-\begin{Verbatim}[commandchars=+\(\)]
-\declaretursefer[seifkatan]{\pitcheiteshuvah}{+texthebrew(פתחי תשובה)}{Pitchei Teshuvah}
-\declaretursefer[seifkatan, section=oh]{\shaarhatziyun}
-  {+texthebrew(שער הציון)}{Shaar haTziyun}
-\end{Verbatim}
-Its options are \texttt{seifkatan} for a sub-unit of \texthebrew{ס״ק} rather than
-\texthebrew{סע׳}, \texttt{subunit=} for any other (the Darkei Moshe's is \texthebrew{אות}), and
-\texttt{section=} for a work on one section only.
-
-Other works are cited with \cs{sefer}, by a key and the parts of the reference:
-\begin{center}
-\setlength{\tabcolsep}{4pt}%
-\begin{tabular}{@{}lll@{}}
-\toprule
-Command & English & Hebrew \\
-\midrule
-\verb|\sefer{bereshitrabbah}{38:13}| & \sefer{bereshitrabbah}{38:13} & \texthebrew{\sefer{bereshitrabbah}{38:13}} \\
 \verb|\sefer{tanchuma}{noach}{1}| & \sefer{tanchuma}{noach}{1} & \texthebrew{\sefer{tanchuma}{noach}{1}} \\
-\verb|\sefer{sifra}{emor}{13:1}| & \sefer{sifra}{emor}{13:1} & \texthebrew{\sefer{sifra}{emor}{13:1}} \\
-\verb|\sefer{igrotmoshe}{oh}{4}{10}| & \sefer{igrotmoshe}{oh}{4}{10} & \texthebrew{\sefer{igrotmoshe}{oh}{4}{10}} \\
+\verb|\sham[rashi]| & \sham[rashi] & \texthebrew{\sham[rashi]} \\
 \bottomrule
 \end{tabular}
 \end{center}
-The package knows the ten Rabbot (\texttt{bereshitrabbah}, \texttt{shemotrabbah}, \ldots,
-\texttt{estherrabbah}, each by chapter and section), \texttt{tanchuma} (parashah and section),
-\texttt{sifra} (parashah, chapter and section), \texttt{sifreibamidbar} and
-\texttt{sifreidevarim} (piska), \texttt{mekhilta} (parashah, masekhta and its parashah),
-\texttt{pirkeiderabbieliezer}, \texttt{midrashtehillim}, \texttt{midrashaggadah} (book and
-chapter), \texttt{yalkutshimoni} (book and remez) and \texttt{igrotmoshe} (section, volume and
-siman). A parashah is named by a key such as \texttt{noach}, \texttt{lechlecha} or
-\texttt{vezothaberachah}. \verb|\sefer*| leaves out the name.
+Books, tractates and works are named by keys in any usual transliteration (\texttt{menachot},
+\texttt{menakhot} and \texttt{menahot} are the same). \cs{declaresefer} declares any other work
+from a template, \cs{declarecommentary} a commentary, and \cs{declaretursefer} a work arranged
+by the Tur; a document's own declaration replaces the package's. The
+\texttt{mareimekomot} manual (\texttt{mareimekomot-doc.pdf}) describes all of it, with the full
+lists of names.
 
-\cs{declaresefer} declares more works, in the preamble or anywhere before they are used. It
-takes the work's keys, its Hebrew and English names, and a template for what follows the name,
-with a placeholder for each argument of \cs{sefer}, which takes them in order:
-\begin{center}
-\begin{tabular}{@{}ll@{}}
-\toprule
-\verb|#N| & a number or range (\texttt{4}, \texttt{10-12}) \\
-\verb|#R| & a chapter and verse, as in \cs{tanach} (\texttt{38:13}) \\
-\verb|#D| & a daf (\texttt{69b}) \\
-\verb|#T| & a section of the Tur (\texttt{oh}, \texttt{yd}, \texttt{eh}, \texttt{hm}) \\
-\verb|#B|, \verb|#M|, \verb|#P| & a book of Tanakh, a tractate, a parashah, by key \\
-\verb|#H| & a set of laws of the Mishneh Torah, by key (\texttt{shofar}) \\
-\verb|#S| & any text, printed as written \\
-\bottomrule
-\end{tabular}
-\end{center}
-The template is used for both languages; when English is written differently, \texttt{english=}
-gives it its own, with the same placeholders in the same order. A space before \verb|#N|,
-\verb|#R| or \verb|#D| doesn't break, so a number stays with its label. The package's Igrot Moshe
-is declared like this:
-\begin{Verbatim}[commandchars=+\(\)]
-\declaresefer[english={, #T #N:#N}]{igrotmoshe}{+texthebrew(אגרות משה)}{Igrot Moshe}
-  { #T +texthebrew(חלק) #N +texthebrew(סי׳) #N}
-\end{Verbatim}
-A later declaration replaces an earlier one, so a document or a package of your own can cite a
-built-in work in its own style; it takes over every key of the work it replaces (\texttt{igrosmoshe}
-as well as \texttt{igrotmoshe}). \cs{mishnah}, \cs{yerushalmi} and \cs{rambam} are short for
-\verb|\sefer{mishnah}|, \verb|\sefer{yerushalmi}| and \verb|\sefer{rambam}|, so they can be
-restyled the same way:
-\begin{Verbatim}[commandchars=+\(\)]
-\declaresefer{mishnah}{+texthebrew(משנה)}{Mishnah}{\nobreakspace#M #R}   % Mishnah Sukkah 4:1
-\end{Verbatim}
-\cs{declarecommentary} replaces a commentary in the same way, under all its keys.
-
-Text for \verb|#S| is printed as it is written, or given as \verb|{Hebrew}{English}| for each
-language:
-\begin{Verbatim}[commandchars=+\(\)]
-\sefer{mekhilta}{yitro}{{+texthebrew(בחדש)}{Ba\Hdot odesh}}{7}
-\end{Verbatim}
-gives
-\begin{center}
-\sefer{mekhilta}{yitro}{{בחדש}{Ba\Hdot odesh}}{7}\\
-\texthebrew{\sefer{mekhilta}{yitro}{{בחדש}{Ba\Hdot odesh}}{7}}
-\end{center}
-
-Hebrew numbers take a geresh when they are one letter and gershayim when they are more
-(\mbox{\texthebrew{ח׳, ל״ח}}), ranges take an en dash, and a reference only breaks across
-lines at its dash.
-
-\cs{sham} gives \texthebrew{שם} or ``ad loc''. On slides, where a source can be
-several slides from the one it refers to, it also gives that reference: ``Rashi ad loc
-(\bavli{menachot}{69b})''. A source whose heading has no reference of the package's (a work not
-declared, say) clears it, so \cs{sham} after it stays plain rather than pointing at the wrong
-source. A reference never hyphenates; it breaks only between the words of a long name, as in the
-Mishneh Torah's, and at the dash of a range. Two settings change the style, in any document:
-\begin{Verbatim}
-\mareimekomotsetup{sham=full}    % always give the reference after ad loc
-\mareimekomotsetup{daf=short}    % a daf as סט: rather than ס״ט ע״ב
-\end{Verbatim}
+Two things are particular to \texttt{shiur}. On slides, where a source can be several slides
+from the one it refers to, \cs{sham} also gives the reference it stands for: ``Rashi ad loc
+(\bavli{menachot}{69b})''. And a source whose heading has no reference of the package's (a work
+not declared, say) clears \cs{sham}, so \cs{sham} after it stays plain rather than pointing at
+the wrong source.
 
 \section{Notes}
 
