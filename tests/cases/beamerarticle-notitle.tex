@@ -1,0 +1,21 @@
+% A beamerarticle handout without \makeTitle (bidi used to give it beamer's page
+% header, which failed), with a gnote and \mode.
+\documentclass{article}
+\usepackage{beamerarticle}
+\usepackage[maggidshiur]{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{english}{\tanakh{gen}{1:1}}In the beginning.\end{mekorlang}
+\end{mekor}
+\begin{gnote}A note.\end{gnote}
+\mode<presentation>{Only on slides.}
+\mode<article>{Only in the handout.}
+\begin{itemize}\item A list.\end{itemize}
+\end{document}
+
+%! expect: In the beginning.
+%! expect: A note.
+%! expect: Only in the handout.
+%! absent: Only on slides.
+%! expect: A list.

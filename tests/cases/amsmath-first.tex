@@ -1,0 +1,10 @@
+% amsmath loaded before shiur: its \boxed and shiur's boxedtext both work.
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{boxedtext}Boxed text, and $\boxed{x=1}$.\end{boxedtext}
+\end{document}
+
+%! expect: Boxed text, and x = 1.

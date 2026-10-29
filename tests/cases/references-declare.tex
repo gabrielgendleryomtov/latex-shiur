@@ -1,0 +1,16 @@
+% Works and commentaries declared by a document.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\declaretursefer[seifkatan]{\pitcheiteshuvah}{פתחי תשובה}{Pitchei Teshuvah}
+\declaretursefer[subunit=אות, section=oh]{\eliyahurabbah}{אליה רבה}{Eliyahu Rabbah}
+\declarecommentary{haamekdavar}{העמק דבר}{Ha'amek Davar}
+\newcommand{\all}{\pitcheiteshuvah{yd}{114:2} | \eliyahurabbah{605:4} | \tanakh[haamekdavar]{deut}{6:5}}
+\begin{document}
+\all
+
+\begin{hebrew}\all\end{hebrew}
+\end{document}
+
+%! expect: Pitchei Teshuvah, Yoreh De’ah 114:2 | Eliyahu Rabbah 605:4 | Ha’amek Davar on Deuteronomy 6:5
+%! expect: פתחי תשובה יו״ד סי׳ קי״ד ס״ק ב׳ | אליה רבה סי׳ תר״ה אות ד׳ | העמק דבר על דברים ו׳, ה׳

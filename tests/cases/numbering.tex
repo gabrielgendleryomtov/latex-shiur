@@ -1,0 +1,18 @@
+% Sources are numbered; mekor* continues with the same number; \attribution leaves
+% out empty parts; \hdot, \Hdot and \sectionsymbol.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}\begin{mekorlang}{english}{First}One.\end{mekorlang}\end{mekor}
+\begin{mekor*}\begin{mekorlang}{english}{More}Continued.\end{mekorlang}\end{mekor*}
+\begin{mekor}\begin{mekorlang}{english}{Second}Two.\end{mekorlang}\end{mekor}
+\begin{mekor}\begin{mekorlang}{hebrew}{שלישי}שלוש.\end{mekorlang}\end{mekor}
+\attribution{R. Ploni}{}{1943}. Mena\hdot ot, \Hdot anukkah, \sectionsymbol 3.
+\end{document}
+
+%! expect: 1. First One.
+%! expect: 1. More Continued.
+%! expect: 2. Second Two.
+%! expect: שלישי שלוש.
+%! expect: R. Ploni, 1943. Menaḥot, Ḥanukkah, §3.

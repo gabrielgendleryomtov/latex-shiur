@@ -10,7 +10,7 @@
 *.snm
 *.toc
 .DS_Store
-tests/docs.local
+tests/mine.local
 !doc/shiur-doc.pdf
 !doc/trop-fonts.pdf
 !doc/shiur-fonts.pdf

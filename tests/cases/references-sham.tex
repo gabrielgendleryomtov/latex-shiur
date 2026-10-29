@@ -1,0 +1,36 @@
+% \sham: plain, full, and forgotten after a source whose heading has no reference.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{english}{\bavli{menachot}{69b}}First.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{Rashi \sham}Second.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{Bereishit Rabbah 87:7}Third.\end{mekorlang}
+\end{mekor}
+\mareimekomotsetup{sham=full}
+\begin{mekor}
+\begin{mekorlang}{english}{Tosafot \sham}Fourth.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{\tanakh[rashi]{gen}{18:7}}Fifth.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{Ibn Ezra \sham}Sixth.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{hebrew}{רמב״ן \sham}שביעי.\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: Rashi ad loc Second.
+%! expect: Tosafot ad loc Fourth.
+%! expect: Ibn Ezra ad loc (Genesis 18:7) Sixth.
+% (pdftotext scrambles the order of a bracketed reference in Hebrew, so its parts
+% are checked separately)
+%! expect: רמב״ן שם
+%! expect: בראשית י״ח

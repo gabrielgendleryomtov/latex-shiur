@@ -1,0 +1,17 @@
+% Verse numbers and gaps, in English and in Hebrew.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{english}{\tanakh{gen}{37:18-38:1}}
+\pasuk[37:18] One. \pasuk Two. \pasuk[23] Three. \pasuk* Four. \perek{38} Five. Six \dilug seven.
+\end{mekorlang}
+\begin{mekorlang}{hebrew}{\tanakh{gen}{37:18-38:1}}
+\pasuk[37:18] אחד. \pasuk שתיים. \pasuk[23] שלוש. \perek{38} חמש. שש \dilug שבע.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: (37:18) One. (19) Two. ... (23) Three. ... (24) Four. (38:1) Five. Six ... seven.
+%! expect: (לז יח) אחד. (יט) שתיים. ... (כג) שלוש. (לח א) חמש. שש ... שבע.

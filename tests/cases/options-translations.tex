@@ -1,0 +1,21 @@
+% translations=false drops the English that follows Hebrew in a source, but not
+% English written as the source itself; \iftranslations chooses text.
+\documentclass{article}
+\usepackage[translations=false]{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{hebrew}{מקור}המקור.\end{mekorlang}
+\begin{mekorlang}{english}{Source}The translation.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{Essay}An English original.\end{mekorlang}
+\end{mekor}
+\iftranslations{Bilingual version.}{Hebrew-only version.}
+\end{document}
+
+%! expect: המקור.
+%! absent: The translation.
+%! expect: An English original.
+%! expect: Hebrew-only version.
+%! absent: Bilingual version.

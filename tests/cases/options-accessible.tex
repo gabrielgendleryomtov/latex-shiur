@@ -1,0 +1,16 @@
+% Large print builds, with the header and the sources.
+\documentclass{article}
+\usepackage[accessible=20pt]{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\title{Large print}\author{}\date{}
+\begin{document}
+\makeTitle
+\begin{mekor}
+\begin{mekorlang}{hebrew}{\bavli{menachot}{69b}}בעי ר׳ זירא: חיטין שירדו בעבים מהו?\end{mekorlang}
+\begin{mekorlang}{english}{\bavli{menachot}{69b}}R. Zeira asked.\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: בס״ד
+%! expect: א. בבלי מנחות ס״ט ע״ב
+%! expect: R. Zeira asked.

@@ -1,0 +1,14 @@
+% On slides \sham names the reference it stands for.
+\documentclass{beamer}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{english}{\bavli{menachot}{69b}}First.\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{Rashi \sham}Second.\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: Rashi ad loc (B. Menaḥot 69b)

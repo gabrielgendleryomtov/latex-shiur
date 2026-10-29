@@ -135,10 +135,12 @@ Ideas for later versions, not yet planned in detail:
 
 ## Tests
 
-`tests/regress.sh baseline`, then `tests/regress.sh check` after a change, compiles the
-documents listed in `tests/docs.txt` against the committed and the working version of the
-package, and compares the PDFs page by page as text and images. It needs `pdftotext`,
-`pdftoppm` and ImageMagick's `compare`.
+`tests/run.sh` compiles the test cases in `tests/cases` and the examples in `tests/examples`
+against the working copy of the package, and checks that each builds with no error or missing
+character. Each test case also states, in `%!` comment lines, text its PDF must or must not
+contain (`tests/check.py` explains the forms). `tests/run.sh pasuk` runs only the files whose
+names contain "pasuk". It needs Python 3 and `pdftotext`. A bug fix should come with a small
+test case that would have caught it.
 
 ## Licence
 
