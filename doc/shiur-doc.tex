@@ -236,7 +236,22 @@ can follow it. A commentary on a daf works the same way, with \texttt{rashi}, \t
 \texttt{rif}, \texttt{rabbeinuchananel}, \texttt{ramban}, \texttt{rashba}, \texttt{ritva},
 \texttt{ran}, \texttt{meiri} or \texttt{maharsha}: \verb|\bavli[tosafot]{menachot}{69b}| gives
 \bavli[tosafot]{menachot}{69b} and \texthebrew{\bavli[tosafot]{menachot}{69b}}.
-\cs{declarecommentary} adds more, for both, in the preamble:
+The words a comment opens with go in the same optional argument, \texttt{dh=} for Hebrew and
+\texttt{sv=} for English; either alone serves both languages, and words with a comma go in
+braces:
+\begin{Verbatim}[commandchars=+\(\)]
+\bavli[tosafot, dh=+texthebrew(ואם תאמר), sv=ve'im tomar]{menachot}{69b}
+\end{Verbatim}
+gives
+\begin{center}
+\bavli[tosafot, sv=ve'im tomar]{menachot}{69b}\\
+\texthebrew{\bavli[tosafot, dh=ואם תאמר]{menachot}{69b}}
+\end{center}
+\verb|\sham[rashi]| gives
+``\sham[rashi]'' and \texthebrew{\sham[rashi]}, so ``Rashi ad loc'' can head a \env{mekor}
+too.
+
+\cs{declarecommentary} adds commentaries, for verses and dafim alike, in the preamble:
 \begin{Verbatim}[commandchars=+\(\)]
 \declarecommentary{haamekdavar}{+texthebrew(העמק דבר)}{Ha'amek Davar}
 \end{Verbatim}
@@ -331,9 +346,16 @@ A later declaration replaces an earlier one, so a document or a package of your 
 built-in work in its own style; it takes over every key of the work it replaces (\texttt{igrosmoshe}
 as well as \texttt{igrotmoshe}).
 
-Text for \verb|#S| is printed as it is written, so a source's Hebrew and English headings each
-give it in their own language: \verb|\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}| gives
-\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}.
+Text for \verb|#S| is printed as it is written, or given as \verb|{Hebrew}{English}| for each
+language:
+\begin{Verbatim}[commandchars=+\(\)]
+\sefer{mekhilta}{yitro}{{+texthebrew(בחדש)}{Ba\Hdot odesh}}{7}
+\end{Verbatim}
+gives
+\begin{center}
+\sefer{mekhilta}{yitro}{{בחדש}{Ba\Hdot odesh}}{7}\\
+\texthebrew{\sefer{mekhilta}{yitro}{{בחדש}{Ba\Hdot odesh}}{7}}
+\end{center}
 
 Hebrew numbers take a geresh when they are one letter and gershayim when they are more
 (\mbox{\texthebrew{ח׳, ל״ח}}), ranges take an en dash, and a reference only breaks across

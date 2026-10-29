@@ -21,6 +21,9 @@
 %   \tanach*{gen}{39:1}      the same without the book's name
 %   \tanach[rashi]{gen}{18:7}   רש״י על בראשית י״ח, ז׳ / Rashi on Genesis 18:7;
 %                            \declarecommentary adds commentaries
+%   \bavli[tosafot, dh=ואם תאמר, sv=ve'im tomar]{menachot}{69b}
+%                            תוספות מנחות ס״ט ע״ב ד״ה ואם תאמר /
+%                            Tosafot on B. Menaḥot 69b s.v. ve'im tomar
 %   \bavli{menachot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
 %   \bavli*{69b}             the daf alone: ס״ט ע״ב / 69b
 %   \mishnah{sukkah}{4:1}   משנה סוכה ד׳, א׳ / M. Sukkah 4:1
@@ -34,7 +37,7 @@
 %   \aruchhashulchan; \declaretursefer declares more. Commands with ח or כ in
 %   their names can be spelt with kh too: \tanakh, \shulkhanarukh, \shakh, \bakh
 %   (or \bah), \arukhhashulkhan.
-%   \sham                    שם / ad loc
+%   \sham                    שם / ad loc; \sham[rashi] רש״י שם / Rashi ad loc
 % Numbers follow the usual Hebrew convention: geresh for one letter (ח׳),
 % gershayim before the last of several (ל״ח). Ranges take an en dash, the
 % only place a reference can break across lines.
@@ -518,21 +521,76 @@
 \NewDocumentCommand \declarecommentary { m m m }
 	{ \__mm_commentary:nnn {#1} {#2} {#3} }
 
+% A commentary's optional argument: its key, and the words it opens with, dh=
+% for Hebrew and sv= for English (either alone serves both): [tosafot, dh=ואם
+% תאמר, sv=ve'im tomar] gives ד״ה ואם תאמר / s.v. ve'im tomar after the reference.
+\tl_new:N \l__mm_commentary_tl
+\tl_new:N \l__mm_dh_tl
+\tl_new:N \l__mm_sv_tl
+\keys_define:nn { mareimekomot / commentary }
+	{
+		dh .tl_set:N = \l__mm_dh_tl,
+		sv .tl_set:N = \l__mm_sv_tl,
+	}
+% #1 the optional argument, or -NoValue-
+\cs_new_protected:Npn \__mm_commentary_options:n #1
+	{
+		\tl_clear:N \l__mm_commentary_tl
+		\tl_clear:N \l__mm_dh_tl
+		\tl_clear:N \l__mm_sv_tl
+		\IfValueT {#1}
+			{
+				\clist_map_inline:nn {#1}
+					{
+						\tl_if_in:nnTF {##1} { = }
+							{ \keys_set:nn { mareimekomot / commentary } {##1} }
+							{ \tl_set:Nn \l__mm_commentary_tl {##1} }
+					}
+			}
+	}
+% the commentary's name and #1 ("על" / "on") before it, if there is one
+\cs_new_protected:Npn \__mm_commentator:nn #1 #2
+	{
+		\tl_if_empty:NF \l__mm_commentary_tl
+			{
+				\__mm_lookup:NVn \g__mm_commentary_prop \l__mm_commentary_tl { }
+				\__mm_if_hebrew:TF { \l__mm_he_tl #1 } { \l__mm_en_tl #2 }
+				\c_space_tl
+			}
+	}
+\cs_generate_variant:Nn \__mm_lookup:Nnn { NV }
+% the opening words, after the reference
+\cs_new_protected:Npn \__mm_dibbur:
+	{
+		\__mm_if_hebrew:TF
+			{
+				\tl_if_empty:NTF \l__mm_dh_tl
+					{ \tl_if_empty:NF \l__mm_sv_tl { \c_space_tl ד״ה \nobreakspace \l__mm_sv_tl } }
+					{ \c_space_tl ד״ה \nobreakspace \l__mm_dh_tl }
+			}
+			{
+				\tl_if_empty:NTF \l__mm_sv_tl
+					{
+						\tl_if_empty:NF \l__mm_dh_tl
+							{
+								\c_space_tl s.v. \nobreakspace
+								\cs_if_exist:NTF \texthebrew { \texthebrew { \l__mm_dh_tl } } { \l__mm_dh_tl }
+							}
+					}
+					{ \c_space_tl s.v. \nobreakspace \l__mm_sv_tl }
+			}
+	}
+
 \NewDocumentCommand \tanach { s o m m }
 	{
 		\group_begin:
-		\IfValueT {#2}
-			{
-				\__mm_lookup:Nnn \g__mm_commentary_prop {#2} { }
-				\__mm_if_hebrew:TF
-					{ \l__mm_he_tl \nobreakspace על }
-					{ \l__mm_en_tl \nobreakspace on }
-				\c_space_tl
-			}
+		\__mm_commentary_options:n {#2}
+		\__mm_commentator:nn { \nobreakspace על } { \nobreakspace on }
 		\__mm_lookup:Nnn \g__mm_book_prop {#3} { }
 		\IfBooleanF {#1}
 			{ \__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl } \nobreakspace }
 		\__mm_tanakh_ref:n {#4}
+		\__mm_dibbur:
 		% the verse itself, so that "Ibn Ezra \sham" after Rashi means the verse
 		\__mm_remember:n { \tanach {#3} {#4} }
 		\group_end:
@@ -590,27 +648,19 @@
 % Tosafot on B. Menaḥot 69b.
 \NewDocumentCommand \bavli { s o }
 	{ \IfBooleanTF {#1} { \__mm_bavli_daf:nn {#2} } { \__mm_bavli:nnn {#2} } }
-% #1 commentary or -NoValue-: "תוספות " / "Tosafot on "
-\cs_new_protected:Npn \__mm_bavli_commentary:n #1
-	{
-		\IfValueT {#1}
-			{
-				\__mm_lookup:Nnn \g__mm_commentary_prop {#1} { }
-				\__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl \nobreakspace on }
-				\c_space_tl
-			}
-	}
 \cs_new_protected:Npn \__mm_bavli:nnn #1 #2 #3
 	{
 		\group_begin:
-		\__mm_bavli_commentary:n {#1}
+		\__mm_commentary_options:n {#1}
+		\__mm_commentator:nn { } { \nobreakspace on }
 		\__mm_lookup:Nnn \g__mm_tractate_prop {#2} { }
 		% a commentary is on the Bavli anyway, so Hebrew doesn't say so
 		\__mm_if_hebrew:TF
-			{ \IfValueF {#1} { בבלי \nobreakspace } \l__mm_he_tl }
+			{ \tl_if_empty:NT \l__mm_commentary_tl { בבלי \nobreakspace } \l__mm_he_tl }
 			{ B. \nobreakspace \l__mm_en_tl }
 		\nobreakspace
 		\__mm_daf:n {#3}
+		\__mm_dibbur:
 		% the daf itself, so that "Rashi \sham" after Tosafot means the daf
 		\__mm_remember:n { \bavli {#2} {#3} }
 		\group_end:
@@ -619,8 +669,10 @@
 	{
 		\group_begin:
 		\__mm_nohyphenation:
-		\__mm_bavli_commentary:n {#1}
+		\__mm_commentary_options:n {#1}
+		\__mm_commentator:nn { } { \nobreakspace on }
 		\__mm_daf:n {#2}
+		\__mm_dibbur:
 		\group_end:
 	}
 
@@ -791,7 +843,7 @@
 %   #D  a daf (69b): ס״ט ע״ב / 69b
 %   #T  a section of the Tur (oh, yd, eh, chm): או״ח / Oraḥ Ḥayyim
 %   #B  a book of Tanakh, #M a tractate, #P a parashah (noach)
-%   #S  any text, printed as written
+%   #S  any text, printed as written, or {Hebrew}{English} for each language
 % The template is used in both languages unless english= gives English its own,
 % with the same placeholders in the same order. A space before #N, #R or #D
 % doesn't break, which keeps a number with its label. So
@@ -954,9 +1006,24 @@
 				{ B } { \__mm_named:NV \g__mm_book_prop \l__mm_arg_tl }
 				{ M } { \__mm_named:NV \g__mm_tractate_prop \l__mm_arg_tl }
 				{ P } { \__mm_named:NV \g__mm_parashah_prop \l__mm_arg_tl }
-				{ S } { \l__mm_arg_tl }
+				{ S } { \__mm_text:V \l__mm_arg_tl }
 			}
 	}
+% #1 text, or {Hebrew}{English}
+\cs_new_protected:Npn \__mm_text:n #1
+	{
+		\bool_lazy_and:nnTF
+			{ \int_compare_p:nNn { \tl_count:n {#1} } = 2 }
+			{ \bool_lazy_and_p:nn { \tl_if_head_is_group_p:n {#1} } { \__mm_tail_is_group_p:n {#1} } }
+			{ \__mm_if_hebrew:TF { \use_i:nn #1 } { \use_ii:nn #1 } }
+			{ #1 }
+	}
+\prg_new_conditional:Npnn \__mm_tail_is_group:n #1 { p }
+	{
+		\exp_args:Ne \tl_if_head_is_group:nTF { \tl_tail:n {#1} }
+			{ \prg_return_true: } { \prg_return_false: }
+	}
+\cs_generate_variant:Nn \__mm_text:n { V }
 % #1 a number, or a range of them
 \cs_new_protected:Npn \__mm_range:n #1
 	{
@@ -1042,8 +1109,17 @@
 \cs_new_protected:Npn \mareimekomot@endunit
 	{ \bool_if:NF \g__mm_referred_bool { \tl_gclear:N \g__mm_last_tl } }
 
-\NewDocumentCommand \sham { }
+% \sham[rashi] is רש״י שם / Rashi ad loc
+\NewDocumentCommand \sham { !o }
 	{
+		\IfValueT {#1}
+			{
+				\group_begin:
+				\__mm_lookup:Nnn \g__mm_commentary_prop {#1} { }
+				\__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl }
+				\group_end:
+				\c_space_tl
+			}
 		\__mm_if_hebrew:TF { שם } { ad~loc }
 		\legacy_if:nT { mm@shamfull }
 			{

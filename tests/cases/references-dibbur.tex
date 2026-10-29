@@ -1,0 +1,22 @@
+% A commentary's opening words: dh= in Hebrew, sv= in English, either alone in
+% both; and \sham with a commentary.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\newcommand{\all}{\bavli[tosafot, dh=ואם תאמר, sv=ve'im tomar]{menachot}{69b} | \tanach[rashi, sv=vayikach]{gen}{18:7} | \bavli*[rashi, dh={אמר, רבא}]{70a} | \sham[ramban] | \bavli{shabbat}{21b} \sham}
+\begin{document}
+\all
+
+\bavli[rashi, dh=אמר]{shabbat}{21b} [a bracket after it]
+
+\begin{hebrew}\all\end{hebrew}
+\end{document}
+
+%! expect: Tosafot on B. Menaḥot 69b s.v. ve’im tomar | Rashi on Genesis 18:7 s.v. vayikach | Rashi on 70a s.v.
+%! expect: Ramban ad loc | B. Shabbat 21b ad loc
+%! expect: Rashi on B. Shabbat 21b s.v.
+%! expect: a bracket after it]
+%! expect: תוספות מנחות ס״ט ע״ב ד״ה ואם תאמר | רש״י על בראשית י״ח
+%! expect: | רש״י ע׳ ע״א ד״ה אמר
+%! expect: רבא | רמב״ן שם
+%! expect: בבלי שבת כ״א ע״ב שם
