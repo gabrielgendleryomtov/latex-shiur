@@ -330,6 +330,7 @@ with a placeholder for each argument of \cs{sefer}, which takes them in order:
 \verb|#D| & a daf (\texttt{69b}) \\
 \verb|#T| & a section of the Tur (\texttt{oh}, \texttt{yd}, \texttt{eh}, \texttt{hm}) \\
 \verb|#B|, \verb|#M|, \verb|#P| & a book of Tanakh, a tractate, a parashah, by key \\
+\verb|#H| & a set of laws of the Mishneh Torah, by key (\texttt{shofar}) \\
 \verb|#S| & any text, printed as written \\
 \bottomrule
 \end{tabular}
@@ -344,7 +345,13 @@ is declared like this:
 \end{Verbatim}
 A later declaration replaces an earlier one, so a document or a package of your own can cite a
 built-in work in its own style; it takes over every key of the work it replaces (\texttt{igrosmoshe}
-as well as \texttt{igrotmoshe}).
+as well as \texttt{igrotmoshe}). \cs{mishnah}, \cs{yerushalmi} and \cs{rambam} are short for
+\verb|\sefer{mishnah}|, \verb|\sefer{yerushalmi}| and \verb|\sefer{rambam}|, so they can be
+restyled the same way:
+\begin{Verbatim}[commandchars=+\(\)]
+\declaresefer{mishnah}{+texthebrew(משנה)}{Mishnah}{\nobreakspace#M #R}   % Mishnah Sukkah 4:1
+\end{Verbatim}
+\cs{declarecommentary} replaces a commentary in the same way, under all its keys.
 
 Text for \verb|#S| is printed as it is written, or given as \verb|{Hebrew}{English}| for each
 language:

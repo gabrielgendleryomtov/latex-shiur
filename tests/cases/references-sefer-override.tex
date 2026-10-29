@@ -1,5 +1,5 @@
-% A package's or document's own declaration of a work replaces the earlier one,
-% under all of its keys.
+% A package's or document's own declaration of a work or commentary replaces
+% the earlier one, under all of its keys; \mishnah follows \sefer{mishnah}.
 \begin{filecontents}[force]{references-sefer-override.sty}
 \ProvidesPackage{references-sefer-override}
 \RequirePackage{mareimekomot}
@@ -14,7 +14,12 @@ A: \sefer{igrotmoshe}{oh}{4}{10} | \sefer{Igros Moshe}{yd}{1}{62}
 
 \declaresefer{im, igrotmoshe}{אגרות משה}{Igrot Moshe}{, #T #N}
 B: \sefer{igrosmoshe}{eh}{2} | \sefer{im}{eh}{3}
+
+\declaresefer{mishnah}{משנה}{Mishnah}{\nobreakspace#M~#R}
+\declarecommentary{nachmanides}{רמב״ן ז״ל}{Nachmanides}
+C: \mishnah{sukkah}{4:1} | \tanach[ramban]{gen}{1:1} | \rambam{shofar}{2:6}
 \end{document}
 
 %! expect: A: IM Oraḥ Ḥayyim 4:10 | IM Yoreh De’ah 1:62
 %! expect: B: Igrot Moshe, Even haEzer 2 | Igrot Moshe, Even haEzer 3
+%! expect: C: Mishnah Sukkah 4:1 | Nachmanides on Genesis 1:1 | Mishneh Torah, Laws of Shofar, Sukkah and Lulav 2:6

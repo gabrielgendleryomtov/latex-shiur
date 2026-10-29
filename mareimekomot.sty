@@ -81,9 +81,11 @@
 \prop_new:N \g__mm_parashah_prop
 % #1 property list, #2 keys, #3 Hebrew, #4 English
 % While the package loads, two of its names matching alike is an error in the
-% package; a document may redefine a name on purpose.
+% package; a document or package may redefine a name on purpose, and the new
+% name then replaces the old one under all of the old one's keys too.
 \cs_new_protected:Npn \__mm_name:Nnnn #1 #2 #3 #4
 	{
+		\bool_if:NF \g__mm_loading_bool { \__mm_rename:Nnn #1 {#2} { {#3} {#4} } }
 		\clist_map_inline:nn {#2}
 			{
 				\__mm_normalise:Nn \l__mm_key_str {##1}
@@ -98,6 +100,29 @@
 				\prop_gput:NVn #1 \l__mm_key_str { {#3} {#4} }
 			}
 	}
+% #1 property list, #2 keys, #3 new value: gives every key of the name that
+% one of the keys has the new value
+\seq_new:N \l__mm_rename_seq
+\cs_new_protected:Npn \__mm_rename:Nnn #1 #2 #3
+	{
+		\tl_clear:N \l__mm_names_tl
+		\clist_map_inline:nn {#2}
+			{
+				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\prop_get:NVNT #1 \l__mm_key_str \l__mm_names_tl { \clist_map_break: }
+			}
+		\tl_if_empty:NF \l__mm_names_tl
+			{
+				\seq_clear:N \l__mm_rename_seq
+				\prop_map_inline:Nn #1
+					{
+						\tl_if_eq:nVT {##2} \l__mm_names_tl
+							{ \seq_put_right:Nn \l__mm_rename_seq {##1} }
+					}
+				\seq_map_inline:Nn \l__mm_rename_seq { \prop_gput:Nnn #1 {##1} {#3} }
+			}
+	}
+\cs_generate_variant:Nn \tl_if_eq:nnT { nV }
 \bool_new:N \g__mm_loading_bool
 \bool_gset_true:N \g__mm_loading_bool
 \AtEndOfPackage { \bool_gset_false:N \g__mm_loading_bool }
@@ -676,43 +701,6 @@
 		\group_end:
 	}
 
-%                         ************************************
-%                         ** MISHNAH, YERUSHALMI AND RAMBAM **
-%                         ************************************
-
-% These take a chapter and its mishnah, halakhah or law, written like a
-% Tanakh reference (4:1, 4:1-3).
-% #1 Hebrew prefix, #2 English prefix, #3 name list, #4 key, #5 reference
-\cs_new_protected:Npn \__mm_chapter_work:nnNnn #1 #2 #3 #4 #5
-	{
-		\group_begin:
-		\__mm_lookup:Nnn #3 {#4} { }
-		\__mm_if_hebrew:TF { #1 \l__mm_he_tl } { #2 \l__mm_en_tl }
-		\nobreakspace
-		\__mm_tanakh_ref:n {#5}
-		\group_end:
-	}
-\NewDocumentCommand \mishnah { m m }
-	{
-		\__mm_chapter_work:nnNnn { משנה \nobreakspace } { M. \nobreakspace }
-			\g__mm_tractate_prop {#1} {#2}
-		\__mm_remember:n { \mishnah {#1} {#2} }
-	}
-\NewDocumentCommand \yerushalmi { m m }
-	{
-		\__mm_chapter_work:nnNnn { ירושלמי \nobreakspace } { Y. \nobreakspace }
-			\g__mm_tractate_prop {#1} {#2}
-		\__mm_remember:n { \yerushalmi {#1} {#2} }
-	}
-\NewDocumentCommand \rambam { m m }
-	{
-		\__mm_chapter_work:nnNnn
-			{ משנה \nobreakspace תורה ~ הלכות ~ }
-			{ Mishneh \nobreakspace Torah, ~ Laws ~ of ~ }
-			\g__mm_hilkhot_prop {#1} {#2}
-		\__mm_remember:n { \rambam {#1} {#2} }
-	}
-
 %                         ******************************
 %                         ** TUR AND SHULCHAN ARUKH **
 %                         ******************************
@@ -842,7 +830,8 @@
 %   #R  a chapter and verse, as in \tanach (38:13, 5:1-3): ל״ח, י״ג / 38:13
 %   #D  a daf (69b): ס״ט ע״ב / 69b
 %   #T  a section of the Tur (oh, yd, eh, chm): או״ח / Oraḥ Ḥayyim
-%   #B  a book of Tanakh, #M a tractate, #P a parashah (noach)
+%   #B  a book of Tanakh, #M a tractate, #P a parashah (noach), #H a set of
+%       laws of the Mishneh Torah (shofar)
 %   #S  any text, printed as written, or {Hebrew}{English} for each language
 % The template is used in both languages unless english= gives English its own,
 % with the same placeholders in the same order. A space before #N, #R or #D
@@ -872,7 +861,7 @@
 	{
 		The~template~of~`#1'~has~a~placeholder~that~isn't~one~of~
 		\iow_char:N\#N,~\iow_char:N\#R,~\iow_char:N\#D,~\iow_char:N\#T,~
-		\iow_char:N\#B,~\iow_char:N\#M,~\iow_char:N\#P~and~\iow_char:N\#S.
+		\iow_char:N\#B,~\iow_char:N\#M,~\iow_char:N\#P,~\iow_char:N\#H~and~\iow_char:N\#S.
 	}
 \msg_new:nnn { mareimekomot } { template-mismatch }
 	{ The~English~template~of~`#1'~has~different~placeholders~from~the~Hebrew~one. }
@@ -937,7 +926,7 @@
 		% each match comes as itself and then its letter
 		\int_step_inline:nnnn { 2 } { 2 } { \seq_count:N \l__mm_slots_seq }
 			{ \str_put_right:Ne #2 { \seq_item:Nn \l__mm_slots_seq {##1} } }
-		\regex_match:nVF { \A [NRDTBMPS]* \Z } #2
+		\regex_match:nVF { \A [NRDTBMPHS]* \Z } #2
 			{ \msg_error:nnn { mareimekomot } { bad-placeholder } {#3} }
 		\regex_replace_all:nnN { \x20 (\cP. [NRD]) } { \c{nobreakspace} \1 } #1
 		\regex_replace_all:nnN { \cP. (.) } { \c{__mm_slot:n} \cB\{ \1 \cE\} } #1
@@ -1006,6 +995,7 @@
 				{ B } { \__mm_named:NV \g__mm_book_prop \l__mm_arg_tl }
 				{ M } { \__mm_named:NV \g__mm_tractate_prop \l__mm_arg_tl }
 				{ P } { \__mm_named:NV \g__mm_parashah_prop \l__mm_arg_tl }
+				{ H } { \__mm_named:NV \g__mm_hilkhot_prop \l__mm_arg_tl }
 				{ S } { \__mm_text:V \l__mm_arg_tl }
 			}
 	}
@@ -1042,6 +1032,18 @@
 \cs_generate_variant:Nn \__mm_tanakh_ref:n { V }
 \cs_generate_variant:Nn \__mm_daf:n { V }
 \cs_generate_variant:Nn \__mm_named:Nn { NV }
+
+% The Mishnah, the Yerushalmi and the Mishneh Torah, by chapter and mishnah,
+% halakhah or law (4:1, 4:1-3), with their own commands: \mishnah{sukkah}{4:1}
+% is \sefer{mishnah}{sukkah}{4:1}, so a document's \declaresefer{mishnah}...
+% changes \mishnah too.
+\declaresefer{mishnah}{משנה}{M.}{\nobreakspace#M~#R}
+\declaresefer{yerushalmi}{ירושלמי}{Y.}{\nobreakspace#M~#R}
+\declaresefer[english={,~Laws~of~#H~#R}]{rambam, mishnehtorah}
+	{משנה\nobreakspace תורה}{Mishneh\nobreakspace Torah}{~הלכות~#H~#R}
+\NewDocumentCommand \mishnah { } { \sefer {mishnah} }
+\NewDocumentCommand \yerushalmi { } { \sefer {yerushalmi} }
+\NewDocumentCommand \rambam { } { \sefer {rambam} }
 
 % Midrash
 \declaresefer{bereshitrabbah, bereishitrabbah, genesisrabbah}
