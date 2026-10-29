@@ -218,6 +218,36 @@ se'ifim (\texttt{658:1-2}), in one of the four sections \texttt{oh}, \texttt{yd}
 \texttt{teshuvah} or \texttt{yesodeihatorah}; all 83, with their keys, are listed in
 \texttt{mareimekomot.sty}.
 
+Works arranged by the Tur's four sections work the same way. Besides \cs{tur} and
+\cs{shulchanaruch}, the package has \cs{beityosef}, \cs{darkeimoshe}, \cs{bach},
+\cs{arukhhashulchan}, and the commentaries \cs{shakh}, \cs{taz}, \cs{magenavraham} and
+\cs{mishnahberurah}, whose sub-unit is the se'if katan:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Command & English & Hebrew \\
+\midrule
+\verb|\shakh{yd}{114:3}| & \shakh{yd}{114:3} & \texthebrew{\shakh{yd}{114:3}} \\
+\verb|\darkeimoshe{oh}{605:3}| & \darkeimoshe{oh}{605:3} & \texthebrew{\darkeimoshe{oh}{605:3}} \\
+\verb|\mishnahberurah{605:3}| & \mishnahberurah{605:3} & \texthebrew{\mishnahberurah{605:3}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The Magen Avraham and the Mishnah Brurah cover Ora\hdot\ \Hdot ayyim only, so they take just the
+reference, and don't name the section. \cs{declaretursefer} declares more such works, in the
+preamble:
+\begin{Verbatim}
+\declaretursefer[seifkatan]{\pitcheiteshuvah}
+  {פתחי תשובה}
+  {Pitchei Teshuvah}
+\declaretursefer[seifkatan, section=oh]{\shaarhatziyun}
+  {שער הציון}
+  {Shaar haTziyun}
+\end{Verbatim}
+Its options are \texttt{seifkatan} for a sub-unit of \texthebrew{ס״ק} rather than
+\texthebrew{סע׳}, \texttt{subunit=} for any other (the Darkei Moshe's is \texthebrew{אות}), and
+\texttt{section=} for a work on one section only.
+
 Hebrew numbers take a geresh when they are one letter and gershayim when they are more
 (\mbox{\texthebrew{ח׳, ל״ח}}), ranges take an en dash, and a reference only breaks across
 lines at its dash.
