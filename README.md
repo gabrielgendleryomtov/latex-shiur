@@ -77,7 +77,7 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 | `\iftranslations{bilingual}{Hebrew-only}` | Text for just one of the two versions. |
 | `\makeTitle` | Title, plus the page style with בס״ד in the header. |
 | `\attribution{who}{where}{when}` | "who, where, when", leaving out empty parts. |
-| `\hdot`, `\Hdot`, `\sectionsymbol`, `boxed` | ḥ, Ḥ, §, and a boxed paragraph. |
+| `\hdot`, `\Hdot`, `\sectionsymbol`, `boxedtext` | ḥ, Ḥ, §, and text in a box. |
 
 ### Fonts
 
@@ -120,6 +120,15 @@ and the slide wrapper uses `\documentclass{beamer}`. The body can then use
 of them. The manual has a complete example.
 
 `shiurbeamer.sty` is kept so that older documents still compile; it just loads `shiur`.
+
+## Wishlist
+
+Ideas for later versions, not yet planned in detail:
+
+- **Hebrew and English side by side**, in two columns, as an alternative to one after the other.
+- **Long sources that flow onto the next slide by themselves**, sharing each slide's space between
+  Hebrew and English the way an article paginates, instead of manual `\mekorbreak`s.
+- **A written-up prose version** of a shiur, made from the same body as its sheet and slides.
 
 ## Tests
 
