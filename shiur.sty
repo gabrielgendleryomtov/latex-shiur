@@ -48,12 +48,16 @@
 \RequirePackage{etoolbox}
 % bidi patches beamer's navigation code, which needs pgf, and beamerarticle
 % doesn't load it. It also replaces itemize and description with beamer's,
-% whose helpers aren't defined in article mode, so keep the article's (they are
-% restored once hebrew has loaded bidi).
+% whose helpers aren't defined in article mode, and at the start of the
+% document sets beamer's slide page style, whose header fails in an article
+% (\makeTitle hides this by choosing its own page style); so keep the
+% article's (they are restored once hebrew has loaded bidi, and once the
+% document has begun).
 \ifshiur@beamerarticle
 	\RequirePackage{pgf}
 	\let\shiur@itemize\itemize
 	\let\shiur@description\@@description
+	\let\shiur@ps@empty\ps@empty
 \fi
 \RequirePackage{polyglossia}
 \RequirePackage{changepage}
@@ -105,6 +109,10 @@
 \ifshiur@beamerarticle
 	\let\itemize\shiur@itemize
 	\let\@@description\shiur@description
+	\AddToHook{begindocument/end}{%
+		\let\ps@empty\shiur@ps@empty
+		\pagestyle{plain}%
+	}%
 \fi
 
 % References to Tanakh and Talmud (\tanakh, \bavli, \sham). On slides, where a
