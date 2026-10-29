@@ -75,7 +75,7 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 | `\tanach` (with commentaries: `\tanach[rashi]{gen}{18:7}`; `\declarecommentary` adds more), `\bavli`, `\mishnah`, `\yerushalmi`, `\rambam`, `\shulchanaruch`, `\tur` (and `\beityosef`, `\darkeimoshe`, `\bach`, `\shach`, `\taz`, `\magenavraham`, `\mishnahberurah`, `\aruchhashulchan`; `\declaretursefer` adds more), `\sham` | References, from the companion `mareimekomot` package, set in the language around them: `\tanach{gen}{37:18-20}` gives Genesis 37:18–20 / בראשית ל״ז, י״ח–כ׳; `\shulchanaruch{oh}{605:1}` gives Shulḥan Arukh, Oraḥ Ḥayyim 605:1 / שו״ע או״ח סי׳ תר״ה סע׳ א׳; `\sham` gives ad loc / שם. Keys and command names take any usual transliteration: `menachot`, `menakhot` and `menahot` are the same, as are `\tanach` and `\tanakh`. The English printed uses ḥ for ח and kh for כ. |
 | `\dilug` | Marks text left out with "...", in any language; never doubles up with a verse marker's or a slide break's ellipsis. |
 | `\setshiurfont{role}[options]{font}` | Choose the font for `hebrew`, `mikra` or `rashi`, with `fontspec` options. Unset roles get an installed font from a built-in list. |
-| `hearah` | A note for the maggid shiur (הערה), printed only with `maggidshiur`. Optional argument: its language. Inside a split source, one before the text goes on the first slide and one after it on the last. |
+| `hearah` | A note for the maggid shiur (הערה), printed only with `maggidshiur`, and never on slides. Optional argument: its language. |
 | `\mekorbreak`, `\mekorbreak*` | Split a source over several slides, with or without an ellipsis at the cut. Handouts ignore it. |
 | `\iftranslations{bilingual}{Hebrew-only}` | Text for just one of the two versions. |
 | `\attribution{who}{where}{when}` | "who, where, when", leaving out empty parts. |
@@ -166,6 +166,9 @@ Ideas for later versions, not yet planned in detail:
   Hebrew and English the way an article paginates, instead of manual `\mekorbreak`s.
 - **A setting for how ח and כ are transliterated** in the English printed (now ḥ and kh: Menaḥot,
   Berakhot), for those who write ch, h or kh.
+- **Presenter pages for slides:** from the same body, one full page per slide, with the slide at
+  the top and its notes underneath (running onto another page, under the slide again, when they
+  are long), for the maggid shiur to present from.
 - **A written-up prose version** of a shiur, made from the same body as its sheet and slides.
 
 ## Tests

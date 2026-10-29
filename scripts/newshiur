@@ -126,7 +126,7 @@ A note for the maggid shiur: printed only in the presenter notes.
 % \\mekorbreak splits a long source over two slides; the handouts ignore it.
 \\begin{mekor}
 \\begin{hearah}
-A note before a source's text goes on its first slide, and one after it on its last.
+A note can also go inside a source, before or after its text. Slides leave notes out.
 \\end{hearah}
 \\begin{mekorlang}{mikra}{\\tanach{genesis}{1:1-2}}
 \\pasuk[1:1] בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ׃ \\mekorbreak*
