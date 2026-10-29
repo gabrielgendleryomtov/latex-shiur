@@ -109,6 +109,129 @@
 
 \newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
 
+%                         ***********
+%                         ** FONTS **
+%                         ***********
+
+% Hebrew text has three roles, each usable as the language of a mekorlang or a
+% note: hebrew (rabbinic and other text), mikra (Tanakh, whose trop needs a font
+% that places it well) and rashi (Rashi script). They differ only in font.
+% \setshiurfont{role}[options]{font}[options] chooses a role's font, with
+% fontspec's options. A role the document leaves unset gets the first installed
+% font from its list below: mikra and rashi then fall back to the hebrew font,
+% and hebrew to FreeSerif, which comes with TeX Live. A document that defines
+% \hebrewfont (or, in beamer, \hebrewfontsf) itself keeps it.
+\newcommand{\shiur@fonts@hebrew}{Taamey Frank CLM, Ezra SIL, Keter YG, Noto Serif Hebrew, FreeSerif}
+\newcommand{\shiur@fonts@mikra}{Taamey Frank CLM, Taamey David CLM, Ezra SIL, SBL Hebrew, Keter YG}
+\newcommand{\shiur@fonts@rashi}{Noto Rashi Hebrew}
+% fonts known to place trop well, as they appear in a font's name or file,
+% lowercased and without spaces or hyphens
+\newcommand{\shiur@tropfonts}{taameyfrank, taameydavid, ezrasil, sblhebrew, keteryg}
+
+\newif\ifshiur@hebrewset
+\NewDocumentCommand{\setshiurfont}{m O{} m O{}}{%
+	\ifstrequal{#1}{hebrew}{%
+		\setfontfamily{\hebrewfont}[#2,#4]{#3}%
+		\ifbool{shiur@beamer}{\setfontfamily{\hebrewfontsf}[#2,#4]{#3}}{}%
+		\shiur@hebrewsettrue
+	}{%
+		\ifboolexpr{test{\ifstrequal{#1}{mikra}} or test{\ifstrequal{#1}{rashi}}}{%
+			\expandafter\setfontfamily\csname shiur@font@#1\endcsname[#2,#4]{#3}%
+			\csdef{shiur@fontname@#1}{#3}%
+			\csdef{shiur@fontset@#1}{}%
+		}{\PackageError{shiur}{Unknown font role `#1'}{The roles are hebrew, mikra and rashi.}}%
+	}%
+}
+
+\ExplSyntaxOn
+% #1 role: give it the first installed font from its list, if any
+\cs_new_protected:Npn \shiur@fallbackfont #1
+	{
+		\clist_set:Nv \l_tmpa_clist { shiur@fonts@#1 }
+		\clist_map_inline:Nn \l_tmpa_clist
+			{
+				\IfFontExistsTF {##1}
+					{
+						\str_if_eq:nnTF {#1} { hebrew }
+							{ \setfontfamily \hebrewfont {##1} }
+							{ \exp_args:Nc \setfontfamily { shiur@font@#1 } {##1} }
+						\cs_set:cpn { shiur@fontname@#1 } {##1}
+						\PackageInfo { shiur } { #1~font:~##1~(the~first~installed~from~its~list) }
+						\clist_map_break:
+					}
+					{ }
+			}
+	}
+\ExplSyntaxOff
+% before polyglossia checks that the Hebrew font has Hebrew
+\DeclareHookRule{begindocument/before}{shiur}{before}{polyglossia}
+\AddToHook{begindocument/before}{%
+	\ifboolexpr{bool{shiur@hebrewset} or test{\ifdef{\hebrewfont}}}{}{%
+		\ifboolexpr{bool{shiur@beamer} and test{\ifdef{\hebrewfontsf}}}{}{%
+			\shiur@fallbackfont{hebrew}%
+			\ifbool{shiur@beamer}{\let\hebrewfontsf\hebrewfont}{}%
+		}%
+	}%
+	\ifcsdef{shiur@fontset@mikra}{}{\shiur@fallbackfont{mikra}}%
+	\ifcsdef{shiur@fontset@rashi}{}{\shiur@fallbackfont{rashi}}%
+}
+
+% #1 role: switch to its font, or stay in the hebrew font if it has none
+\newcommand{\shiur@rolefont}[1]{\ifcsdef{shiur@font@#1}{\csuse{shiur@font@#1}}{}}
+
+% The roles are all Hebrew. #1 language, #2 if it is Hebrew, #3 if not
+\newcommand{\shiur@ifhebrew}[1]{%
+	\ifboolexpr{test{\ifstrequal{#1}{hebrew}} or test{\ifstrequal{#1}{mikra}} or test{\ifstrequal{#1}{rashi}}}%
+}
+
+% Warn once if Tanakh text with trop is set in a font that isn't known to place
+% trop well, unless the document chose that font for mikra itself. Runs with the
+% font already selected. #1 text
+\newif\ifshiur@tropwarned
+\ExplSyntaxOn
+\cs_new_protected:Npn \shiur@checktrop #1
+	{
+		\legacy_if:nF { shiur@tropwarned }
+			{
+				\cs_if_exist:cF { shiur@fontset@mikra }
+					{
+						\regex_match:nnT { [\x{0591}-\x{05AF}] } {#1}
+							{
+								\str_set:Nx \l_tmpa_str { \fontname \font }
+								\str_set:Nx \l_tmpa_str { \str_lowercase:f { \l_tmpa_str } }
+								\str_remove_all:Nn \l_tmpa_str { ~ }
+								\str_remove_all:Nn \l_tmpa_str { - }
+								\bool_set_false:N \l_tmpa_bool
+								\clist_set:NV \l_tmpa_clist \shiur@tropfonts
+								\clist_map_inline:Nn \l_tmpa_clist
+									{
+										\str_if_in:NnT \l_tmpa_str {##1}
+											{ \bool_set_true:N \l_tmpa_bool \clist_map_break: }
+									}
+								\bool_if:NF \l_tmpa_bool
+									{
+										% the font's name without its features, folders or extension
+										\str_set:Nx \l_tmpb_str { \fontname \font }
+										\regex_replace_all:nnN { ["\[] } { } \l_tmpb_str
+										\regex_replace_once:nnN { [\]/:] .* } { } \l_tmpb_str
+										\regex_replace_once:nnN { \A .* / } { } \l_tmpb_str
+										\regex_replace_once:nnN { \. (ttf|otf|TTF|OTF) \Z } { } \l_tmpb_str
+										\global\shiur@tropwarnedtrue
+										\PackageWarningNoLine { shiur }
+											{
+												Tanakh~text~with~trop~is~set~in~a~font~that~isn't~known~to~place~
+												trop~well:~\l_tmpb_str.~Install~a~font~made~for~it,~such~as~
+												Ezra~SIL~(on~Ubuntu:~sudo~apt~install~fonts-sil-ezra)~or~
+												Taamey~Frank~CLM,~and~compile~again;~or~choose~a~font~with~
+												\protect\setshiurfont{mikra}{...}.~See~"Fonts"~in~the~shiur~manual
+											}
+									}
+							}
+					}
+			}
+	}
+\ExplSyntaxOff
+
 %                         *************
 %                         ** SOURCES **
 %                         *************
@@ -229,18 +352,21 @@
 	\let\shiur@lastslide\@firstofone
 }
 
-% #1 number, #2 subtitle, #3 title, #4 text
+% #1 number, #2 subtitle, #3 title, #4 text. \shiur@bodyfont sets the text's
+% font; the heading stays in the language's main font.
+\newcommand{\shiur@bodyfont}{}
 \newcommand{\shiur@mekorlang}[4]{%
 	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}\textbf{#3}%
 	\ifstrempty{#2}{}{\newline\shiur@subtitlefont\textit{#2}}%
 	\par\vspace{0.5em}\noindent
-	\shiur@parts{#4}\par\vspace{1em}%
+	{\shiur@bodyfont\shiur@parts{#4}\par}\vspace{1em}%
 }
 
 % \begin{mekorlang}[subtitle]{language}{title}
 \NewDocumentEnvironment{mekorlang}{O{} m m +b}{%
-	\ifstrequal{#2}{hebrew}
+	\shiur@ifhebrew{#2}
 		{\global\shiur@hashebrewtrue
+		\def\shiur@bodyfont{\shiur@rolefont{#2}\ifstrequal{#2}{mikra}{\shiur@checktrop{#4}}{}}%
 		\begin{hebrew}\shiur@hebrewblock{\shiur@mekorlang{\hebrewnumeral{\themekor}}{#1}{#3}{#4}}\end{hebrew}\par}
 		{\ifboolexpr{not bool{shiur@translations} and bool{shiur@hashebrew}}
 			{}
@@ -269,8 +395,8 @@
 % #1 language, #2 text
 \newcommand{\shiur@note}[2]{%
 	\ifbool{shiur@maggidshiur}{%
-		\ifstrequal{#1}{hebrew}
-			{\begin{hebrew}\begin{shiur@notebar}#2\end{shiur@notebar}\end{hebrew}}
+		\shiur@ifhebrew{#1}
+			{\begin{hebrew}\begin{shiur@notebar}\shiur@rolefont{#1}#2\end{shiur@notebar}\end{hebrew}}
 			{\begin{shiur@notebar}#2\end{shiur@notebar}}%
 	}{}%
 }
