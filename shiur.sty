@@ -449,20 +449,8 @@
 \NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@firstslide{\shiur@note{#1}{#2}}}{}
 \NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@lastslide{\shiur@note{#1}{#2}}}{}
 
-% beamerarticle loads amsmath, which has a \boxed command
-\ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
-	\NewDocumentEnvironment{boxed}{+b}
-		{\begin{center}
-		\begin{tabular}{|p{0.9\textwidth}|}
-		\hline\\
-
-		#1
-
-		\\\\\hline
-		\end{tabular}
-		\end{center}}
-		{}
-}
+% Text in a box. It was called boxed, which clashes with amsmath's \boxed.
+\newenvironment{boxedtext}{\begin{framed}}{\end{framed}}
 
 %                         ************
 %                         ** MACROS **
