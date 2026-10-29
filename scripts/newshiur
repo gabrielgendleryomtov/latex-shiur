@@ -1,0 +1,159 @@
+#!/bin/sh
+# newshiur: start a new shiur as one body file and a wrapper file for each version.
+#
+#   newshiur [options] NAME
+#
+# makes a folder NAME holding
+#   NAME_body.tex              the content, shared by all the versions
+#   NAME.tex                   the handout for participants (talmid)
+#   NAME_presenter_notes.tex   the handout with your notes (maggidshiur)
+#   NAME_beamer.tex            the slides
+# and, if asked for,
+#   NAME_heb.tex               a Hebrew-only handout (--hebrew-only)
+#   NAME_large.tex             a large-print handout (--large-print)
+#
+# Options:
+#   --title TEXT     the title (default: NAME, capitalised, with spaces for
+#                    underscores)
+#   --author TEXT    the author (default: $SHIUR_AUTHOR, if set)
+#   --font FONT      the Hebrew font (default: $SHIUR_HEBREW_FONT, or the
+#                    package's own choice)
+#   --hebrew-only    also make the Hebrew-only handout
+#   --large-print    also make the large-print handout
+#   --here           put the files in the current folder, not a new one
+#
+# Compile each wrapper with xelatex; edit only the body.
+
+set -eu
+
+usage() {
+	sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+	exit "${1:-0}"
+}
+
+title= author=${SHIUR_AUTHOR:-} font=${SHIUR_HEBREW_FONT:-}
+hebrewonly= largeprint= here= name=
+while [ $# -gt 0 ]; do
+	case $1 in
+	--title) title=${2:?--title needs a value}; shift 2 ;;
+	--author) author=${2:?--author needs a value}; shift 2 ;;
+	--font) font=${2:?--font needs a value}; shift 2 ;;
+	--hebrew-only) hebrewonly=1; shift ;;
+	--large-print) largeprint=1; shift ;;
+	--here) here=1; shift ;;
+	-h | --help) usage ;;
+	-*) echo "newshiur: unknown option $1" >&2; usage 2 >&2 ;;
+	*) [ -z "$name" ] || usage 2 >&2; name=$1; shift ;;
+	esac
+done
+[ -n "$name" ] || usage 2 >&2
+case $name in
+*[!A-Za-z0-9_-]*) echo "newshiur: use letters, digits, _ and - in NAME, as it names the files" >&2; exit 2 ;;
+esac
+if [ -z "$title" ]; then
+	title=$(echo "$name" | tr '_' ' ')
+	title=$(echo "$title" | cut -c1 | tr '[:lower:]' '[:upper:]')$(echo "$title" | cut -c2-)
+fi
+
+dir=$name
+[ -z "$here" ] || dir=.
+mkdir -p "$dir"
+for suffix in _body '' _presenter_notes _beamer ${hebrewonly:+_heb} ${largeprint:+_large}; do
+	if [ -e "$dir/$name$suffix.tex" ]; then
+		echo "newshiur: $dir/$name$suffix.tex already exists; nothing written" >&2
+		exit 1
+	fi
+done
+
+if [ -n "$font" ]; then
+	fontline="\\setshiurfont{hebrew}{$font}"
+else
+	fontline="%\\setshiurfont{hebrew}{Taamey Frank CLM}"
+fi
+
+# handout OPTIONS FILE: a handout wrapper with these package options
+handout() {
+	cat >"$dir/$2" <<EOF
+\\documentclass[11pt]{article}
+\\usepackage{beamerarticle}
+
+\\title{$title}
+\\author{$author}
+\\date{}
+
+\\usepackage[$1]{shiur}
+$fontline
+
+\\input{${name}_body}
+EOF
+}
+
+handout talmid "$name.tex"
+handout maggidshiur "${name}_presenter_notes.tex"
+[ -z "$hebrewonly" ] || handout "talmid, translations=false" "${name}_heb.tex"
+[ -z "$largeprint" ] || handout "talmid, accessible" "${name}_large.tex"
+
+cat >"$dir/${name}_beamer.tex" <<EOF
+\\documentclass[british]{beamer}
+
+\\title{$title}
+\\author{$author}
+\\date{}
+
+\\usepackage{shiur}
+$fontline
+
+\\usetheme{CambridgeUS}
+\\setbeamertemplate{navigation symbols}{}
+
+\\input{${name}_body}
+EOF
+
+versions="$name.tex (talmid), ${name}_presenter_notes.tex (maggidshiur)"
+[ -z "$hebrewonly" ] || versions="$versions, ${name}_heb.tex (Hebrew only)"
+[ -z "$largeprint" ] || versions="$versions, ${name}_large.tex (large print)"
+cat >"$dir/${name}_body.tex" <<EOF
+% The content of the shiur, shared by $versions
+% and ${name}_beamer.tex (slides). Compile those, not this file.
+\\begin{document}
+
+\\maketitle
+
+\\section{First section}
+
+\\begin{hearah}
+A note for the maggid shiur: printed only in the presenter notes.
+\\end{hearah}
+
+% \\mekorbreak splits a long source over two slides; the handouts ignore it.
+\\begin{mekor}
+\\begin{hearah}
+A note before a source's text goes on its first slide, and one after it on its last.
+\\end{hearah}
+\\begin{mekorlang}{mikra}{\\tanach{genesis}{1:1-2}}
+\\pasuk[1:1] בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ׃ \\mekorbreak*
+\\pasuk וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ וְחֹשֶׁךְ עַל־פְּנֵי תְהוֹם וְרוּחַ אֱלֹהִים מְרַחֶפֶת עַל־פְּנֵי הַמָּיִם׃
+\\end{mekorlang}
+\\begin{mekorlang}{english}{\\tanach{genesis}{1:1-2}}
+\\pasuk[1:1] In the beginning God created the heaven and the earth. \\mekorbreak*
+\\pasuk Now the earth was unformed and void, and darkness was upon the face of the deep; and the
+spirit of God hovered over the face of the waters.
+\\end{mekorlang}
+\\end{mekor}
+
+\\begin{mekor}
+\\begin{mekorlang}{hebrew}{\\bavli{menachot}{69b}}
+בעי ר׳ זירא: חיטין שירדו בעבים מהו?
+\\end{mekorlang}
+\\begin{mekorlang}{english}{\\bavli{menachot}{69b}}
+R. Zeira asked: if wheat came down in the clouds, what is the law?
+\\end{mekorlang}
+\\end{mekor}
+
+% \\mode<presentation>{...} holds material for the slides only, and
+% \\mode<article>{...} material for the handouts only.
+
+\\end{document}
+EOF
+
+echo "newshiur: made $dir/${name}_body.tex and its versions: $versions, ${name}_beamer.tex (slides)"

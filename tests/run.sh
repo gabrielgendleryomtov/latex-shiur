@@ -8,8 +8,9 @@
 #                            paths, gitignored), checking only that they build
 #
 # Test cases (tests/cases/*.tex) state what their PDFs must show, in comment
-# lines; see tests/check.py. Examples (tests/examples) must build. Every
-# document must build with no error and no missing character.
+# lines; see tests/check.py. Examples (tests/examples), and every version of a
+# shiur made by scripts/newshiur, must build. Every document must build with no
+# error and no missing character.
 
 set -uo pipefail
 
@@ -24,7 +25,12 @@ docs() {
 		return
 	fi
 	local doc word
-	for doc in "$repo"/tests/cases/*.tex "$repo"/tests/examples/*.tex; do
+	# a fresh shiur from the starter script, with every version
+	rm -rf "$out/starter"
+	mkdir -p "$out/starter"
+	(cd "$out/starter" && "$repo/scripts/newshiur" --hebrew-only --large-print --font FreeSerif \
+		--author "A. Teacher" starter >/dev/null)
+	for doc in "$repo"/tests/cases/*.tex "$repo"/tests/examples/*.tex "$out"/starter/starter/*.tex; do
 		grep -q '\\documentclass' "$doc" || continue  # bodies are \input by others
 		if (($#)); then
 			for word; do [[ $(basename "$doc") = *"$word"* ]] && echo "$doc" && break; done
@@ -38,6 +44,7 @@ docs() {
 one() {
 	local doc=$1 id dir
 	id=${doc#"$repo"/tests/}
+	id=${id#"$out"/}
 	id=${id#"$HOME"/}
 	id=${id%.tex}
 	dir=$out/${id//\//__}
