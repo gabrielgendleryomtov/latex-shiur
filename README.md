@@ -71,6 +71,8 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 |---|---|
 | `mekor`, `mekor*` | One numbered source; a continuation that takes no new number. One frame each on slides. |
 | `mekorlang[subtitle]{language}{title}` | One language of a source. `hebrew`, `mikra` (Tanakh) and `rashi` are Hebrew, set right to left with Hebrew numerals, each in its own font. |
+| `\pasuk`, `\pasuk[23]`, `\pasuk[37:18]`, `\perek{38}` | Verse numbers in Tanakh: (19), (23), (37:18), (38:1), or (יט), (כג), (לז יח), (לח א) in Hebrew. A skipped verse gets "..." first; `\pasuk*`/`\perek*` force it. |
+| `\dilug` | Marks text left out with "...", in any language; never doubles up with a verse marker's or a slide break's ellipsis. |
 | `\setshiurfont{role}[options]{font}` | Choose the font for `hebrew`, `mikra` or `rashi`, with `fontspec` options. Unset roles get an installed font from a built-in list. |
 | `note`, `gnote`, `prenote`, `postnote` | Teacher's notes, printed only with `maggidshiur`. Optional argument: the note's language. Use `gnote` with beamer or `beamerarticle`. |
 | `\mekorbreak`, `\mekorbreak*` | Split a source over several slides, with or without an ellipsis at the cut. Handouts ignore it. |

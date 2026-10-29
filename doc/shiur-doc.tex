@@ -4,6 +4,7 @@
 \usepackage{fancyvrb}
 \usepackage{booktabs}
 \setshiurfont{hebrew}{FreeSerif}
+\setshiurfont{mikra}{FreeSerif}
 \hypersetup{hidelinks}
 % code listings use a monospaced font that has Hebrew
 \newfontfamily{\codefont}{FreeMono}
@@ -110,6 +111,66 @@ title, usually names the author or the translation:
 
 \cs{attribution}\verb|{who}{where}{when}| joins its non-empty parts with commas, giving
 ``\attribution{R. Asher Weiss}{Jerusalem}{5780}''.
+
+\subsection{Verse numbers}
+
+In a passage from Tanakh, \cs{pasuk} starts each verse with its number, and \cs{perek} starts
+a new chapter:
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Command & English & Hebrew \\
+\midrule
+\verb|\pasuk| & the next verse: (19) & \foreignlanguage{hebrew}{(יט)} \\
+\verb|\pasuk[23]| & verse 23 of this chapter & \foreignlanguage{hebrew}{(כג)} \\
+\verb|\pasuk[37:18]| & chapter 37, verse 18 & \foreignlanguage{hebrew}{(לז יח)} \\
+\verb|\perek{38}| & the start of chapter 38 & \foreignlanguage{hebrew}{(לח א)} \\
+\bottomrule
+\end{tabular}
+\end{center}
+Each \env{mekorlang} counts from scratch, so the Hebrew and its translation use the same
+commands and come out numbered alike. Where verses are left out, an ellipsis comes first:
+going from verse 20 to \verb|\pasuk[23]| gives ``... (23)''. Moving on to the first verse of
+the next chapter counts as continuing, since the package can't know where a chapter ends; if
+you skipped the end of a chapter, use the starred form, \verb|\pasuk*[39:1]| or
+\verb|\perek*{39}|, which always puts an ellipsis first.
+
+\begin{Verbatim}
+\begin{mekorlang}{mikra}{בראשית לז יח-כ, כג; לח א}
+\pasuk[37:18] וַיִּרְאוּ אֹתוֹ מֵרָחֹק
+\pasuk וַיֹּאמְרוּ אִישׁ אֶל אָחִיו
+\pasuk וְעַתָּה לְכוּ וְנַהַרְגֵהוּ
+\pasuk[23] וַיְהִי כַּאֲשֶׁר בָּא יוֹסֵף אֶל אֶחָיו
+\perek{38} וַיְהִי בָּעֵת הַהִוא
+\end{mekorlang}
+\end{Verbatim}
+
+\begin{mekor}
+\begin{mekorlang}{mikra}{בראשית לז יח-כ, כג; לח א}
+\pasuk[37:18] וַיִּרְאוּ אֹתוֹ מֵרָחֹק
+\pasuk וַיֹּאמְרוּ אִישׁ אֶל אָחִיו
+\pasuk וְעַתָּה לְכוּ וְנַהַרְגֵהוּ
+\pasuk[23] וַיְהִי כַּאֲשֶׁר בָּא יוֹסֵף אֶל אֶחָיו
+\perek{38} וַיְהִי בָּעֵת הַהִוא
+\end{mekorlang}
+\begin{mekorlang}{english}{Genesis 37:18--20, 23; 38:1}
+\pasuk[37:18] They saw him from afar
+\pasuk and said to one another
+\pasuk ``Come now, let us kill him''
+\pasuk[23] When Joseph came to his brothers
+\perek{38} At that time
+\end{mekorlang}
+\end{mekor}
+
+On slides, the numbering carries on across a source split with \cs{mekorbreak}.
+
+\subsection{Leaving text out}
+
+\cs{dilug} marks a place where text is left out, in any source, translation or note:
+\verb|said \dilug Why| gives ``said ... Why''. It keeps the ellipsis on the line of the
+word before it, and it never doubles up: straight before \cs{pasuk} or \cs{perek} it stands for
+the marker's own ellipsis, and at a \cs{mekorbreak} it merges with the break's. So to leave out
+the end of verse 22 and go on with verse 23, write \verb|\dilug \pasuk|, or \verb|\pasuk*|.
 
 \section{Notes}
 
