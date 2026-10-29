@@ -21,17 +21,17 @@
 %   \tanakh*{gen}{39:1}      the same without the book's name
 %   \tanakh[rashi]{gen}{18:7}   רש״י על בראשית י״ח, ז׳ / Rashi on Genesis 18:7;
 %                            \declarecommentary adds commentaries
-%   \bavli{menachot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
+%   \bavli{menakhot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
 %   \bavli*{69b}             the daf alone: ס״ט ע״ב / 69b
 %   \mishnah{sukkah}{4:1}   משנה סוכה ד׳, א׳ / M. Sukkah 4:1
-%   \yerushalmi{brachot}{1:1}   ירושלמי ברכות א׳, א׳ / Y. Brachot 1:1
+%   \yerushalmi{berakhot}{1:1}  ירושלמי ברכות א׳, א׳ / Y. Berakhot 1:1
 %   \rambam{shofar}{2:6}     משנה תורה הלכות שופר וסוכה ולולב ב׳, ו׳ /
 %                            Mishneh Torah, Laws of Shofar, Sukkah and Lulav 2:6
-%   \shulchanaruch{oh}{605:1}   שו״ע או״ח סי׳ תר״ה סע׳ א׳ / Shulḥan Arukh, Oraḥ Ḥayyim 605:1
+%   \shulkhanarukh{oh}{605:1}   שו״ע או״ח סי׳ תר״ה סע׳ א׳ / Shulḥan Arukh, Oraḥ Ḥayyim 605:1
 %   \tur{oh}{605}            טור או״ח סי׳ תר״ה / Tur, Oraḥ Ḥayyim 605
-%   \mishnahberurah{605:3}   משנה ברורה סי׳ תר״ה ס״ק ג׳ / Mishnah Brurah 605:3
-%   and \beityosef, \darkeimoshe, \bach, \shakh, \taz, \magenavraham and
-%   \arukhhashulchan; \declaretursefer declares more
+%   \mishnahberurah{605:3}   משנה ברורה סי׳ תר״ה ס״ק ג׳ / Mishnah Berurah 605:3
+%   and \beityosef, \darkeimoshe, \bakh, \shakh, \taz, \magenavraham and
+%   \arukhhashulkhan (\bakh, \bach and \bah are the same); \declaretursefer declares more
 %   \sham                    שם / ad loc
 % Numbers follow the usual Hebrew convention: geresh for one letter (ח׳),
 % gershayim before the last of several (ל״ח). Ranges take an en dash, the
@@ -61,23 +61,46 @@
 %                         ***********
 
 % Each name has a key, used in documents, and its Hebrew and English forms.
-% Keys are matched ignoring case, spaces, hyphens, dots and apostrophes, and
-% some names have more than one key.
+% Keys are written with kh for both ח and כ (menakhot, berakhot), but are
+% matched loosely, so that any usual transliteration works: ignoring case,
+% spaces, hyphens, dots and apostrophes, with kh, ch and h alike, tz, ts and z
+% alike, y and i alike, doubled letters as single, and no final h. So
+% menachot, menahot and Menakhot are all the same key. Some names have more
+% than one key, for forms that differ beyond that (berakhot, brakhot).
 \prop_new:N \g__mm_book_prop
 \prop_new:N \g__mm_tractate_prop
 \prop_new:N \g__mm_hilkhot_prop
 \prop_new:N \g__mm_section_prop
 \prop_new:N \g__mm_commentary_prop
 % #1 property list, #2 keys, #3 Hebrew, #4 English
+% While the package loads, two of its names matching alike is an error in the
+% package; a document may redefine a name on purpose.
 \cs_new_protected:Npn \__mm_name:Nnnn #1 #2 #3 #4
 	{
 		\clist_map_inline:nn {#2}
 			{
 				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\bool_if:NT \g__mm_loading_bool
+					{
+						\prop_get:NVNT #1 \l__mm_key_str \l__mm_names_tl
+							{
+								\tl_if_eq:nVF { {#3} {#4} } \l__mm_names_tl
+									{ \msg_error:nnn { mareimekomot } { clash } {##1} }
+							}
+					}
 				\prop_gput:NVn #1 \l__mm_key_str { {#3} {#4} }
 			}
 	}
+\bool_new:N \g__mm_loading_bool
+\bool_gset_true:N \g__mm_loading_bool
+\AtEndOfPackage { \bool_gset_false:N \g__mm_loading_bool }
+\tl_new:N \l__mm_names_tl
+\cs_generate_variant:Nn \tl_if_eq:nnF { nV }
+\msg_new:nnn { mareimekomot } { clash }
+	{ The~key~`#1'~matches~another~name's~key. }
 \str_new:N \l__mm_key_str
+\str_new:N \l__mm_loose_str
+\str_new:N \l__mm_last_str
 % #1 string variable, #2 key as written
 \cs_new_protected:Npn \__mm_normalise:Nn #1 #2
 	{
@@ -86,7 +109,27 @@
 		\str_remove_all:Nn #1 { - }
 		\str_remove_all:Nn #1 { . }
 		\str_remove_all:Nn #1 { ' }
+		% a numeral at either end, as in samuelii or iisam, before i and ii could merge
+		\regex_replace_once:nnN { \A ii } { 2 } #1
+		\regex_replace_once:nnN { \A i } { 1 } #1
+		\regex_replace_once:nnN { ii \Z } { 2 } #1
+		\regex_replace_once:nnN { i \Z } { 1 } #1
+		\regex_replace_all:nnN { [kc]h } { h } #1
+		\regex_replace_all:nnN { t[sz] } { z } #1
+		\regex_replace_all:nnN { y } { i } #1
+		% doubled letters as single (l3regex has no backreferences)
+		\str_clear:N \l__mm_loose_str
+		\str_clear:N \l__mm_last_str
+		\str_map_inline:Nn #1
+			{
+				\str_if_eq:nVF {##1} \l__mm_last_str
+					{ \str_put_right:Nn \l__mm_loose_str {##1} }
+				\str_set:Nn \l__mm_last_str {##1}
+			}
+		\regex_replace_once:nnN { h \Z } { } \l__mm_loose_str
+		\str_set_eq:NN #1 \l__mm_loose_str
 	}
+\cs_generate_variant:Nn \str_if_eq:nnF { nV }
 \cs_new_protected:Npn \__mm_book:nnn { \__mm_name:Nnnn \g__mm_book_prop }
 \cs_new_protected:Npn \__mm_tractate:nnn { \__mm_name:Nnnn \g__mm_tractate_prop }
 \cs_new_protected:Npn \__mm_hilkhot:nnn { \__mm_name:Nnnn \g__mm_hilkhot_prop }
@@ -113,87 +156,87 @@
 \__mm_book:nnn { obadiah, obad, ovadiah } { עובדיה } { Obadiah }
 \__mm_book:nnn { jonah, yonah } { יונה } { Jonah }
 \__mm_book:nnn { micah, mic, michah } { מיכה } { Micah }
-\__mm_book:nnn { nahum, nah, nachum } { נחום } { Nahum }
+\__mm_book:nnn { nahum, nah } { נחום } { Nahum }
 \__mm_book:nnn { habakkuk, hab, chavakuk } { חבקוק } { Habakkuk }
 \__mm_book:nnn { zephaniah, zeph, tzefaniah } { צפניה } { Zephaniah }
-\__mm_book:nnn { haggai, hag, chaggai } { חגי } { Haggai }
-\__mm_book:nnn { zechariah, zech, zecharyah } { זכריה } { Zechariah }
+\__mm_book:nnn { haggai, hag } { חגי } { Haggai }
+\__mm_book:nnn { zechariah, zech } { זכריה } { Zechariah }
 \__mm_book:nnn { malachi, mal } { מלאכי } { Malachi }
 \__mm_book:nnn { psalms, psalm, ps, tehillim } { תהלים } { Psalms }
 \__mm_book:nnn { proverbs, prov, mishlei } { משלי } { Proverbs }
 \__mm_book:nnn { job, iyov } { איוב } { Job }
 \__mm_book:nnn { songofsongs, song, shirhashirim } { שיר\nobreakspace השירים } { Song\nobreakspace of\nobreakspace Songs }
-\__mm_book:nnn { ruth, rut } { רות } { Ruth }
-\__mm_book:nnn { lamentations, lam, eichah, eicha } { איכה } { Lamentations }
+\__mm_book:nnn { ruth } { רות } { Ruth }
+\__mm_book:nnn { lamentations, lam, eichah } { איכה } { Lamentations }
 \__mm_book:nnn { ecclesiastes, eccl, kohelet } { קהלת } { Ecclesiastes }
 \__mm_book:nnn { esther, est } { אסתר } { Esther }
 \__mm_book:nnn { daniel, dan } { דניאל } { Daniel }
 \__mm_book:nnn { ezra } { עזרא } { Ezra }
-\__mm_book:nnn { nehemiah, neh, nechemiah } { נחמיה } { Nehemiah }
+\__mm_book:nnn { nehemiah, neh } { נחמיה } { Nehemiah }
 \__mm_book:nnn { chroniclesi, chronicles1, 1chronicles, ichr, 1chr, chr1 } { דברי\nobreakspace הימים\nobreakspace א׳ } { Chronicles\nobreakspace I }
 \__mm_book:nnn { chroniclesii, chronicles2, 2chronicles, iichr, 2chr, chr2 } { דברי\nobreakspace הימים\nobreakspace ב׳ } { Chronicles\nobreakspace II }
 
-\__mm_tractate:nnn { brachot, berakhot, berachot } { ברכות } { Brachot }
+\__mm_tractate:nnn { berakhot, brakhot } { ברכות } { Berakhot }
 \__mm_tractate:nnn { shabbat } { שבת } { Shabbat }
 \__mm_tractate:nnn { eruvin } { עירובין } { Eruvin }
-\__mm_tractate:nnn { pesachim, pesahim } { פסחים } { Pesa\__mm_h: im }
+\__mm_tractate:nnn { pesakhim } { פסחים } { Pesa\__mm_h: im }
 \__mm_tractate:nnn { shekalim } { שקלים } { Shekalim }
 \__mm_tractate:nnn { yoma } { יומא } { Yoma }
-\__mm_tractate:nnn { sukkah, sukka } { סוכה } { Sukkah }
-\__mm_tractate:nnn { beitzah, beitza, betzah } { ביצה } { Beitzah }
-\__mm_tractate:nnn { roshhashanah, roshhashana, rh } { ראש\nobreakspace השנה } { Rosh\nobreakspace Hashanah }
+\__mm_tractate:nnn { sukkah } { סוכה } { Sukkah }
+\__mm_tractate:nnn { beitzah, betzah } { ביצה } { Beitzah }
+\__mm_tractate:nnn { roshhashanah, rh } { ראש\nobreakspace השנה } { Rosh\nobreakspace Hashanah }
 \__mm_tractate:nnn { taanit } { תענית } { Ta'anit }
-\__mm_tractate:nnn { megillah, megila, megilla } { מגילה } { Megillah }
+\__mm_tractate:nnn { megillah } { מגילה } { Megillah }
 \__mm_tractate:nnn { moedkatan, mk } { מועד\nobreakspace קטן } { Moed\nobreakspace Katan }
-\__mm_tractate:nnn { chagigah, hagigah, chagiga } { חגיגה } { \__mm_H: agigah }
+\__mm_tractate:nnn { khagigah } { חגיגה } { \__mm_H: agigah }
 \__mm_tractate:nnn { yevamot } { יבמות } { Yevamot }
 \__mm_tractate:nnn { ketubot, ketuvot } { כתובות } { Ketubot }
 \__mm_tractate:nnn { nedarim } { נדרים } { Nedarim }
 \__mm_tractate:nnn { nazir } { נזיר } { Nazir }
-\__mm_tractate:nnn { sotah, sota } { סוטה } { Sotah }
-\__mm_tractate:nnn { gittin, gitin } { גיטין } { Gittin }
-\__mm_tractate:nnn { kiddushin, kidushin } { קידושין } { Kiddushin }
-\__mm_tractate:nnn { bavakamma, bavakama, bk } { בבא\nobreakspace קמא } { Bava\nobreakspace Kamma }
-\__mm_tractate:nnn { bavametzia, bavametsia, bm } { בבא\nobreakspace מציעא } { Bava\nobreakspace Metzia }
+\__mm_tractate:nnn { sotah } { סוטה } { Sotah }
+\__mm_tractate:nnn { gittin } { גיטין } { Gittin }
+\__mm_tractate:nnn { kiddushin } { קידושין } { Kiddushin }
+\__mm_tractate:nnn { bavakamma, bk } { בבא\nobreakspace קמא } { Bava\nobreakspace Kamma }
+\__mm_tractate:nnn { bavametzia, bm } { בבא\nobreakspace מציעא } { Bava\nobreakspace Metzia }
 \__mm_tractate:nnn { bavabatra, bb } { בבא\nobreakspace בתרא } { Bava\nobreakspace Batra }
 \__mm_tractate:nnn { sanhedrin } { סנהדרין } { Sanhedrin }
-\__mm_tractate:nnn { makkot, makot } { מכות } { Makkot }
+\__mm_tractate:nnn { makkot } { מכות } { Makkot }
 \__mm_tractate:nnn { shevuot } { שבועות } { Shevuot }
 \__mm_tractate:nnn { avodazara, avodahzarah, az } { עבודה\nobreakspace זרה } { Avoda\nobreakspace Zara }
 \__mm_tractate:nnn { horayot } { הוריות } { Horayot }
-\__mm_tractate:nnn { zevachim, zevahim } { זבחים } { Zeva\__mm_h: im }
-\__mm_tractate:nnn { menachot, menahot } { מנחות } { Mena\__mm_h: ot }
-\__mm_tractate:nnn { chullin, hullin, chulin } { חולין } { \__mm_H: ullin }
-\__mm_tractate:nnn { bekhorot, bechorot } { בכורות } { Bekhorot }
-\__mm_tractate:nnn { arakhin, arachin } { ערכין } { Arakhin }
-\__mm_tractate:nnn { temurah, temura } { תמורה } { Temurah }
+\__mm_tractate:nnn { zevakhim } { זבחים } { Zeva\__mm_h: im }
+\__mm_tractate:nnn { menakhot } { מנחות } { Mena\__mm_h: ot }
+\__mm_tractate:nnn { khullin } { חולין } { \__mm_H: ullin }
+\__mm_tractate:nnn { bekhorot } { בכורות } { Bekhorot }
+\__mm_tractate:nnn { arakhin } { ערכין } { Arakhin }
+\__mm_tractate:nnn { temurah } { תמורה } { Temurah }
 \__mm_tractate:nnn { keritot, kritot } { כריתות } { Keritot }
-\__mm_tractate:nnn { meilah, meila } { מעילה } { Me'ilah }
+\__mm_tractate:nnn { meilah } { מעילה } { Me'ilah }
 \__mm_tractate:nnn { tamid } { תמיד } { Tamid }
-\__mm_tractate:nnn { niddah, nidah, nidda } { נדה } { Niddah }
+\__mm_tractate:nnn { niddah } { נדה } { Niddah }
 
 % tractates with Mishnah but no Bavli
 \__mm_tractate:nnn { peah } { פאה } { Peah }
 \__mm_tractate:nnn { demai } { דמאי } { Demai }
-\__mm_tractate:nnn { kilayim, kilaim } { כלאים } { Kilayim }
+\__mm_tractate:nnn { kilayim } { כלאים } { Kilayim }
 \__mm_tractate:nnn { sheviit } { שביעית } { Shevi'it }
 \__mm_tractate:nnn { terumot } { תרומות } { Terumot }
 \__mm_tractate:nnn { maasrot, maaserot } { מעשרות } { Ma'asrot }
 \__mm_tractate:nnn { maasersheni } { מעשר\nobreakspace שני } { Ma'aser\nobreakspace Sheni }
-\__mm_tractate:nnn { challah, chala, hallah } { חלה } { \__mm_H: allah }
-\__mm_tractate:nnn { orlah, orla } { ערלה } { Orlah }
-\__mm_tractate:nnn { bikkurim, bikurim } { ביכורים } { Bikkurim }
+\__mm_tractate:nnn { khallah } { חלה } { \__mm_H: allah }
+\__mm_tractate:nnn { orlah } { ערלה } { Orlah }
+\__mm_tractate:nnn { bikkurim } { ביכורים } { Bikkurim }
 \__mm_tractate:nnn { eduyot, ediyot } { עדויות } { Eduyot }
 \__mm_tractate:nnn { avot } { אבות } { Avot }
-\__mm_tractate:nnn { middot, midot } { מדות } { Middot }
-\__mm_tractate:nnn { kinnim, kinim } { קינים } { Kinnim }
+\__mm_tractate:nnn { middot } { מדות } { Middot }
+\__mm_tractate:nnn { kinnim } { קינים } { Kinnim }
 \__mm_tractate:nnn { kelim } { כלים } { Kelim }
 \__mm_tractate:nnn { oholot, ohalot } { אהלות } { Oholot }
 \__mm_tractate:nnn { negaim } { נגעים } { Nega'im }
-\__mm_tractate:nnn { parah, para } { פרה } { Parah }
+\__mm_tractate:nnn { parah } { פרה } { Parah }
 \__mm_tractate:nnn { tohorot, taharot } { טהרות } { Tohorot }
 \__mm_tractate:nnn { mikvaot, mikvaos } { מקואות } { Mikva'ot }
-\__mm_tractate:nnn { makhshirin, machshirin } { מכשירין } { Makhshirin }
+\__mm_tractate:nnn { makhshirin } { מכשירין } { Makhshirin }
 \__mm_tractate:nnn { zavim } { זבים } { Zavim }
 \__mm_tractate:nnn { tevulyom } { טבול\nobreakspace יום } { Tevul\nobreakspace Yom }
 \__mm_tractate:nnn { yadayim } { ידים } { Yadayim }
@@ -201,45 +244,45 @@
 
 % the four sections of the Tur and the Shulchan Arukh: abbreviated Hebrew,
 % full English
-\__mm_section:nnn { oh, orachchayim, orachchaim, orahhayyim } { או״ח } { Ora\__mm_h: \nobreakspace \__mm_H: ayyim }
+\__mm_section:nnn { oh, orakhkhayyim } { או״ח } { Ora\__mm_h: \nobreakspace \__mm_H: ayyim }
 \__mm_section:nnn { yd, yorehdeah } { יו״ד } { Yoreh\nobreakspace De'ah }
 \__mm_section:nnn { eh, evenhaezer } { אה״ע } { Even\nobreakspace haEzer }
-\__mm_section:nnn { hm, cm, choshenmishpat, hoshenmishpat } { חו״מ } { \__mm_H: oshen\nobreakspace Mishpat }
+\__mm_section:nnn { hm, cm, khoshenmishpat } { חו״מ } { \__mm_H: oshen\nobreakspace Mishpat }
 
 % the 83 hilkhot of the Mishneh Torah, in order
 \__mm_hilkhot:nnn { yesodeihatorah, yesodei } { יסודי~התורה } { Foundations~of~the~Torah }
 \__mm_hilkhot:nnn { deot, deos } { דעות } { Character~Traits }
 \__mm_hilkhot:nnn { talmudtorah } { תלמוד~תורה } { Torah~Study }
 \__mm_hilkhot:nnn { avodahzarah, avodazara, az } { עבודה~זרה~וחוקות~הגויים } { Idolatry }
-\__mm_hilkhot:nnn { teshuvah, teshuva } { תשובה } { Repentance }
+\__mm_hilkhot:nnn { teshuvah } { תשובה } { Repentance }
 \__mm_hilkhot:nnn { kriatshema, shema } { קריאת~שמע } { Reading~the~Shema }
-\__mm_hilkhot:nnn { tefillah, tefilah, birkatkohanim } { תפילה~וברכת~כהנים } { Prayer~and~the~Priestly~Blessing }
+\__mm_hilkhot:nnn { tefillah, birkatkohanim } { תפילה~וברכת~כהנים } { Prayer~and~the~Priestly~Blessing }
 \__mm_hilkhot:nnn { tefillin, mezuzah, sefertorah } { תפילין~ומזוזה~וספר~תורה } { Tefillin,~Mezuzah~and~the~Torah~Scroll }
 \__mm_hilkhot:nnn { tzitzit } { ציצית } { Tzitzit }
-\__mm_hilkhot:nnn { berakhot, brachot, berachot } { ברכות } { Blessings }
+\__mm_hilkhot:nnn { berakhot, brakhot } { ברכות } { Blessings }
 \__mm_hilkhot:nnn { milah } { מילה } { Circumcision }
 \__mm_hilkhot:nnn { shabbat } { שבת } { Shabbat }
 \__mm_hilkhot:nnn { eruvin } { עירובין } { Eruvin }
 \__mm_hilkhot:nnn { shevitatasor, yomkippur } { שביתת~עשור } { Resting~on~the~Tenth~of~Tishrei }
 \__mm_hilkhot:nnn { yomtov, shevitatyomtov } { שביתת~יום~טוב } { Resting~on~Festivals }
-\__mm_hilkhot:nnn { chametzumatzah, chametz, matzah } { חמץ~ומצה } { \__mm_H: ametz~and~Matzah }
+\__mm_hilkhot:nnn { khametzumatzah, khametz, matzah } { חמץ~ומצה } { \__mm_H: ametz~and~Matzah }
 \__mm_hilkhot:nnn { shofar, sukkah, lulav } { שופר~וסוכה~ולולב } { Shofar,~Sukkah~and~Lulav }
 \__mm_hilkhot:nnn { shekalim } { שקלים } { Shekalim }
-\__mm_hilkhot:nnn { kiddushhachodesh } { קידוש~החודש } { Sanctifying~the~New~Month }
+\__mm_hilkhot:nnn { kiddushhakhodesh } { קידוש~החודש } { Sanctifying~the~New~Month }
 \__mm_hilkhot:nnn { taaniyot, taanit } { תעניות } { Fasts }
-\__mm_hilkhot:nnn { megillah, chanukah, megillahvechanukah } { מגילה~וחנוכה } { Megillah~and~\__mm_H: anukkah }
+\__mm_hilkhot:nnn { megillah, khanukah, megillahvekhanukah } { מגילה~וחנוכה } { Megillah~and~\__mm_H: anukkah }
 \__mm_hilkhot:nnn { ishut } { אישות } { Marriage }
 \__mm_hilkhot:nnn { gerushin } { גירושין } { Divorce }
-\__mm_hilkhot:nnn { yibbum, yibum, chalitzah } { יבום~וחליצה } { Levirate~Marriage~and~\__mm_H: alitzah }
+\__mm_hilkhot:nnn { yibbum, khalitzah } { יבום~וחליצה } { Levirate~Marriage~and~\__mm_H: alitzah }
 \__mm_hilkhot:nnn { naarahbetulah } { נערה~בתולה } { The~Virgin~Maiden }
 \__mm_hilkhot:nnn { sotah } { סוטה } { Sotah }
 \__mm_hilkhot:nnn { issureibiah } { איסורי~ביאה } { Forbidden~Relations }
-\__mm_hilkhot:nnn { maachalotassurot, maachalot } { מאכלות~אסורות } { Forbidden~Foods }
-\__mm_hilkhot:nnn { shechitah } { שחיטה } { Ritual~Slaughter }
+\__mm_hilkhot:nnn { maakhalotassurot, maakhalot } { מאכלות~אסורות } { Forbidden~Foods }
+\__mm_hilkhot:nnn { shekhitah } { שחיטה } { Ritual~Slaughter }
 \__mm_hilkhot:nnn { shevuot } { שבועות } { Oaths }
 \__mm_hilkhot:nnn { nedarim } { נדרים } { Vows }
 \__mm_hilkhot:nnn { nezirut } { נזירות } { Nazirites }
-\__mm_hilkhot:nnn { arakhin, arachin, charamin } { ערכין~וחרמין } { Valuations~and~Devoted~Property }
+\__mm_hilkhot:nnn { arakhin, kharamin } { ערכין~וחרמין } { Valuations~and~Devoted~Property }
 \__mm_hilkhot:nnn { kilayim } { כלאים } { Mixed~Species }
 \__mm_hilkhot:nnn { matnotaniyim } { מתנות~עניים } { Gifts~to~the~Poor }
 \__mm_hilkhot:nnn { terumot } { תרומות } { Terumot }
@@ -247,49 +290,49 @@
 \__mm_hilkhot:nnn { maasersheni, netarevai } { מעשר~שני~ונטע~רבעי } { Second~Tithe~and~Fourth-Year~Fruit }
 \__mm_hilkhot:nnn { bikkurim } { ביכורים~ושאר~מתנות~כהונה~שבגבולין } { First~Fruits~and~Other~Priestly~Gifts }
 \__mm_hilkhot:nnn { shemitah, yovel, shemitahveyovel } { שמיטה~ויובל } { The~Sabbatical~Year~and~the~Jubilee }
-\__mm_hilkhot:nnn { beithabechirah } { בית~הבחירה } { The~Temple }
+\__mm_hilkhot:nnn { beithabekhirah } { בית~הבחירה } { The~Temple }
 \__mm_hilkhot:nnn { kleihamikdash } { כלי~המקדש~והעובדין~בו } { Temple~Vessels~and~Those~Who~Serve~There }
 \__mm_hilkhot:nnn { biathamikdash } { ביאת~המקדש } { Entering~the~Temple }
-\__mm_hilkhot:nnn { issureimizbeach } { איסורי~המזבח } { Things~Forbidden~on~the~Altar }
+\__mm_hilkhot:nnn { issureimizbeakh } { איסורי~המזבח } { Things~Forbidden~on~the~Altar }
 \__mm_hilkhot:nnn { maasehakorbanot } { מעשה~הקרבנות } { Sacrificial~Procedure }
 \__mm_hilkhot:nnn { temidin, temidinumusafin } { תמידין~ומוספין } { Daily~and~Additional~Offerings }
 \__mm_hilkhot:nnn { pesuleihamukdashin } { פסולי~המוקדשין } { Disqualified~Offerings }
 \__mm_hilkhot:nnn { avodatyomhakippurim } { עבודת~יום~הכפורים } { The~Yom~Kippur~Service }
 \__mm_hilkhot:nnn { meilah } { מעילה } { Misuse~of~Sanctified~Property }
-\__mm_hilkhot:nnn { korbanpesach } { קרבן~פסח } { The~Paschal~Offering }
-\__mm_hilkhot:nnn { chagigah } { חגיגה } { The~Festival~Offering }
-\__mm_hilkhot:nnn { bekhorot, bechorot } { בכורות } { Firstborn~Animals }
+\__mm_hilkhot:nnn { korbanpesakh } { קרבן~פסח } { The~Paschal~Offering }
+\__mm_hilkhot:nnn { khagigah } { חגיגה } { The~Festival~Offering }
+\__mm_hilkhot:nnn { bekhorot } { בכורות } { Firstborn~Animals }
 \__mm_hilkhot:nnn { shegagot } { שגגות } { Offerings~for~Unintentional~Sins }
-\__mm_hilkhot:nnn { mechusreikapparah } { מחוסרי~כפרה } { Those~Lacking~Atonement }
+\__mm_hilkhot:nnn { mekhusreikapparah } { מחוסרי~כפרה } { Those~Lacking~Atonement }
 \__mm_hilkhot:nnn { temurah } { תמורה } { Substituted~Offerings }
 \__mm_hilkhot:nnn { tumatmet } { טומאת~מת } { Impurity~of~the~Dead }
 \__mm_hilkhot:nnn { parahadumah } { פרה~אדומה } { The~Red~Heifer }
 \__mm_hilkhot:nnn { tumattzaraat } { טומאת~צרעת } { Impurity~of~Tzara'at }
 \__mm_hilkhot:nnn { metameimishkav } { מטמאי~משכב~ומושב } { Impurity~of~Bed~and~Seat }
 \__mm_hilkhot:nnn { shaaravothatumah } { שאר~אבות~הטומאות } { Other~Sources~of~Impurity }
-\__mm_hilkhot:nnn { tumatochalin } { טומאת~אוכלין } { Impurity~of~Foods }
+\__mm_hilkhot:nnn { tumatokhalin } { טומאת~אוכלין } { Impurity~of~Foods }
 \__mm_hilkhot:nnn { kelim } { כלים } { Vessels }
 \__mm_hilkhot:nnn { mikvaot } { מקואות } { Mikva'ot }
 \__mm_hilkhot:nnn { nizkeimamon } { נזקי~ממון } { Damage~to~Property }
 \__mm_hilkhot:nnn { geneivah } { גניבה } { Theft }
 \__mm_hilkhot:nnn { gezelah, aveidah } { גזילה~ואבידה } { Robbery~and~Lost~Property }
-\__mm_hilkhot:nnn { chovelumazik } { חובל~ומזיק } { Injury~and~Damage }
-\__mm_hilkhot:nnn { rotzeach, shemiratnefesh } { רוצח~ושמירת~נפש } { Murder~and~the~Preservation~of~Life }
-\__mm_hilkhot:nnn { mechirah } { מכירה } { Sales }
-\__mm_hilkhot:nnn { zechiyah, matanah } { זכייה~ומתנה } { Acquisition~and~Gifts }
-\__mm_hilkhot:nnn { shechenim } { שכנים } { Neighbours }
-\__mm_hilkhot:nnn { sheluchin, shutafin } { שלוחין~ושותפין } { Agents~and~Partners }
+\__mm_hilkhot:nnn { khovelumazik } { חובל~ומזיק } { Injury~and~Damage }
+\__mm_hilkhot:nnn { rotzeakh, shemiratnefesh } { רוצח~ושמירת~נפש } { Murder~and~the~Preservation~of~Life }
+\__mm_hilkhot:nnn { mekhirah } { מכירה } { Sales }
+\__mm_hilkhot:nnn { zekhiyah, matanah } { זכייה~ומתנה } { Acquisition~and~Gifts }
+\__mm_hilkhot:nnn { shekhenim } { שכנים } { Neighbours }
+\__mm_hilkhot:nnn { shelukhin, shutafin } { שלוחין~ושותפין } { Agents~and~Partners }
 \__mm_hilkhot:nnn { avadim } { עבדים } { Slaves }
-\__mm_hilkhot:nnn { sechirut } { שכירות } { Hiring }
+\__mm_hilkhot:nnn { sekhirut } { שכירות } { Hiring }
 \__mm_hilkhot:nnn { sheelah, pikadon } { שאלה~ופיקדון } { Borrowing~and~Deposits }
 \__mm_hilkhot:nnn { malveh, loveh } { מלוה~ולוה } { Lenders~and~Borrowers }
 \__mm_hilkhot:nnn { toen, nitan } { טוען~ונטען } { Claimants~and~Defendants }
-\__mm_hilkhot:nnn { nachalot } { נחלות } { Inheritance }
+\__mm_hilkhot:nnn { nakhalot } { נחלות } { Inheritance }
 \__mm_hilkhot:nnn { sanhedrin } { סנהדרין~והעונשין~המסורין~להם } { The~Sanhedrin }
 \__mm_hilkhot:nnn { edut } { עדות } { Testimony }
 \__mm_hilkhot:nnn { mamrim } { ממרים } { Rebels }
 \__mm_hilkhot:nnn { evel, avel } { אבל } { Mourning }
-\__mm_hilkhot:nnn { melachim, milchamot } { מלכים~ומלחמות } { Kings~and~Wars }
+\__mm_hilkhot:nnn { melakhim, milkhamot } { מלכים~ומלחמות } { Kings~and~Wars }
 
 %                         *************
 %                         ** NUMBERS **
@@ -328,7 +371,6 @@
 % and \l__mm_en_tl
 \tl_new:N \l__mm_he_tl
 \tl_new:N \l__mm_en_tl
-\tl_new:N \l__mm_names_tl
 \cs_new_protected:Npn \__mm_lookup:Nnn #1 #2 #3
 	{
 		\__mm_nohyphenation:
@@ -390,15 +432,15 @@
 % Commentaries on a verse, for \tanakh[rashi]{gen}{18:7}: רש״י על בראשית י״ח, ז׳ /
 % Rashi on Genesis 18:7. \declarecommentary{keys}{Hebrew}{English} adds more.
 \__mm_commentary:nnn { rashi } { רש״י } { Rashi }
-\__mm_commentary:nnn { ramban, nachmanides } { רמב״ן } { Ramban }
+\__mm_commentary:nnn { ramban, nakhmanides } { רמב״ן } { Ramban }
 \__mm_commentary:nnn { ibnezra } { אבן\nobreakspace עזרא } { Ibn\nobreakspace Ezra }
 \__mm_commentary:nnn { rashbam } { רשב״ם } { Rashbam }
 \__mm_commentary:nnn { radak } { רד״ק } { Radak }
-\__mm_commentary:nnn { sforno, seforno } { ספורנו } { Sforno }
-\__mm_commentary:nnn { chizkuni, hizkuni } { חזקוני } { \__mm_H: izkuni }
-\__mm_commentary:nnn { orhachaim, orhachayim, orhahayyim } { אור\nobreakspace החיים } { Or\nobreakspace ha\__mm_H: ayyim }
+\__mm_commentary:nnn { seforno, sforno } { ספורנו } { Seforno }
+\__mm_commentary:nnn { khizkuni } { חזקוני } { \__mm_H: izkuni }
+\__mm_commentary:nnn { orhakhayyim } { אור\nobreakspace החיים } { Or\nobreakspace ha\__mm_H: ayyim }
 \__mm_commentary:nnn { baalhaturim } { בעל\nobreakspace הטורים } { Ba'al\nobreakspace haTurim }
-\__mm_commentary:nnn { kliyakar } { כלי\nobreakspace יקר } { Kli\nobreakspace Yakar }
+\__mm_commentary:nnn { keliyakar, kliyakar } { כלי\nobreakspace יקר } { Keli\nobreakspace Yakar }
 \__mm_commentary:nnn { malbim } { מלבי״ם } { Malbim }
 \__mm_commentary:nnn { onkelos, targumonkelos } { תרגום\nobreakspace אונקלוס } { Targum\nobreakspace Onkelos }
 \__mm_commentary:nnn { yonatan, targumyonatan, jonathan } { תרגום\nobreakspace יונתן } { Targum\nobreakspace Yonatan }
@@ -586,7 +628,7 @@
 %   subunit=...   any other Hebrew sub-unit, such as אות
 %   section=oh    it covers one section only: the command then takes just the
 %                 reference, and the section isn't named
-% A declared command takes {section}{reference}, as \shulchanaruch{oh}{605:1},
+% A declared command takes {section}{reference}, as \shulkhanarukh{oh}{605:1},
 % or just {reference} for a one-section work, as \mishnahberurah{605:3}.
 \tl_new:N \l__mm_decl_subunit_tl
 \tl_new:N \l__mm_decl_section_tl
@@ -627,15 +669,17 @@
 \cs_generate_variant:Nn \__mm_declare:Nnnnn { NnnVV }
 
 \declaretursefer{\tur}{טור}{Tur}
-\declaretursefer{\shulchanaruch}{שו״ע}{Shul\__mm_h: an \nobreakspace Arukh}
+\declaretursefer{\shulkhanarukh}{שו״ע}{Shul\__mm_h: an \nobreakspace Arukh}
 \declaretursefer{\beityosef}{בית\nobreakspace יוסף}{Beit\nobreakspace Yosef}
 \declaretursefer[subunit=אות]{\darkeimoshe}{דרכי\nobreakspace משה}{Darkei\nobreakspace Moshe}
-\declaretursefer{\bach}{ב״ח}{Bach}
+\declaretursefer{\bah}{ב״ח}{Ba\__mm_h:}
+\declaretursefer{\bach}{ב״ח}{Ba\__mm_h:}
+\declaretursefer{\bakh}{ב״ח}{Ba\__mm_h:}
 \declaretursefer[seifkatan]{\shakh}{ש״ך}{Shakh}
 \declaretursefer[seifkatan]{\taz}{ט״ז}{Taz}
 \declaretursefer[seifkatan, section=oh]{\magenavraham}{מגן\nobreakspace אברהם}{Magen\nobreakspace Avraham}
-\declaretursefer[seifkatan, section=oh]{\mishnahberurah}{משנה\nobreakspace ברורה}{Mishnah\nobreakspace Brurah}
-\declaretursefer{\arukhhashulchan}{ערוך\nobreakspace השולחן}{Arukh\nobreakspace haShul\__mm_h: an}
+\declaretursefer[seifkatan, section=oh]{\mishnahberurah}{משנה\nobreakspace ברורה}{Mishnah\nobreakspace Berurah}
+\declaretursefer{\arukhhashulkhan}{ערוך\nobreakspace השולחן}{Arukh\nobreakspace haShul\__mm_h: an}
 
 %                         ************
 %                         ** AD LOC **

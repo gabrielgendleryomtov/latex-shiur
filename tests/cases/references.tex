@@ -3,31 +3,60 @@
 \usepackage{shiur}
 \setshiurfont{hebrew}{FreeSerif}
 \newcommand{\all}{%
-	\tanakh{gen}{37:18-20} | \tanakh{exodus}{14} | \tanakh{gen}{37:18-38:2} | \tanakh*{gen}{39:1} |
-	\tanakh{kings ii}{4:1} |
-	\bavli{menachot}{69b} | \bavli{yoma}{9a-b} | \bavli{avoda zara}{2a} | \bavli*{127b} |
-	\mishnah{sukkah}{4:1} | \yerushalmi{brachot}{1:1} | \rambam{shofar}{2:6} |
-	\shulchanaruch{oh}{605:1} | \shulchanaruch{oh}{658:1-2} | \tur{yd}{114} |
-	\mishnahberurah{605:3} | \shakh{yd}{114:3} | \darkeimoshe{oh}{605:3} |
-	\tanakh[rashi]{gen}{18:7} | \tanakh[targum yonatan]{exodus}{35:27-28}}
+	\tanakh{gen}{37:18-20}\par \tanakh{exodus}{14}\par \tanakh{gen}{37:18-38:2}\par \tanakh*{gen}{39:1}\par
+	\tanakh{kings ii}{4:1}\par
+	\bavli{menakhot}{69b}\par \bavli{yoma}{9a-b}\par \bavli{avoda zara}{2a}\par \bavli*{127b}\par
+	\mishnah{sukkah}{4:1}\par \yerushalmi{berakhot}{1:1}\par \rambam{shofar}{2:6}\par
+	\shulkhanarukh{oh}{605:1}\par \shulkhanarukh{oh}{658:1-2}\par \tur{yd}{114}\par
+	\mishnahberurah{605:3}\par \shakh{yd}{114:3}\par \darkeimoshe{oh}{605:3}\par
+	\tanakh[rashi]{gen}{18:7}\par \tanakh[targum yonatan]{exodus}{35:27-28}}
 \begin{document}
 \all
 
 \begin{hebrew}\all\end{hebrew}
 
-{\mareimekomotsetup{daf=short}\bavli{menachot}{69b} | \bavli{menachot}{70a}}
+{\mareimekomotsetup{daf=short}\bavli{menakhot}{69b}\par \bavli{menakhot}{70a}}
 \end{document}
 
-%! expect: Genesis 37:18–20 | Exodus 14 | Genesis 37:18–38:2 | 39:1 | Kings II 4:1
-%! expect: B. Menaḥot 69b | B. Yoma 9a–b | B. Avoda Zara 2a | 127b
-%! expect: M. Sukkah 4:1 | Y. Brachot 1:1 | Mishneh Torah, Laws of Shofar, Sukkah and Lulav 2:6
-%! expect: Shulḥan Arukh, Oraḥ Ḥayyim 605:1 | Shulḥan Arukh, Oraḥ Ḥayyim 658:1–2 | Tur, Yoreh De’ah 114
-%! expect: Mishnah Brurah 605:3 | Shakh, Yoreh De’ah 114:3 | Darkei Moshe, Oraḥ Ḥayyim 605:3
-%! expect: Rashi on Genesis 18:7 | Targum Yonatan on Exodus 35:27–28
-%! expect: בראשית ל״ז, י״ח–כ׳ | שמות י״ד | בראשית ל״ז, י״ח–ל״ח, ב׳ | ל״ט, א׳ | מלכים ב׳ ד׳, א׳
-%! expect: בבלי מנחות ס״ט ע״ב | בבלי יומא ט׳ ע״א–ע״ב | בבלי עבודה זרה ב׳ ע״א | קכ״ז ע״ב
-%! expect: משנה סוכה ד׳, א׳ | ירושלמי ברכות א׳, א׳ | משנה תורה הלכות שופר וסוכה ולולב ב׳, ו׳
-%! expect: שו״ע או״ח סי׳ תר״ה סע׳ א׳ | שו״ע או״ח סי׳ תרנ״ח סע׳ א׳–ב׳ | טור יו״ד סי׳ קי״ד
-%! expect: משנה ברורה סי׳ תר״ה ס״ק ג׳ | ש״ך יו״ד סי׳ קי״ד ס״ק ג׳ | דרכי משה או״ח סי׳ תר״ה אות ג׳
-%! expect: רש״י על בראשית י״ח, ז׳ | תרגום יונתן על שמות ל״ה, כ״ז–כ״ח
-%! expect: B. Menaḥot 69b | B. Menaḥot 70a
+%! expect: Genesis 37:18–20
+%! expect: Exodus 14
+%! expect: Genesis 37:18–38:2
+%! expect: 39:1
+%! expect: Kings II 4:1
+%! expect: B. Menaḥot 69b
+%! expect: B. Yoma 9a–b
+%! expect: B. Avoda Zara 2a
+%! expect: 127b
+%! expect: M. Sukkah 4:1
+%! expect: Y. Berakhot 1:1
+%! expect: Mishneh Torah, Laws of Shofar, Sukkah and Lulav 2:6
+%! expect: Shulḥan Arukh, Oraḥ Ḥayyim 605:1
+%! expect: Shulḥan Arukh, Oraḥ Ḥayyim 658:1–2
+%! expect: Tur, Yoreh De’ah 114
+%! expect: Mishnah Berurah 605:3
+%! expect: Shakh, Yoreh De’ah 114:3
+%! expect: Darkei Moshe, Oraḥ Ḥayyim 605:3
+%! expect: Rashi on Genesis 18:7
+%! expect: Targum Yonatan on Exodus 35:27–28
+%! expect: בראשית ל״ז, י״ח–כ׳
+%! expect: שמות י״ד
+%! expect: בראשית ל״ז, י״ח–ל״ח, ב׳
+%! expect: ל״ט, א׳
+%! expect: מלכים ב׳ ד׳, א׳
+%! expect: בבלי מנחות ס״ט ע״ב
+%! expect: בבלי יומא ט׳ ע״א–ע״ב
+%! expect: בבלי עבודה זרה ב׳ ע״א
+%! expect: קכ״ז ע״ב
+%! expect: משנה סוכה ד׳, א׳
+%! expect: ירושלמי ברכות א׳, א׳
+%! expect: משנה תורה הלכות שופר וסוכה ולולב ב׳, ו׳
+%! expect: שו״ע או״ח סי׳ תר״ה סע׳ א׳
+%! expect: שו״ע או״ח סי׳ תרנ״ח סע׳ א׳–ב׳
+%! expect: טור יו״ד סי׳ קי״ד
+%! expect: משנה ברורה סי׳ תר״ה ס״ק ג׳
+%! expect: ש״ך יו״ד סי׳ קי״ד ס״ק ג׳
+%! expect: דרכי משה או״ח סי׳ תר״ה אות ג׳
+%! expect: רש״י על בראשית י״ח, ז׳
+%! expect: תרגום יונתן על שמות ל״ה, כ״ז–כ״ח
+%! expect: B. Menaḥot 69b
+%! expect: B. Menaḥot 70a

@@ -1,0 +1,24 @@
+% Keys match any usual transliteration (kh, ch and h alike, and so on), and
+% \bah, \bach and \bakh are all the Baḥ.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\bavli{menakhot}{1a}, \bavli{menachot}{2a}, \bavli{Menahot}{3a}.
+\bavli{khagigah}{4a}, \bavli{chagiga}{5a}.
+\bavli{berakhot}{6a}, \bavli{brachot}{7a}.
+\shulkhanarukh{orakh khayyim}{1:1}, \shulkhanarukh{orach chaim}{2:1}.
+\rambam{tsitsit}{1:1}, \rambam{kiddush hachodesh}{1:1}.
+\bah{yd}{1}, \bach{yd}{2}, \bakh{yd}{3}.
+\tanakh[nachmanides]{gen}{1:1}, \tanakh[nakhmanides]{gen}{1:2}, \tanakh[kli yakar]{gen}{1:3}, \tanakh[sforno]{gen}{1:4}.
+\tanakh{samuel ii}{1:1}, \tanakh{i sam}{1:1}, \tanakh{kings i}{1:1}.
+\end{document}
+
+%! expect: B. Menaḥot 1a, B. Menaḥot 2a, B. Menaḥot 3a.
+%! expect: B. Ḥagigah 4a, B. Ḥagigah 5a.
+%! expect: B. Berakhot 6a, B. Berakhot 7a.
+%! expect: Shulḥan Arukh, Oraḥ Ḥayyim 1:1, Shulḥan Arukh, Oraḥ Ḥayyim 2:1.
+%! expect: Laws of Tzitzit 1:1, Mishneh Torah, Laws of Sanctifying the New Month 1:1.
+%! expect: Baḥ, Yoreh De’ah 1, Baḥ, Yoreh De’ah 2, Baḥ, Yoreh De’ah 3.
+%! expect: Ramban on Genesis 1:1, Ramban on Genesis 1:2, Keli Yakar on Genesis 1:3, Seforno on Genesis 1:4.
+%! expect: Samuel II 1:1, Samuel I 1:1, Kings I 1:1.
