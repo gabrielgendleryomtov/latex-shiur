@@ -1,5 +1,5 @@
 % Keys match any usual transliteration (kh, ch and h alike, and so on), and
-% \bah, \bach and \bakh are all the Baḥ.
+% commands with ח or כ in their names have ch and kh spellings.
 \documentclass{article}
 \usepackage{shiur}
 \setshiurfont{hebrew}{FreeSerif}
@@ -11,7 +11,8 @@
 \rambam{tsitsit}{1:1}, \rambam{kiddush hachodesh}{1:1}.
 \bah{yd}{1}, \bach{yd}{2}, \bakh{yd}{3}.
 \tanakh[nachmanides]{gen}{1:1}, \tanakh[nakhmanides]{gen}{1:2}, \tanakh[kli yakar]{gen}{1:3}, \tanakh[sforno]{gen}{1:4}.
-\tanakh{samuel ii}{1:1}, \tanakh{i sam}{1:1}, \tanakh{kings i}{1:1}.
+\tanakh{samuel ii}{1:1}, \tanach{i sam}{1:1}, \tanakh{kings i}{1:1}.
+\shulchanaruch{yd}{3:1}, \shach{yd}{4:1}, \shakh{yd}{5:1}, \aruchhashulchan{hm}{6:1}, \arukhhashulkhan{hm}{7:1}.
 \end{document}
 
 %! expect: B. Menaḥot 1a, B. Menaḥot 2a, B. Menaḥot 3a.
@@ -22,3 +23,4 @@
 %! expect: Baḥ, Yoreh De’ah 1, Baḥ, Yoreh De’ah 2, Baḥ, Yoreh De’ah 3.
 %! expect: Ramban on Genesis 1:1, Ramban on Genesis 1:2, Keli Yakar on Genesis 1:3, Seforno on Genesis 1:4.
 %! expect: Samuel II 1:1, Samuel I 1:1, Kings I 1:1.
+%! expect: Shulḥan Arukh, Yoreh De’ah 3:1, Shakh, Yoreh De’ah 4:1, Shakh, Yoreh De’ah 5:1, Arukh haShulḥan, Ḥoshen Mishpat 6:1, Arukh haShulḥan, Ḥoshen Mishpat 7:1.
