@@ -1,0 +1,90 @@
+#!/bin/sh
+# buildshiur: compile every version of a shiur, all at once.
+#
+#   buildshiur [--clean] [FOLDER]
+#
+# finds each NAME_body.tex in FOLDER (default: the current folder) and every
+# wrapper that inputs it, and compiles the wrappers with xelatex, side by side.
+# Each one is compiled again until its auxiliary files stop changing (usually
+# twice the first time, once after that), so the bookmarks and slide navigation
+# are right. The PDFs go next to the wrappers.
+#
+# It prints one line per version: "ok", or the first error with its file and
+# line. The log of a version that failed is kept for the details.
+#
+# Options:
+#   --clean    afterwards, delete the auxiliary files (.aux, .log, .nav, .out,
+#              .snm, .toc, .vrb) of the versions that built
+
+set -u
+
+usage() {
+	sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
+	exit "${1:-0}"
+}
+
+clean= dir=
+while [ $# -gt 0 ]; do
+	case $1 in
+	--clean) clean=1; shift ;;
+	-h | --help) usage ;;
+	-*) echo "buildshiur: unknown option $1" >&2; usage 2 >&2 ;;
+	*) [ -z "$dir" ] || usage 2 >&2; dir=$1; shift ;;
+	esac
+done
+cd "${dir:-.}" 2>/dev/null || { echo "buildshiur: no folder $dir" >&2; exit 2; }
+command -v xelatex >/dev/null || { echo "buildshiur: xelatex not found" >&2; exit 2; }
+
+# the wrappers: .tex files, other than bodies, that \input a body here
+wrappers=
+for body in *_body.tex; do
+	[ -e "$body" ] || continue
+	for tex in *.tex; do
+		case $tex in *_body.tex) continue ;; esac
+		grep -q "^[^%]*\\\\input{${body%.tex}\(\.tex\)\{0,1\}}" "$tex" && wrappers="$wrappers ${tex%.tex}"
+	done
+done
+[ -n "$wrappers" ] || { echo "buildshiur: no NAME_body.tex with wrappers in ${dir:-this folder}" >&2; exit 2; }
+
+aux() { for ext in aux nav out snm toc; do [ -e "$1.$ext" ] && cksum <"$1.$ext"; done; }
+
+# build NAME: compile NAME.tex until its auxiliary files settle; print the result
+build() {
+	runs=0
+	while :; do
+		before=$(aux "$1")
+		runs=$((runs + 1))
+		if ! xelatex -interaction=nonstopmode -halt-on-error -file-line-error "$1.tex" \
+			</dev/null >/dev/null 2>&1; then
+			error=$(grep -m1 -e '^[^ ]*:[0-9]*: ' -e '^! ' "$1.log" 2>/dev/null)
+			# TeX's context line ends with the command it doesn't know
+			case $error in *'Undefined control sequence.')
+				error="$error $(grep -m1 '^l\.[0-9]' "$1.log" | awk '{print $NF}')" ;;
+			esac
+			printf 'FAIL %s.tex: %s (see %s.log)\n' "$1" "${error:-xelatex failed}" "$1"
+			return 1
+		fi
+		[ "$(aux "$1")" = "$before" ] || [ $runs -ge 4 ] && break
+	done
+	missing=$(grep -c 'Missing character' "$1.log")
+	if [ "$missing" -gt 0 ]; then
+		echo "ok   $1.pdf, but $missing missing characters: the font lacks them (see $1.log)"
+	else
+		echo "ok   $1.pdf"
+	fi
+	[ -z "$clean" ] || for ext in aux log nav out snm toc vrb; do rm -f "$1.$ext"; done
+}
+
+results=$(mktemp -d) || exit 2
+trap 'rm -rf "$results"' EXIT
+for name in $wrappers; do
+	build "$name" >"$results/$name" &
+done
+wait
+
+status=0
+for name in $wrappers; do
+	cat "$results/$name"
+	grep -q '^ok' "$results/$name" || status=1
+done
+exit $status

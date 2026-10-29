@@ -22,9 +22,9 @@
 #   --large-print    also make the large-print handout
 #   --here           put the files in the current folder, not a new one
 #
-# Compile each wrapper with xelatex; edit only the body. The title, author and
-# Hebrew font are at the top of the body, before \begin{document}, so they are
-# set once for every version.
+# Edit only the body, and compile the wrappers with buildshiur (or each with
+# xelatex). The title, author and Hebrew font are at the top of the body, before
+# \begin{document}, so they are set once for every version.
 
 set -eu
 
@@ -155,3 +155,4 @@ R. Zeira asked: if wheat came down in the clouds, what is the law?
 EOF
 
 echo "newshiur: made $dir/${name}_body.tex and its versions: $versions, ${name}_beamer.tex (slides)"
+echo "newshiur: compile them all with: buildshiur $dir"

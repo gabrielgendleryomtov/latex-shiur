@@ -127,11 +127,16 @@ of them. The manual has a complete example.
 for the participants' handout, the presenter's notes and the slides, plus, with
 `--hebrew-only` and `--large-print`, those versions too. The title, author and Hebrew font go
 at the top of the body, before `\begin{document}`, so they are set once for every version.
-`scripts/newshiur --help` lists its options. It runs on Linux and macOS, and on Windows in Git
-Bash or WSL.
+`scripts/newshiur --help` lists its options.
+
+`scripts/buildshiur [FOLDER]` then compiles every version at once, each as many times as it
+needs, and prints `ok` or the first error, with its file and line, for each. `--clean` deletes
+the auxiliary files afterwards. Both scripts run on Linux and macOS, and on Windows in Git Bash
+or WSL.
 
 ```sh
 scripts/newshiur --title "Wheat from the clouds" --author "A. Teacher" wheat
+scripts/buildshiur wheat
 ```
 
 To avoid typing your name and font every time, set them as environment variables, which the
@@ -143,10 +148,13 @@ export SHIUR_AUTHOR="A. Teacher"
 export SHIUR_HEBREW_FONT="Taamey Frank CLM"
 ```
 
-To run it as plain `newshiur` from anywhere, link it into a folder on your `PATH`, for example:
+To run them as plain `newshiur` and `buildshiur` from anywhere, link them into a folder on your
+`PATH`, for example:
 
 ```sh
-ln -s "$(kpsewhich -var-value TEXMFHOME)/tex/latex/shiur/scripts/newshiur" ~/.local/bin/newshiur
+for s in newshiur buildshiur; do
+	ln -s "$(kpsewhich -var-value TEXMFHOME)/tex/latex/shiur/scripts/$s" ~/.local/bin/$s
+done
 ```
 
 ## Wishlist
@@ -162,8 +170,8 @@ Ideas for later versions, not yet planned in detail:
 
 ## Tests
 
-`tests/run.sh` compiles the test cases in `tests/cases` and the examples in `tests/examples`
-against the working copy of the package, and checks that each builds with no error or missing
+`tests/run.sh` compiles the test cases in `tests/cases`, the examples in `tests/examples` and a
+fresh shiur from `newshiur` (with `buildshiur`) against the working copy of the package, and checks that each builds with no error or missing
 character. Each test case also states, in `%!` comment lines, text its PDF must or must not
 contain (`tests/check.py` explains the forms). `tests/run.sh pasuk` runs only the files whose
 names contain "pasuk". It needs Python 3 and `pdftotext`. A bug fix should come with a small

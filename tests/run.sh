@@ -10,7 +10,8 @@
 # Test cases (tests/cases/*.tex) state what their PDFs must show, in comment
 # lines; see tests/check.py. Examples (tests/examples), and every version of a
 # shiur made by scripts/newshiur, must build. Every document must build with no
-# error and no missing character.
+# error and no missing character. The newshiur versions are compiled by
+# scripts/buildshiur, which must also report an error in a broken copy of them.
 
 set -uo pipefail
 
@@ -47,6 +48,10 @@ one() {
 	id=${id#"$out"/}
 	id=${id#"$HOME"/}
 	id=${id%.tex}
+	if [[ $doc = "$out"/starter/* ]]; then  # compiled already, by buildshiur
+		python3 -I "$repo/tests/check.py" "$id" "$doc" "${doc%.tex}.pdf" "${doc%.tex}.log"
+		return
+	fi
 	dir=$out/${id//\//__}
 	rm -rf "$dir"
 	mkdir -p "$dir"
@@ -58,11 +63,52 @@ one() {
 export -f one
 export repo out
 
+# buildshiur: compile the starter, and a copy of it with an unknown command in its body; print a
+# result line for each
+buildshiur() {
+	local status=0 report wrappers
+	report=$(TEXINPUTS="$repo//:" "$repo/scripts/buildshiur" "$out/starter/starter") || status=$?
+	if ((status)); then
+		echo "FAIL buildshiur: exit $status"$'\n'"$report"
+	else
+		echo "ok scripts/buildshiur"
+	fi
+	rm -rf "$out/starter/broken"
+	cp -r "$out/starter/starter" "$out/starter/broken"
+	sed -i 's/^\\maketitle$/&\n\\nosuchcommand/' "$out/starter/broken/starter_body.tex"
+	status=0
+	report=$(TEXINPUTS="$repo//:" "$repo/scripts/buildshiur" "$out/starter/broken") || status=$?
+	wrappers=$(grep -l 'input{starter_body}' "$out"/starter/starter/*.tex | wc -l)
+	if ((status == 1)) && (($(grep -c '^FAIL .*starter_body.tex:[0-9]*: Undefined control sequence. \\nosuchcommand' <<<"$report") == wrappers)); then
+		echo "ok scripts/buildshiur, errors"
+	else
+		echo "FAIL buildshiur, errors: exit $status"$'\n'"$report"
+	fi
+}
+
 mapfile -t list < <(docs "$@")
 ((${#list[@]})) || { echo "no documents match" >&2; exit 2; }
 mkdir -p "$out"
 start=$SECONDS
-results=$(printf '%s\0' "${list[@]}" | xargs -0 -n1 -P "$(nproc)" bash -c 'one "$1"' _ | sort)
+others=() starters=()
+for doc in "${list[@]}"; do
+	if [[ $doc = "$out"/starter/* ]]; then starters+=("$doc"); else others+=("$doc"); fi
+done
+# buildshiur compiles the starter alongside the other documents; its versions are checked after
+if ((${#starters[@]})); then
+	buildshiur >"$out/buildshiur.txt" &
+	builder=$!
+	list+=(buildshiur buildshiur)  # its two result lines
+fi
+results=
+((${#others[@]})) &&
+	results=$(printf '%s\0' "${others[@]}" | xargs -0 -n1 -P "$(nproc)" bash -c 'one "$1"' _)
+if ((${#starters[@]})); then
+	wait "$builder"
+	results+=$'\n'$(cat "$out/buildshiur.txt")
+	results+=$'\n'$(printf '%s\0' "${starters[@]}" | xargs -0 -n1 -P "$(nproc)" bash -c 'one "$1"' _)
+fi
+results=$(sort <<<"$results" | sed '/^$/d')
 echo "$results" | grep -v '^ok ' || true
 passed=$(grep -c '^ok ' <<<"$results")
 echo "$passed of ${#list[@]} passed ($((SECONDS - start)) s)"

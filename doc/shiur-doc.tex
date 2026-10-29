@@ -358,8 +358,19 @@ Its options:
 \end{description}
 The environment variables \texttt{SHIUR\_AUTHOR} and \texttt{SHIUR\_HEBREW\_FONT} give your
 usual author and font. The title, author and font go at the top of the body, so they are
-set once for every version. Write the shiur in the body, and compile the wrappers. The rest of this
-section explains how the files fit together.
+set once for every version. Write the shiur in the body, and compile the wrappers.
+
+The \texttt{buildshiur} script, in the same folder, compiles them all at once:
+\begin{Verbatim}
+buildshiur wheat
+\end{Verbatim}
+compiles every wrapper of every body in the folder \texttt{wheat} (or, with no folder named,
+the current one) side by side, each as many times as its bookmarks and slide navigation
+need. It prints a line for each version: \texttt{ok}, or the first error with its file and
+line. With \texttt{--clean} it then deletes the auxiliary files (\texttt{.aux},
+\texttt{.log} and the like) of the versions that built.
+
+The rest of this section explains how the files fit together.
 
 Put everything from \verb|\begin{document}| to \verb|\end{document}| in a body file,
 and give each version a small file of its own. If the versions differ only in options, the
