@@ -189,6 +189,10 @@ Command & English & Hebrew \\
 \verb|\bavli{menachot}{69b}| & \bavli{menachot}{69b} & \texthebrew{\bavli{menachot}{69b}} \\
 \verb|\bavli{yoma}{9a-b}| & \bavli{yoma}{9a-b} & \texthebrew{\bavli{yoma}{9a-b}} \\
 \verb|\bavli*{127b}| & \bavli*{127b} & \texthebrew{\bavli*{127b}} \\
+\verb|\mishnah{sukkah}{4:1}| & \mishnah{sukkah}{4:1} & \texthebrew{\mishnah{sukkah}{4:1}} \\
+\verb|\yerushalmi{brachot}{1:1}| & \yerushalmi{brachot}{1:1} & \texthebrew{\yerushalmi{brachot}{1:1}} \\
+\verb|\shulchanaruch{oh}{605:1}| & \shulchanaruch{oh}{605:1} & \texthebrew{\shulchanaruch{oh}{605:1}} \\
+\verb|\tur{yd}{114}| & \tur{yd}{114} & \texthebrew{\tur{yd}{114}} \\
 \verb|Rashi \sham| & Rashi \sham & \texthebrew{רש״י \sham} \\
 \bottomrule
 \end{tabular}
@@ -201,15 +205,29 @@ daf alone. A daf is \texttt{69b},
 case, spaces and hyphens, with common short forms: \texttt{gen}, \texttt{kings ii},
 \texttt{avoda zara}, \texttt{menachot}; the full lists are in \texttt{mareimekomot.sty}.
 
+\verb|\rambam{shofar}{2:6}| gives
+\begin{center}
+\rambam{shofar}{2:6}\\
+\texthebrew{\rambam{shofar}{2:6}}
+\end{center}
+Mishnah and Yerushalmi references, and the Mishneh Torah's, are
+a chapter and its mishnah, halakhah or law, written like a Tanakh reference; the Shul\hdot an
+Arukh's and the Tur's are a siman, optionally with a se'if (\texttt{605:1}) or a range of
+se'ifim (\texttt{658:1-2}), in one of the four sections \texttt{oh}, \texttt{yd}, \texttt{eh} and
+\texttt{hm}. The Mishneh Torah's sets of laws are named by short keys such as \texttt{shofar},
+\texttt{teshuvah} or \texttt{yesodeihatorah}; all 83, with their keys, are listed in
+\texttt{mareimekomot.sty}.
+
 Hebrew numbers take a geresh when they are one letter and gershayim when they are more
-(\texthebrew{ח׳, ל״ח}), ranges take an en dash, and a reference only breaks across
+(\mbox{\texthebrew{ח׳, ל״ח}}), ranges take an en dash, and a reference only breaks across
 lines at its dash.
 
 \cs{sham} gives \texthebrew{שם} or ``ad loc''. On slides, where a source can be
 several slides from the one it refers to, it also gives that reference: ``Rashi ad loc
 (\bavli{menachot}{69b})''. A source whose heading has no reference of the package's (a Tur or a
-Shul\hdot an Arukh, say) clears it, so \cs{sham} after it stays plain rather than pointing at the
-wrong source. Two settings change the style, in any document:
+midrash, say) clears it, so \cs{sham} after it stays plain rather than pointing at the wrong
+source. A reference never hyphenates; it breaks only between the words of a long name, as in the
+Mishneh Torah's, and at the dash of a range. Two settings change the style, in any document:
 \begin{Verbatim}
 \mareimekomotsetup{sham=full}    % always give the reference after ad loc
 \mareimekomotsetup{daf=short}    % a daf as סט: rather than ס״ט ע״ב
