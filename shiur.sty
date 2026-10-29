@@ -313,7 +313,7 @@
 % beamer, slide k of the mekor's frame shows part k of each mekorlang under its
 % heading, with an ellipsis on both sides of the cut. \mekorbreak* cuts without
 % one, for a break between sentences or paragraphs.
-\NewDocumentCommand{\mekorbreak}{s}{\ignorespaces}
+\NewDocumentCommand{\mekorbreak}{s}{\shiur@afterbreak}
 \newcommand{\shiur@ellipsis}{...}
 \ExplSyntaxOn
 % A part without the star of the break before it, and without the spaces and
@@ -323,6 +323,8 @@
 	{
 		\tl_set:Nn \shiur@parttext {#1}
 		\regex_replace_once:nnN { \A \c{relax}? \*? (?: \s | \c{par} )* } { } \shiur@parttext
+		\legacy_if:nT { shiur@midbreak }
+			{ \regex_replace_once:nnN { \A \c{dilug} \s* } { } \shiur@parttext }
 		\regex_replace_once:nnN { (?: \s | \c{par} )* \Z } { } \shiur@parttext
 	}
 % The ellipsis at a break replaces any punctuation there, so "him." reads "him...".
@@ -330,7 +332,7 @@
 \cs_new_protected:Npn \shiur@dropstop #1
 	{
 		\shiur@trimpart {#1}
-		\regex_replace_once:nnN { [.,;:]+ \Z } { } \shiur@parttext
+		\regex_replace_once:nnN { (?: [.,;:] | \c{dilug} | \s )+ \Z } { } \shiur@parttext
 		\shiur@parttext
 	}
 \cs_new_protected:Npn \shiur@trimmed #1
@@ -488,6 +490,8 @@
 		\int_gset:Nn \g__shiur_pasuk_int {#2}
 		\bool_gset_true:N \g__shiur_verses_bool
 		\bool_if:NT \l__shiur_forceskip_bool { \bool_set_true:N \l__shiur_skip_bool }
+		\bool_if:NT \g__shiur_dilug_bool { \bool_set_false:N \l__shiur_skip_bool \c_space_tl }
+		\bool_gset_false:N \g__shiur_dilug_bool
 		\bool_if:NT \l__shiur_skip_bool { \shiur@ellipsis \c_space_tl }
 		(
 		\tl_if_blank:nF {#1}
@@ -499,6 +503,53 @@
 \cs_generate_variant:Nn \__shiur_verse:nn { ne, ee }
 \cs_new:Npn \__shiur_number:n #1
 	{ \str_if_eq:VnTF \languagename { hebrew } { \hebrewnumeral {#1} } { \int_eval:n {#1} } }
+
+% \dilug marks text left out, in any language: "word \dilug word" gives
+% "word ... word", with the ellipsis kept on the line of the word before it.
+% Straight before \pasuk or \perek it stands for their ellipsis, and at a
+% \mekorbreak it merges with the break's ellipsis on slides, and with a \dilug
+% after the break on handouts, which ignore the break.
+% \g__shiur_dilug_bool: an ellipsis has just been printed, and only a verse
+% marker, a break or another \dilug has come since
+\bool_new:N \g__shiur_dilug_bool
+\NewDocumentCommand \dilug { }
+	{
+		\bool_if:NTF \g__shiur_dilug_bool
+			{
+				% the ellipsis is already there: keep it pending, or end it with a space
+				\__shiur_dilug_next:nn { }
+					{ \bool_gset_false:N \g__shiur_dilug_bool \c_space_tl }
+			}
+			{
+				\mode_leave_vertical:
+				\dim_compare:nNnT \lastskip > \c_zero_dim { \unskip \nobreakspace }
+				\shiur@ellipsis
+				\__shiur_dilug_next:nn { \bool_gset_true:N \g__shiur_dilug_bool } { \c_space_tl }
+			}
+	}
+% #1 if a verse marker, a break or \dilug comes next, #2 if not
+\cs_new_protected:Npn \__shiur_dilug_next:nn #1 #2
+	{
+		\peek_meaning_ignore_spaces:NTF \pasuk {#1}
+			{
+				\peek_meaning_ignore_spaces:NTF \perek {#1}
+					{
+						\peek_meaning_ignore_spaces:NTF \mekorbreak {#1}
+							{ \peek_meaning_ignore_spaces:NTF \dilug {#1} {#2} }
+					}
+			}
+	}
+% on a handout a break is ignored; it keeps a \dilug's ellipsis pending only
+% if a \dilug or verse marker follows
+\cs_new_protected:Npn \shiur@afterbreak
+	{
+		\bool_if:NTF \g__shiur_dilug_bool
+			{
+				\__shiur_dilug_next:nn { }
+					{ \bool_gset_false:N \g__shiur_dilug_bool \c_space_tl }
+			}
+			{ \tex_ignorespaces:D }
+	}
 \ExplSyntaxOff
 
 % Text for only one of the bilingual and Hebrew-only versions.
