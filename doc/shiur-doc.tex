@@ -54,11 +54,11 @@ English as the main language and Hebrew as the other), \texttt{geometry},
 \begin{document}
 \maketitle
 
-\begin{mekor}
-\begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
+\begin{mekor}[\bavli{menachot}{69b}]
+\begin{mekorlang}{hebrew}
 בעי ר׳ זירא: חיטין שירדו בעבים מהו?
 \end{mekorlang}
-\begin{mekorlang}{english}{B. Mena\hdot ot 69b}
+\begin{mekorlang}{english}
 R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \end{mekorlang}
 \end{mekor}
@@ -69,15 +69,16 @@ R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \cs{setshiurfont}\verb|{hebrew}{...}| chooses the Hebrew font, for handouts and slides
 alike. Without it, the package picks an installed font itself (see ``\nameref{sec:fonts}'').
 Every page has \texthebrew{בס״ד} at the top right, the title page included; \cs{maketitle}
-prints the title as usual.
+prints the title as usual. The heading, given to the \env{mekor}, is a reference (see
+``\nameref{sec:references}''), which comes out in the language of each \env{mekorlang}.
 
 The source above comes out like this:
 
-\begin{mekor}
-\begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
+\begin{mekor}[\bavli{menachot}{69b}]
+\begin{mekorlang}{hebrew}
 בעי ר׳ זירא: חיטין שירדו בעבים מהו?
 \end{mekorlang}
-\begin{mekorlang}{english}{B. Mena\hdot ot 69b}
+\begin{mekorlang}{english}
 R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \end{mekorlang}
 \end{mekor}
@@ -88,7 +89,9 @@ R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 
 A \env{mekor} holds one source and gives it the next number. A \env{mekor*} holds a
 source that continues the previous one, and takes no new number. On slides, each
-\env{mekor} is a frame.
+\env{mekor} is a frame. The optional argument is the source's heading, printed over each of
+its languages. A reference there, such as \verb|\tanach{gen}{1:1}|, comes out in each
+\env{mekorlang}'s own language, so it is written once.
 
 \subsection{\env{mekorlang}}
 
@@ -97,6 +100,17 @@ source that continues the previous one, and takes no new number. On slides, each
   text
 \end{mekorlang}
 \end{Verbatim}
+
+The title is optional: without it, the \env{mekorlang} takes the \env{mekor}'s heading. Give
+one when the languages need different headings, as when the heading isn't a reference:
+\begin{Verbatim}[commandchars=+\(\)]
+\begin{mekor}
+\begin{mekorlang}{hebrew}{+texthebrew(מנחת אשר, קורונה)}
+  ...
+\begin{mekorlang}{english}{Min\hdot at Asher, Coronavirus}
+\end{Verbatim}
+A title must follow \verb|{language}| directly; text that starts with a brace goes on the
+next line.
 
 Each language of a source is a \env{mekorlang}. Hebrew is set right to left with Hebrew
 numerals, and any other language left to right with arabic numerals. Hebrew has three
@@ -173,7 +187,7 @@ word before it, and it never doubles up: straight before \cs{pasuk} or \cs{perek
 the marker's own ellipsis, and at a \cs{mekorbreak} it merges with the break's. So to leave out
 the end of verse 22 and go on with verse 23, write \verb|\dilug \pasuk|, or \verb|\pasuk*|.
 
-\subsection{References}
+\subsection{References}\label{sec:references}
 
 The references in headings come from the \texttt{mareimekomot} package, which \texttt{shiur}
 loads and which works in other documents too, such as papers and books. A reference is written

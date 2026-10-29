@@ -46,11 +46,11 @@ git clone https://github.com/gabrielgendleryomtov/latex-shiur.git "$(kpsewhich -
 \begin{document}
 \maketitle
 
-\begin{mekor}
-\begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
+\begin{mekor}[\bavli{menachot}{69b}]   % בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
+\begin{mekorlang}{hebrew}
 בעי ר׳ זירא: חיטין שירדו בעבים מהו?
 \end{mekorlang}
-\begin{mekorlang}{english}{B. Mena\hdot ot 69b}
+\begin{mekorlang}{english}
 R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \end{mekorlang}
 \end{mekor}
@@ -69,8 +69,8 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 
 | | |
 |---|---|
-| `mekor`, `mekor*` | One numbered source; a continuation under the same number. One frame each on slides. |
-| `mekorlang[subtitle]{language}{title}` | One language of a source. `hebrew`, `mikra` (Tanakh) and `rashi` are Hebrew, set right to left with Hebrew numerals, each in its own font. |
+| `mekor[heading]`, `mekor*[heading]` | One numbered source; a continuation under the same number. One frame each on slides. The heading, usually a reference such as `\bavli{menachot}{69b}`, is printed over each language of the source in that language. |
+| `mekorlang[subtitle]{language}{title}` | One language of a source; its own title, if given, replaces the mekor's heading. `hebrew`, `mikra` (Tanakh) and `rashi` are Hebrew, set right to left with Hebrew numerals, each in its own font. |
 | `\pasuk`, `\pasuk[23]`, `\pasuk[37:18]`, `\perek{38}` | Verse numbers in Tanakh: (19), (23), (37:18), (38:1), or (יט), (כג), (לז יח), (לח א) in Hebrew. A skipped verse gets "..." first; `\pasuk*`/`\perek*` force it. |
 | `\tanach` (with commentaries: `\tanach[rashi]{gen}{18:7}`; `\declarecommentary` adds more), `\bavli` (also with commentaries: `\bavli[tosafot]{menachot}{69b}`), `\mishnah`, `\yerushalmi`, `\rambam`, `\shulchanaruch`, `\tur` (and `\beityosef`, `\darkeimoshe`, `\bach`, `\shach`, `\taz`, `\magenavraham`, `\mishnahberurah`, `\aruchhashulchan`; `\declaretursefer` adds more), `\sefer` (Midrash and other works: `\sefer{tanchuma}{noach}{1}`; `\declaresefer` adds more, from a template such as `{ #T #N:#N}`), `\sham` | References, from the companion `mareimekomot` package, set in the language around them: `\tanach{gen}{37:18-20}` gives Genesis 37:18–20 / בראשית ל״ז, י״ח–כ׳; `\shulchanaruch{oh}{605:1}` gives Shulḥan Arukh, Oraḥ Ḥayyim 605:1 / שו״ע או״ח סי׳ תר״ה סע׳ א׳; `\sham` gives ad loc / שם. Keys and command names take any usual transliteration: `menachot`, `menakhot` and `menahot` are the same, as are `\tanach` and `\tanakh`. The English printed uses ḥ for ח and kh for כ. |
 | `\dilug` | Marks text left out with "...", in any language; never doubles up with a verse marker's or a slide break's ellipsis. |

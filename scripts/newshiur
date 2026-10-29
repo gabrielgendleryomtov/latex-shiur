@@ -123,27 +123,29 @@ $fontline
 A note for the maggid shiur: printed only in the presenter notes.
 \\end{hearah}
 
+% The mekor's heading is printed over each language, in that language; a
+% mekorlang can give its own instead: \\begin{mekorlang}{english}{Genesis, the start}.
 % \\mekorbreak splits a long source over two slides; the handouts ignore it.
-\\begin{mekor}
+\\begin{mekor}[\\tanach{genesis}{1:1-2}]
 \\begin{hearah}
 A note can also go inside a source, before or after its text. Slides leave notes out.
 \\end{hearah}
-\\begin{mekorlang}{mikra}{\\tanach{genesis}{1:1-2}}
+\\begin{mekorlang}{mikra}
 \\pasuk[1:1] בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ׃ \\mekorbreak*
 \\pasuk וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ וְחֹשֶׁךְ עַל־פְּנֵי תְהוֹם וְרוּחַ אֱלֹהִים מְרַחֶפֶת עַל־פְּנֵי הַמָּיִם׃
 \\end{mekorlang}
-\\begin{mekorlang}{english}{\\tanach{genesis}{1:1-2}}
+\\begin{mekorlang}{english}
 \\pasuk[1:1] In the beginning God created the heaven and the earth. \\mekorbreak*
 \\pasuk Now the earth was unformed and void, and darkness was upon the face of the deep; and the
 spirit of God hovered over the face of the waters.
 \\end{mekorlang}
 \\end{mekor}
 
-\\begin{mekor}
-\\begin{mekorlang}{hebrew}{\\bavli{menachot}{69b}}
+\\begin{mekor}[\\bavli{menachot}{69b}]
+\\begin{mekorlang}{hebrew}
 בעי ר׳ זירא: חיטין שירדו בעבים מהו?
 \\end{mekorlang}
-\\begin{mekorlang}{english}{\\bavli{menachot}{69b}}
+\\begin{mekorlang}{english}
 R. Zeira asked: if wheat came down in the clouds, what is the law?
 \\end{mekorlang}
 \\end{mekor}

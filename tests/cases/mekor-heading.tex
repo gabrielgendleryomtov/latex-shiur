@@ -1,0 +1,37 @@
+% A mekor's heading is given to each mekorlang without its own, in that
+% mekorlang's language; a mekorlang's own heading wins.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}[\bavli{menachot}{69b}]
+\begin{mekorlang}{hebrew}
+טקסט ראשון
+\end{mekorlang}
+\begin{mekorlang}[a subtitle]{english}
+First text
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}[\tanach{gen}{1:1}]
+\begin{mekorlang}{english}{Own heading}
+Second text
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}
+{Braced} third text
+\end{mekorlang}
+\end{mekor}
+\begin{mekor*}[\mishnah{sukkah}{4:1}]
+\begin{mekorlang}{english}
+Fourth text
+\end{mekorlang}
+\end{mekor*}
+\end{document}
+
+%! expect: בבלי מנחות ס״ט ע״ב
+%! expect: 1. B. Menaḥot 69b a subtitle First text
+%! expect: 2. Own heading Second text
+%! absent: Genesis
+%! expect: 3. Braced third text
+%! expect: M. Sukkah 4:1 Fourth text
