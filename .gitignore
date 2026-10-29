@@ -12,3 +12,4 @@
 .DS_Store
 tests/docs.local
 !doc/shiur-doc.pdf
+!doc/trop-fonts.pdf

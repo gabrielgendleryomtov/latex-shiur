@@ -1,0 +1,17 @@
+% Figure for the manual: the same verses with trop in a general font and in one
+% made for trop. Needs Taamey Frank CLM installed; compile with XeLaTeX and
+% commit the PDF, so the manual builds without the font.
+\documentclass[border=6pt]{standalone}
+\usepackage{fontspec}
+\TeXXeTstate=1
+\newfontfamily{\general}{FreeSerif}[Script=Hebrew]
+\newfontfamily{\trop}{Taamey Frank CLM}[Script=Hebrew]
+\newcommand{\pasuk}{בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹהִ֑ים אֵ֥ת הַשָּׁמַ֖יִם וְאֵ֥ת הָאָֽרֶץ׃ וְהָאָ֗רֶץ הָיְתָ֥ה תֹ֙הוּ֙ וָבֹ֔הוּ}
+% #1 font, #2 label
+\newcommand{\sample}[2]{{\fontsize{22}{34}\selectfont#1\beginR\pasuk\endR} & \small #2}
+\begin{document}
+\begin{tabular}{@{}r@{\hspace{1.5em}}l@{}}
+\sample{\general}{FreeSerif} \\[6pt]
+\sample{\trop}{Taamey Frank CLM} \\
+\end{tabular}
+\end{document}

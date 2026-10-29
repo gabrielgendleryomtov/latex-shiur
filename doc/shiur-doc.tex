@@ -3,7 +3,8 @@
 \usepackage[maggidshiur]{shiur}
 \usepackage{fancyvrb}
 \usepackage{booktabs}
-\newfontfamily{\hebrewfont}{FreeSerif}
+\setshiurfont{hebrew}{FreeSerif}
+\hypersetup{hidelinks}
 % code listings use a monospaced font that has Hebrew
 \newfontfamily{\codefont}{FreeMono}
 \fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
@@ -42,7 +43,7 @@ English as the main language and Hebrew as the other), \texttt{geometry},
 \begin{Verbatim}
 \documentclass[11pt]{article}
 \usepackage{shiur}
-\newfontfamily{\hebrewfont}{FreeSerif}
+\setshiurfont{hebrew}{FreeSerif}
 
 \title{Wheat from the clouds}
 \author{A. Teacher}
@@ -63,9 +64,10 @@ R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \end{document}
 \end{Verbatim}
 
-\cs{newfontfamily}\verb|{\hebrewfont}| chooses the Hebrew font for handouts; in beamer,
-which uses sans serif, set \verb|\hebrewfontsf| instead. \cs{makeTitle} prints the title
-and starts the page style, with \foreignlanguage{hebrew}{בס״ד} at the top right of each page.
+\cs{setshiurfont}\verb|{hebrew}{...}| chooses the Hebrew font, for handouts and slides
+alike. Without it, the package picks an installed font itself (see ``\nameref{sec:fonts}'').
+\cs{makeTitle} prints the title and starts the page style, with
+\foreignlanguage{hebrew}{בס״ד} at the top right of each page.
 
 The source above comes out like this:
 
@@ -94,8 +96,10 @@ source that continues the previous one, and takes no new number. On slides, each
 \end{mekorlang}
 \end{Verbatim}
 
-Each language of a source is a \env{mekorlang}: \texttt{hebrew} is set right to left with
-Hebrew numerals, and any other language left to right with arabic numerals. The number of
+Each language of a source is a \env{mekorlang}. Hebrew is set right to left with Hebrew
+numerals, and any other language left to right with arabic numerals. Hebrew has three
+names, which differ only in font (see ``\nameref{sec:fonts}''): \texttt{hebrew} for most
+text, \texttt{mikra} for Tanakh, and \texttt{rashi} for text in Rashi script. The number of
 the source goes in the margin of a handout. The optional subtitle, in italics under the
 title, usually names the author or the translation:
 
@@ -131,7 +135,8 @@ Why does R. Zeira ask about wheat rather than any other food?
 הערה בעברית.
 \end{note}
 
-The optional argument is the language of the note, English by default. There are four note
+The optional argument is the language of the note, English by default; \texttt{hebrew},
+\texttt{mikra} and \texttt{rashi} all give a Hebrew note. There are four note
 environments, which all look the same:
 \begin{description}
 \item[\env{note}] a note anywhere;
@@ -201,7 +206,7 @@ before \texttt{shiur}, so the body can use beamer's commands in both:
 \documentclass[11pt]{article}
 \usepackage{beamerarticle}
 \usepackage[talmid]{shiur}
-\newfontfamily{\hebrewfont}{FreeSerif}
+\setshiurfont{hebrew}{FreeSerif}
 \title{Wheat from the clouds}
 \author{A. Teacher}
 \date{}
@@ -212,7 +217,7 @@ before \texttt{shiur}, so the body can use beamer's commands in both:
 % shiur_slides.tex: the presentation
 \documentclass{beamer}
 \usepackage{shiur}
-\newfontfamily{\hebrewfontsf}{FreeSerif}
+\setshiurfont{hebrew}{FreeSerif}
 \title{Wheat from the clouds}
 \author{A. Teacher}
 \date{}
@@ -252,6 +257,70 @@ For great is His steadfast love toward us...
 
 \cs{mekorbreak*} splits without the ellipses, where nothing is cut, for example where a
 question ends and its answer begins.
+
+\section{Fonts}
+\label{sec:fonts}
+
+Hebrew text has three roles, each with its own font:
+\begin{description}
+\item[\texttt{hebrew}] rabbinic and other text, and every role's fallback;
+\item[\texttt{mikra}] Tanakh. Its \emph{trop} (cantillation marks) sits beside and among the
+	vowels, and only some fonts position it well;
+\item[\texttt{rashi}] text in Rashi script, such as a commentary printed in it.
+\end{description}
+Choose a role's font in the preamble, with any of \texttt{fontspec}'s options before or
+after the name:
+\begin{Verbatim}
+\setshiurfont{hebrew}{Frank Ruehl CLM}
+\setshiurfont{mikra}{Taamey Frank CLM}
+\setshiurfont{rashi}{Noto Rashi Hebrew}
+\setshiurfont{mikra}{TaameyFrankCLM}[Path=fonts/, Extension=.ttf,
+  UprightFont=*-Medium, BoldFont=*-Bold]
+\end{Verbatim}
+A role you don't set gets the first of these fonts that is installed, and the log says which:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Role & Fonts tried, in order \\
+\midrule
+\texttt{hebrew} & Taamey Frank CLM, Ezra SIL, Keter YG, Noto Serif Hebrew, FreeSerif \\
+\texttt{mikra} & Taamey Frank CLM, Taamey David CLM, Ezra SIL, SBL Hebrew, Keter YG \\
+\texttt{rashi} & Noto Rashi Hebrew \\
+\bottomrule
+\end{tabular}
+\end{center}
+If none of a role's fonts is installed, \texttt{mikra} and \texttt{rashi} use the
+\texttt{hebrew} font, and \texttt{hebrew} ends with FreeSerif, which comes with \TeX\ Live.
+Documents that set \verb|\hebrewfont| (or \verb|\hebrewfontsf| in beamer) with
+\cs{newfontfamily} keep that font as the \texttt{hebrew} one.
+
+\subsection{Fonts for trop}
+
+A general Hebrew font may have every trop mark and still place them badly, crowding a mark
+against a vowel or setting it off its letter. Figure~\ref{fig:trop} shows the same verses in
+FreeSerif and in Taamey Frank CLM, a font made for trop.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{trop-fonts}
+\caption{Genesis 1:1--2 in a general font and in a font made for trop.}
+\label{fig:trop}
+\end{figure}
+
+So that nobody's source sheet is let down by its fonts without their knowing, the package
+warns when a \texttt{mikra} source with trop is set in a font that isn't known to handle it,
+unless you chose that font yourself with \cs{setshiurfont}. The warning appears once per
+document, among \LaTeX's warnings, and says what to install. These fonts handle trop well,
+and are free:
+\begin{description}
+\item[Ezra SIL] from SIL International (\url{https://software.sil.org/ezra/}); on Debian and
+	Ubuntu, \texttt{sudo apt install fonts-sil-ezra}.
+\item[Taamey Frank CLM] and Taamey David CLM, from the Culmus project
+	(\url{https://culmus.sourceforge.io}).
+\item[Keter YG] also from Culmus; on Debian and Ubuntu, \texttt{sudo apt install fonts-culmus}.
+\item[SBL Hebrew] from the Society of Biblical Literature, free for non-commercial use.
+\end{description}
+For Rashi script, Noto Rashi Hebrew is part of Google's free Noto fonts.
 
 \section{Other commands}
 
