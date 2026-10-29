@@ -10,7 +10,7 @@
 %
 % This work has the LPPL maintenance status `maintained'. The Current
 % Maintainer of this work is Gabriel Gendler Yom-Tov. This work consists of
-% the files shiur.sty and shiurbeamer.sty.
+% the files shiur.sty and mareimekomot.sty.
 \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \ProvidesPackage{shiur}[2026/10/28 v2.0 source sheets for articles and beamer]
 
@@ -49,10 +49,9 @@
 % bidi patches beamer's navigation code, which needs pgf, and beamerarticle
 % doesn't load it. It also replaces itemize and description with beamer's,
 % whose helpers aren't defined in article mode, and at the start of the
-% document sets beamer's slide page style, whose header fails in an article
-% (\makeTitle hides this by choosing its own page style); so keep the
-% article's (they are restored once hebrew has loaded bidi, and once the
-% document has begun).
+% document sets beamer's slide page style, whose header fails in an article;
+% so keep the article's (they are restored once hebrew has loaded bidi, and
+% once the document has begun).
 \ifshiur@beamerarticle
 	\RequirePackage{pgf}
 	\let\shiur@itemize\itemize
@@ -68,9 +67,8 @@
 %                         *****************
 
 % Margins are relative to the paper size, so the class's paper options all work.
-\ifbool{shiur@beamer}{
-	\newcommand{\makeTitle}{\maketitle}
-}{
+% Every page of an article has בס״ד in its header, the title page too.
+\ifbool{shiur@beamer}{}{
 	\RequirePackage[hmargin=1in, top=1in, bottom=1.2in, headheight=15pt,
 		headsep=15pt, footskip=29pt, marginparwidth=.5in, marginparsep=5pt]{geometry}
 
@@ -93,7 +91,9 @@
 	\fancyhf{}
 	\fancyhead[R]{\begin{hebrew}בס״ד\end{hebrew}}
 	\fancyfoot[L]{\thepage}
-	\newcommand{\makeTitle}{\maketitle\thispagestyle{fancy}\pagestyle{fancy}}
+	\pagestyle{fancy}
+	% \maketitle gives the title page the plain style
+	\fancypagestyle{plain}{}
 }
 
 \setcounter{secnumdepth}{0}
@@ -111,7 +111,7 @@
 	\let\@@description\shiur@description
 	\AddToHook{begindocument/end}{%
 		\let\ps@empty\shiur@ps@empty
-		\pagestyle{plain}%
+		\pagestyle{fancy}%
 	}%
 \fi
 
@@ -299,10 +299,13 @@
 % whether the current mekor has a hebrew mekorlang, which makes an english one
 % after it a translation
 \newif\ifshiur@hashebrew
+% whether the current mekor has had a mekorlang yet, which puts a hearah after
+% it on the last slide of a split source, rather than the first
+\newif\ifshiur@seenlang
 \ifbool{shiur@beamer}{
 	% #1 body
 	\newcommand{\shiur@frame}[1]{%
-		\frame{\setcounter{shiur@parts}{1}\global\shiur@hashebrewfalse\shiur@inmekortrue
+		\frame{\setcounter{shiur@parts}{1}\global\shiur@hashebrewfalse\global\shiur@seenlangfalse\shiur@inmekortrue
 			\mareimekomot@startunit#1\mareimekomot@endunit}%
 	}
 	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\shiur@frame{#1}\vspace{0.5em}}{}
@@ -401,7 +404,8 @@
 		\expandafter\alt\expandafter<\the\value{shiur@part}>%
 			{\shiur@before#1#2}{\setbox\z@\vbox{\shiur@before#1#2}}%
 	}
-	% Notes around a source go on its first and last slides.
+	% A hearah inside a source goes on its first slide if it comes before the
+	% source's text, and on its last if after.
 	\newcommand{\shiur@firstslide}[1]{\ifshiur@inmekor\only<1>{#1}\else#1\fi}
 	\newcommand{\shiur@lastslide}[1]{%
 		\ifshiur@inmekor\expandafter\only\expandafter<\the\value{shiur@parts}>{#1}\else#1\fi
@@ -434,7 +438,7 @@
 		{\ifboolexpr{not bool{shiur@translations} and bool{shiur@hashebrew}}
 			{}
 			{\shiur@mekorlang{\themekor}{#1}{#3}{#4}\par}}%
-}{}
+}{\global\shiur@seenlangtrue}
 
 % \pasuk starts a verse with its number: \pasuk for the next verse, \pasuk[20]
 % for verse 20 and \pasuk[18:5] for chapter 18 verse 5; \perek{18} is 18:1.
@@ -579,11 +583,12 @@
 %                         ** NOTES **
 %                         ***********
 
-% Notes for the maggid shiur, which are left out of the talmid version. Every
-% kind of note looks the same: upright text beside a grey bar on the side where
-% its lines start (bidi puts it on the right for Hebrew). Where a note sits
-% already says whether it introduces a source or follows one; in beamer, a
-% prenote goes on the first slide of a split source and a postnote on the last.
+% Notes (הערות) for the maggid shiur, which are left out of the talmid version:
+% upright text beside a grey bar on the side where its lines start (bidi puts
+% it on the right for Hebrew). Where a hearah sits says what it does: one
+% inside a mekor before its text introduces the source, and one after follows
+% it, so on slides of a split source they go on the first and last slides. (One
+% between two mekorlangs goes on the last slide of those before it.)
 \RequirePackage{xcolor}
 \RequirePackage{framed}
 \newenvironment{shiur@notebar}
@@ -599,15 +604,16 @@
 	}{}%
 }
 
-% beamer and beamerarticle already have a \note command, so they use gnote instead
-\ifboolexpr{bool{shiur@beamer} or bool{shiur@beamerarticle}}{}{
-	\NewDocumentEnvironment{note}{O{english} +b}{\shiur@note{#1}{#2}}{}
-}
-\NewDocumentEnvironment{gnote}{O{english} +b}{\shiur@note{#1}{#2}}{}
-\NewDocumentEnvironment{prenote}{O{english} +b}{\shiur@firstslide{\shiur@note{#1}{#2}}}{}
-\NewDocumentEnvironment{postnote}{O{english} +b}{\shiur@lastslide{\shiur@note{#1}{#2}}}{}
+% \begin{hearah}[language]
+\NewDocumentEnvironment{hearah}{O{english} +b}{%
+	\ifshiur@seenlang
+		\shiur@lastslide{\shiur@note{#1}{#2}}%
+	\else
+		\shiur@firstslide{\shiur@note{#1}{#2}}%
+	\fi
+}{}
 
-% Text in a box. It was called boxed, which clashes with amsmath's \boxed.
+% Text in a box.
 \newenvironment{boxedtext}{\begin{framed}}{\end{framed}}
 
 %                         ************

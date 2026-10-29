@@ -1,0 +1,23 @@
+% On the slides of a split source, a hearah before the source's text goes on
+% the first slide, and one after it on the last; one outside a source is plain.
+\documentclass{beamer}
+\usepackage[maggidshiur]{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+\begin{mekor}
+\begin{hearah}Before the source.\end{hearah}
+\begin{mekorlang}{english}{\tanakh{gen}{1:1-3}}
+Part one, \mekorbreak part two, \mekorbreak part three.
+\end{mekorlang}
+\begin{hearah}After the source.\end{hearah}
+\end{mekor}
+\end{document}
+
+%! pages: 3
+%! page 1: Before the source.
+%! page 1: Part one
+%! page 3: part three. After the source.
+%! not page 1: After the source.
+%! not page 2: Before the source.
+%! not page 2: After the source.
+%! not page 3: Before the source.

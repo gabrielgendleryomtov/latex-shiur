@@ -7,6 +7,7 @@ A test case states what its PDF must show in comment lines starting %!:
     %! absent: TEXT    the text doesn't appear
     %! pages: N        the PDF has N pages
     %! page N: TEXT    the text appears on page N
+    %! not page N: TEXT  the text doesn't appear on page N
     %! error: TEXT     the document fails, with TEXT in its log
 Text is compared with all whitespace and direction marks removed, since
 pdftotext moves spaces around punctuation next to Hebrew. It also moves full
@@ -19,7 +20,7 @@ import subprocess
 import sys
 
 ident, source, pdf, log = sys.argv[1:5]
-DIRECTIVE = re.compile(r"^\s*%!\s*(expect|absent|pages|page (\d+)|error):\s*(.*?)\s*$")
+DIRECTIVE = re.compile(r"^\s*%!\s*(expect|absent|pages|(?:not )?page (\d+)|error):\s*(.*?)\s*$")
 INVISIBLE = re.compile(r"[\s‎‏‪-‮⁦-⁩]")
 
 
@@ -48,7 +49,8 @@ with open(source, encoding="utf-8") as f:
     for line in f:
         m = DIRECTIVE.match(line)
         if m:
-            directives.append((m.group(1).split()[0], m.group(2), m.group(3)))
+            kind = "notpage" if m.group(1).startswith("not ") else m.group(1).split()[0]
+            directives.append((kind, m.group(2), m.group(3)))
 
 try:
     with open(log, encoding="utf-8", errors="replace") as f:
@@ -80,6 +82,8 @@ else:
             problems.append(f"has {arg!r}")
         elif kind == "page" and not contains(pdftext("-f", page, "-l", page), arg):
             problems.append(f"page {page} lacks {arg!r}")
+        elif kind == "notpage" and contains(pdftext("-f", page, "-l", page), arg):
+            problems.append(f"page {page} has {arg!r}")
         elif kind == "pages":
             if pages is None:
                 info = subprocess.run(["pdfinfo", pdf], capture_output=True, text=True).stdout
