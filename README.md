@@ -44,7 +44,7 @@ git clone https://github.com/gabrielgendleryomtov/latex-shiur.git "$(kpsewhich -
 \date{}
 
 \begin{document}
-\makeTitle
+\maketitle
 
 \begin{mekor}
 \begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
@@ -56,9 +56,9 @@ R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 \end{mekor}
 
 % printed only with \usepackage[maggidshiur]{shiur}
-\begin{note}
+\begin{hearah}
 Why does R. Zeira ask about wheat rather than any other food?
-\end{note}
+\end{hearah}
 
 \end{document}
 ```
@@ -69,16 +69,15 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 
 | | |
 |---|---|
-| `mekor`, `mekor*` | One numbered source; a continuation that takes no new number. One frame each on slides. |
+| `mekor`, `mekor*` | One numbered source; a continuation under the same number. One frame each on slides. |
 | `mekorlang[subtitle]{language}{title}` | One language of a source. `hebrew`, `mikra` (Tanakh) and `rashi` are Hebrew, set right to left with Hebrew numerals, each in its own font. |
 | `\pasuk`, `\pasuk[23]`, `\pasuk[37:18]`, `\perek{38}` | Verse numbers in Tanakh: (19), (23), (37:18), (38:1), or (יט), (כג), (לז יח), (לח א) in Hebrew. A skipped verse gets "..." first; `\pasuk*`/`\perek*` force it. |
-| `\tanakh` (with commentaries: `\tanakh[rashi]{gen}{18:7}`; `\declarecommentary` adds more), `\bavli`, `\mishnah`, `\yerushalmi`, `\rambam`, `\shulchanaruch`, `\tur` (and `\beityosef`, `\darkeimoshe`, `\bach`, `\shakh`, `\taz`, `\magenavraham`, `\mishnahberurah`, `\arukhhashulchan`; `\declaretursefer` adds more), `\sham` | References, from the companion `mareimekomot` package, set in the language around them: `\tanakh{gen}{37:18-20}` gives Genesis 37:18–20 / בראשית ל״ז, י״ח–כ׳; `\shulchanaruch{oh}{605:1}` gives Shulḥan Arukh, Oraḥ Ḥayyim 605:1 / שו״ע או״ח סי׳ תר״ה סע׳ א׳; `\sham` gives ad loc / שם. |
+| `\tanakh` (with commentaries: `\tanakh[rashi]{gen}{18:7}`; `\declarecommentary` adds more), `\bavli`, `\mishnah`, `\yerushalmi`, `\rambam`, `\shulkhanarukh`, `\tur` (and `\beityosef`, `\darkeimoshe`, `\bakh`, `\shakh`, `\taz`, `\magenavraham`, `\mishnahberurah`, `\arukhhashulkhan`; `\declaretursefer` adds more), `\sham` | References, from the companion `mareimekomot` package, set in the language around them: `\tanakh{gen}{37:18-20}` gives Genesis 37:18–20 / בראשית ל״ז, י״ח–כ׳; `\shulkhanarukh{oh}{605:1}` gives Shulḥan Arukh, Oraḥ Ḥayyim 605:1 / שו״ע או״ח סי׳ תר״ה סע׳ א׳; `\sham` gives ad loc / שם. Keys are written with kh for ח and כ (`menakhot`), but any usual transliteration works (`menachot`, `menahot`). |
 | `\dilug` | Marks text left out with "...", in any language; never doubles up with a verse marker's or a slide break's ellipsis. |
 | `\setshiurfont{role}[options]{font}` | Choose the font for `hebrew`, `mikra` or `rashi`, with `fontspec` options. Unset roles get an installed font from a built-in list. |
-| `note`, `gnote`, `prenote`, `postnote` | Teacher's notes, printed only with `maggidshiur`. Optional argument: the note's language. Use `gnote` with beamer or `beamerarticle`. |
+| `hearah` | A note for the maggid shiur (הערה), printed only with `maggidshiur`. Optional argument: its language. Inside a split source, one before the text goes on the first slide and one after it on the last. |
 | `\mekorbreak`, `\mekorbreak*` | Split a source over several slides, with or without an ellipsis at the cut. Handouts ignore it. |
 | `\iftranslations{bilingual}{Hebrew-only}` | Text for just one of the two versions. |
-| `\makeTitle` | Title, plus the page style with בס״ד in the header. |
 | `\attribution{who}{where}{when}` | "who, where, when", leaving out empty parts. |
 | `\hdot`, `\Hdot`, `\sectionsymbol`, `boxedtext` | ḥ, Ḥ, §, and text in a box. |
 
@@ -121,8 +120,6 @@ To make slides from the same body, the handout wrapper loads `beamerarticle` bef
 and the slide wrapper uses `\documentclass{beamer}`. The body can then use
 `\mode<presentation>{...}` and `\mode<article>{...}` for material that belongs to only one
 of them. The manual has a complete example.
-
-`shiurbeamer.sty` is kept so that older documents still compile; it just loads `shiur`.
 
 ## Wishlist
 

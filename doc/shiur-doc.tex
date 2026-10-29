@@ -19,7 +19,7 @@
 
 \begin{document}
 
-\makeTitle
+\maketitle
 
 \section{Introduction}
 
@@ -52,7 +52,7 @@ English as the main language and Hebrew as the other), \texttt{geometry},
 \date{}
 
 \begin{document}
-\makeTitle
+\maketitle
 
 \begin{mekor}
 \begin{mekorlang}{hebrew}{בבלי מנחות ס״ט ע״ב}
@@ -68,8 +68,8 @@ R. Zeira asked: ``if wheat descended in clouds, what is the law?''
 
 \cs{setshiurfont}\verb|{hebrew}{...}| chooses the Hebrew font, for handouts and slides
 alike. Without it, the package picks an installed font itself (see ``\nameref{sec:fonts}'').
-\cs{makeTitle} prints the title and starts the page style, with
-\texthebrew{בס״ד} at the top right of each page.
+Every page has \texthebrew{בס״ד} at the top right, the title page included; \cs{maketitle}
+prints the title as usual.
 
 The source above comes out like this:
 
@@ -188,12 +188,12 @@ Command & English & Hebrew \\
 \verb|\tanakh{exodus}{14}| & \tanakh{exodus}{14} & \texthebrew{\tanakh{exodus}{14}} \\
 \verb|\tanakh*{gen}{39:1}| & \tanakh*{gen}{39:1} & \texthebrew{\tanakh*{gen}{39:1}} \\
 \verb|\tanakh[rashi]{gen}{18:7}| & \tanakh[rashi]{gen}{18:7} & \texthebrew{\tanakh[rashi]{gen}{18:7}} \\
-\verb|\bavli{menachot}{69b}| & \bavli{menachot}{69b} & \texthebrew{\bavli{menachot}{69b}} \\
+\verb|\bavli{menakhot}{69b}| & \bavli{menakhot}{69b} & \texthebrew{\bavli{menakhot}{69b}} \\
 \verb|\bavli{yoma}{9a-b}| & \bavli{yoma}{9a-b} & \texthebrew{\bavli{yoma}{9a-b}} \\
 \verb|\bavli*{127b}| & \bavli*{127b} & \texthebrew{\bavli*{127b}} \\
 \verb|\mishnah{sukkah}{4:1}| & \mishnah{sukkah}{4:1} & \texthebrew{\mishnah{sukkah}{4:1}} \\
-\verb|\yerushalmi{brachot}{1:1}| & \yerushalmi{brachot}{1:1} & \texthebrew{\yerushalmi{brachot}{1:1}} \\
-\verb|\shulchanaruch{oh}{605:1}| & \shulchanaruch{oh}{605:1} & \texthebrew{\shulchanaruch{oh}{605:1}} \\
+\verb|\yerushalmi{berakhot}{1:1}| & \yerushalmi{berakhot}{1:1} & \texthebrew{\yerushalmi{berakhot}{1:1}} \\
+\verb|\shulkhanarukh{oh}{605:1}| & \shulkhanarukh{oh}{605:1} & \texthebrew{\shulkhanarukh{oh}{605:1}} \\
 \verb|\tur{yd}{114}| & \tur{yd}{114} & \texthebrew{\tur{yd}{114}} \\
 \verb|Rashi \sham| & Rashi \sham & \texthebrew{רש״י \sham} \\
 \bottomrule
@@ -205,11 +205,15 @@ out the book's name, for an addition such as ``(+\tanakh*{gen}{39:1})'', and \ve
 daf alone. A daf is \texttt{69b},
 \texttt{69}, \texttt{69b-70a} or \texttt{9a-b}. Books and tractates are named in English, ignoring
 case, spaces and hyphens, with common short forms: \texttt{gen}, \texttt{kings ii},
-\texttt{avoda zara}, \texttt{menachot}; the full lists are in \texttt{mareimekomot.sty}.
+\texttt{avoda zara}, \texttt{menakhot}; the full lists are in \texttt{mareimekomot.sty}. Keys are
+listed with \textit{kh} for both \texthebrew{ח} and \texthebrew{כ}, but any usual
+transliteration works: \textit{kh}, \textit{ch} and \textit{h} count alike, as do
+\textit{tz}, \textit{ts} and \textit{z}, and \textit{y} and \textit{i}, and doubled letters
+and a final \textit{h} don't matter, so \texttt{menakhot} and \texttt{menahot} work too.
 
 A commentary on a verse is named in the optional argument: \texttt{rashi}, \texttt{ramban},
-\texttt{ibnezra}, \texttt{rashbam}, \texttt{radak}, \texttt{sforno}, \texttt{chizkuni},
-\texttt{orhachaim}, \texttt{baalhaturim}, \texttt{kliyakar}, \texttt{malbim}, \texttt{onkelos}
+\texttt{ibnezra}, \texttt{rashbam}, \texttt{radak}, \texttt{seforno}, \texttt{khizkuni},
+\texttt{orhakhayyim}, \texttt{baalhaturim}, \texttt{keliyakar}, \texttt{malbim}, \texttt{onkelos}
 or \texttt{yonatan}. \verb|\sham| after one stands for the verse, so ``Ibn Ezra \verb|\sham|''
 can follow it. \cs{declarecommentary} adds more, in the preamble:
 \begin{Verbatim}[commandchars=+\(\)]
@@ -230,8 +234,8 @@ se'ifim (\texttt{658:1-2}), in one of the four sections \texttt{oh}, \texttt{yd}
 \texttt{mareimekomot.sty}.
 
 Works arranged by the Tur's four sections work the same way. Besides \cs{tur} and
-\cs{shulchanaruch}, the package has \cs{beityosef}, \cs{darkeimoshe}, \cs{bach},
-\cs{arukhhashulchan}, and the commentaries \cs{shakh}, \cs{taz}, \cs{magenavraham} and
+\cs{shulkhanarukh}, the package has \cs{beityosef}, \cs{darkeimoshe}, \cs{bakh} (or \cs{bach}, or \cs{bah}),
+\cs{arukhhashulkhan}, and the commentaries \cs{shakh}, \cs{taz}, \cs{magenavraham} and
 \cs{mishnahberurah}, whose sub-unit is the se'if katan:
 \begin{center}
 \begin{tabular}{@{}lll@{}}
@@ -244,7 +248,7 @@ Command & English & Hebrew \\
 \bottomrule
 \end{tabular}
 \end{center}
-The Magen Avraham and the Mishnah Brurah cover Ora\hdot\ \Hdot ayyim only, so they take just the
+The Magen Avraham and the Mishnah Berurah cover Ora\hdot\ \Hdot ayyim only, so they take just the
 reference, and don't name the section. \cs{declaretursefer} declares more such works, in the
 preamble:
 \begin{Verbatim}[commandchars=+\(\)]
@@ -262,7 +266,7 @@ lines at its dash.
 
 \cs{sham} gives \texthebrew{שם} or ``ad loc''. On slides, where a source can be
 several slides from the one it refers to, it also gives that reference: ``Rashi ad loc
-(\bavli{menachot}{69b})''. A source whose heading has no reference of the package's (a Tur or a
+(\bavli{menakhot}{69b})''. A source whose heading has no reference of the package's (a Tur or a
 midrash, say) clears it, so \cs{sham} after it stays plain rather than pointing at the wrong
 source. A reference never hyphenates; it breaks only between the words of a long name, as in the
 Mishneh Torah's, and at the dash of a range. Two settings change the style, in any document:
@@ -278,36 +282,29 @@ They are printed only in the \texttt{maggidshiur} version, beside a grey bar on 
 where their lines start.
 
 \begin{Verbatim}
-\begin{note}
+\begin{hearah}
 Why does R. Zeira ask about wheat rather than any other food?
-\end{note}
+\end{hearah}
 
-\begin{note}[hebrew]
+\begin{hearah}[hebrew]
 הערה בעברית.
-\end{note}
+\end{hearah}
 \end{Verbatim}
 
-\begin{note}
+\begin{hearah}
 Why does R. Zeira ask about wheat rather than any other food?
-\end{note}
+\end{hearah}
 
-\begin{note}[hebrew]
+\begin{hearah}[hebrew]
 הערה בעברית.
-\end{note}
+\end{hearah}
 
 The optional argument is the language of the note, English by default; \texttt{hebrew},
-\texttt{mikra} and \texttt{rashi} all give a Hebrew note. There are four note
-environments, which all look the same:
-\begin{description}
-\item[\env{note}] a note anywhere;
-\item[\env{gnote}] the same, for documents that load beamer or \texttt{beamerarticle},
-	which define their own \cs{note};
-\item[\env{prenote}] a note introducing a source;
-\item[\env{postnote}] a note following a source.
-\end{description}
-The difference between the last two matters only on slides: when a source is split over
-several slides (see ``\nameref{sec:slides}''), its \env{prenote} goes on the first slide and its
-\env{postnote} on the last.
+\texttt{mikra} and \texttt{rashi} all give a Hebrew note. A \env{hearah} can go anywhere:
+between sources, or inside a \env{mekor}, before its text to introduce it or after its text
+to follow it. That position matters on slides: when a source is split over several slides
+(see ``\nameref{sec:slides}''), a \env{hearah} before its text goes on the first slide and one
+after it on the last.
 
 \section{Options}
 
@@ -333,7 +330,7 @@ When one version needs text that another doesn't, \cs{iftranslations}\verb|{A}{B
 \textit{A} in the bilingual version and \textit{B} in the Hebrew-only one:
 
 \begin{Verbatim}
-\iftranslations{\begin{note}A note about the translation.\end{note}}{}
+\iftranslations{\begin{hearah}A note about the translation.\end{hearah}}{}
 \end{Verbatim}
 
 \section{One body, several versions}
@@ -386,10 +383,9 @@ before \texttt{shiur}, so the body can use beamer's commands in both:
 
 In the body:
 \begin{itemize}
-\item use \env{gnote} rather than \env{note}, since beamer has its own \cs{note};
 \item \verb|\mode<presentation>{...}| holds material for the slides only, such as a frame of
 	photographs, and \verb|\mode<article>{...}| material for the handout only;
-\item \cs{makeTitle} makes a title page on the handout and a title frame on the slides.
+\item \cs{maketitle} makes a title on the handout and a title frame on the slides.
 \end{itemize}
 
 \subsection{Splitting a long source over several slides}
@@ -493,10 +489,6 @@ For Rashi script, Noto Rashi Hebrew is part of Google's free Noto fonts.
 \item[\cs{sectionsymbol}] \sectionsymbol.
 \item[\env{boxedtext}] text in a box, on handouts and slides.
 \end{description}
-
-The package used to come with a separate \texttt{shiurbeamer} package for slides.
-\texttt{shiur} now detects the beamer class itself; \texttt{shiurbeamer} still works, and
-simply loads \texttt{shiur}.
 
 \section{Licence}
 
