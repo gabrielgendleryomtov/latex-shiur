@@ -8,6 +8,7 @@
 \hypersetup{hidelinks}
 % code listings use a monospaced font that has Hebrew
 \newfontfamily{\codefont}{FreeMono}
+\newfontfamily{\hebrewfonttt}{FreeMono}[Script=Hebrew]
 \fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
 \newcommand{\cs}[1]{\texttt{\char`\\#1}}
 \newcommand{\env}[1]{\texttt{#1}}
@@ -186,6 +187,7 @@ Command & English & Hebrew \\
 \verb|\tanakh{gen}{37:18-20}| & \tanakh{gen}{37:18-20} & \texthebrew{\tanakh{gen}{37:18-20}} \\
 \verb|\tanakh{exodus}{14}| & \tanakh{exodus}{14} & \texthebrew{\tanakh{exodus}{14}} \\
 \verb|\tanakh*{gen}{39:1}| & \tanakh*{gen}{39:1} & \texthebrew{\tanakh*{gen}{39:1}} \\
+\verb|\tanakh[rashi]{gen}{18:7}| & \tanakh[rashi]{gen}{18:7} & \texthebrew{\tanakh[rashi]{gen}{18:7}} \\
 \verb|\bavli{menachot}{69b}| & \bavli{menachot}{69b} & \texthebrew{\bavli{menachot}{69b}} \\
 \verb|\bavli{yoma}{9a-b}| & \bavli{yoma}{9a-b} & \texthebrew{\bavli{yoma}{9a-b}} \\
 \verb|\bavli*{127b}| & \bavli*{127b} & \texthebrew{\bavli*{127b}} \\
@@ -204,6 +206,15 @@ daf alone. A daf is \texttt{69b},
 \texttt{69}, \texttt{69b-70a} or \texttt{9a-b}. Books and tractates are named in English, ignoring
 case, spaces and hyphens, with common short forms: \texttt{gen}, \texttt{kings ii},
 \texttt{avoda zara}, \texttt{menachot}; the full lists are in \texttt{mareimekomot.sty}.
+
+A commentary on a verse is named in the optional argument: \texttt{rashi}, \texttt{ramban},
+\texttt{ibnezra}, \texttt{rashbam}, \texttt{radak}, \texttt{sforno}, \texttt{chizkuni},
+\texttt{orhachaim}, \texttt{baalhaturim}, \texttt{kliyakar}, \texttt{malbim}, \texttt{onkelos}
+or \texttt{yonatan}. \verb|\sham| after one stands for the verse, so ``Ibn Ezra \verb|\sham|''
+can follow it. \cs{declarecommentary} adds more, in the preamble:
+\begin{Verbatim}[commandchars=+\(\)]
+\declarecommentary{haamekdavar}{+texthebrew(העמק דבר)}{Ha'amek Davar}
+\end{Verbatim}
 
 \verb|\rambam{shofar}{2:6}| gives
 \begin{center}
@@ -236,13 +247,10 @@ Command & English & Hebrew \\
 The Magen Avraham and the Mishnah Brurah cover Ora\hdot\ \Hdot ayyim only, so they take just the
 reference, and don't name the section. \cs{declaretursefer} declares more such works, in the
 preamble:
-\begin{Verbatim}
-\declaretursefer[seifkatan]{\pitcheiteshuvah}
-  {פתחי תשובה}
-  {Pitchei Teshuvah}
+\begin{Verbatim}[commandchars=+\(\)]
+\declaretursefer[seifkatan]{\pitcheiteshuvah}{+texthebrew(פתחי תשובה)}{Pitchei Teshuvah}
 \declaretursefer[seifkatan, section=oh]{\shaarhatziyun}
-  {שער הציון}
-  {Shaar haTziyun}
+  {+texthebrew(שער הציון)}{Shaar haTziyun}
 \end{Verbatim}
 Its options are \texttt{seifkatan} for a sub-unit of \texthebrew{ס״ק} rather than
 \texthebrew{סע׳}, \texttt{subunit=} for any other (the Darkei Moshe's is \texthebrew{אות}), and
