@@ -357,7 +357,8 @@ Its options:
 \item[\texttt{--here}] puts the files in the current folder rather than a new one.
 \end{description}
 The environment variables \texttt{SHIUR\_AUTHOR} and \texttt{SHIUR\_HEBREW\_FONT} give your
-usual author and font. Write the shiur in the body, and compile the wrappers. The rest of this
+usual author and font. The title, author and font go at the top of the body, so they are
+set once for every version. Write the shiur in the body, and compile the wrappers. The rest of this
 section explains how the files fit together.
 
 Put everything from \verb|\begin{document}| to \verb|\end{document}| in a body file,
@@ -388,10 +389,6 @@ before \texttt{shiur}, so the body can use beamer's commands in both:
 \documentclass[11pt]{article}
 \usepackage{beamerarticle}
 \usepackage[talmid]{shiur}
-\setshiurfont{hebrew}{FreeSerif}
-\title{Wheat from the clouds}
-\author{A. Teacher}
-\date{}
 \input{shiur_body}
 \end{Verbatim}
 
@@ -399,11 +396,23 @@ before \texttt{shiur}, so the body can use beamer's commands in both:
 % shiur_slides.tex: the presentation
 \documentclass{beamer}
 \usepackage{shiur}
-\setshiurfont{hebrew}{FreeSerif}
+\input{shiur_body}
+\end{Verbatim}
+
+What every version shares can go at the top of the body, before \verb|\begin{document}|: it
+is read after each wrapper has loaded the package, so it is still part of the preamble, and
+a change there reaches every version:
+\begin{Verbatim}
+% shiur_body.tex
 \title{Wheat from the clouds}
 \author{A. Teacher}
 \date{}
-\input{shiur_body}
+\setshiurfont{hebrew}{FreeSerif}
+
+\begin{document}
+\maketitle
+...
+\end{document}
 \end{Verbatim}
 
 In the body:

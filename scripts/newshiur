@@ -22,12 +22,14 @@
 #   --large-print    also make the large-print handout
 #   --here           put the files in the current folder, not a new one
 #
-# Compile each wrapper with xelatex; edit only the body.
+# Compile each wrapper with xelatex; edit only the body. The title, author and
+# Hebrew font are at the top of the body, before \begin{document}, so they are
+# set once for every version.
 
 set -eu
 
 usage() {
-	sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+	sed -n '2,28p' "$0" | sed 's/^# \{0,1\}//'
 	exit "${1:-0}"
 }
 
@@ -76,13 +78,7 @@ handout() {
 	cat >"$dir/$2" <<EOF
 \\documentclass[11pt]{article}
 \\usepackage{beamerarticle}
-
-\\title{$title}
-\\author{$author}
-\\date{}
-
 \\usepackage[$1]{shiur}
-$fontline
 
 \\input{${name}_body}
 EOF
@@ -95,13 +91,7 @@ handout maggidshiur "${name}_presenter_notes.tex"
 
 cat >"$dir/${name}_beamer.tex" <<EOF
 \\documentclass[british]{beamer}
-
-\\title{$title}
-\\author{$author}
-\\date{}
-
 \\usepackage{shiur}
-$fontline
 
 \\usetheme{CambridgeUS}
 \\setbeamertemplate{navigation symbols}{}
@@ -115,6 +105,14 @@ versions="$name.tex (talmid), ${name}_presenter_notes.tex (maggidshiur)"
 cat >"$dir/${name}_body.tex" <<EOF
 % The content of the shiur, shared by $versions
 % and ${name}_beamer.tex (slides). Compile those, not this file.
+
+% For every version: this is before \\begin{document}, so it is part of each
+% version's preamble.
+\\title{$title}
+\\author{$author}
+\\date{}
+$fontline
+
 \\begin{document}
 
 \\maketitle

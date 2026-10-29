@@ -125,8 +125,10 @@ of them. The manual has a complete example.
 
 `scripts/newshiur NAME` starts a new shiur this way: a folder with `NAME_body.tex` and wrappers
 for the participants' handout, the presenter's notes and the slides, plus, with
-`--hebrew-only` and `--large-print`, those versions too. `scripts/newshiur --help` lists its
-options. It runs on Linux and macOS, and on Windows in Git Bash or WSL.
+`--hebrew-only` and `--large-print`, those versions too. The title, author and Hebrew font go
+at the top of the body, before `\begin{document}`, so they are set once for every version.
+`scripts/newshiur --help` lists its options. It runs on Linux and macOS, and on Windows in Git
+Bash or WSL.
 
 ```sh
 scripts/newshiur --title "Wheat from the clouds" --author "A. Teacher" wheat
