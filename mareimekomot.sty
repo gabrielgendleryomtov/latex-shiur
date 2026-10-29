@@ -19,6 +19,8 @@
 % come out in English.
 %   \tanakh{gen}{37:18-20}   בראשית ל״ז, י״ח–כ׳ / Genesis 37:18–20
 %   \tanakh*{gen}{39:1}      the same without the book's name
+%   \tanakh[rashi]{gen}{18:7}   רש״י על בראשית י״ח, ז׳ / Rashi on Genesis 18:7;
+%                            \declarecommentary adds commentaries
 %   \bavli{menachot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
 %   \bavli*{69b}             the daf alone: ס״ט ע״ב / 69b
 %   \mishnah{sukkah}{4:1}   משנה סוכה ד׳, א׳ / M. Sukkah 4:1
@@ -65,6 +67,7 @@
 \prop_new:N \g__mm_tractate_prop
 \prop_new:N \g__mm_hilkhot_prop
 \prop_new:N \g__mm_section_prop
+\prop_new:N \g__mm_commentary_prop
 % #1 property list, #2 keys, #3 Hebrew, #4 English
 \cs_new_protected:Npn \__mm_name:Nnnn #1 #2 #3 #4
 	{
@@ -88,6 +91,7 @@
 \cs_new_protected:Npn \__mm_tractate:nnn { \__mm_name:Nnnn \g__mm_tractate_prop }
 \cs_new_protected:Npn \__mm_hilkhot:nnn { \__mm_name:Nnnn \g__mm_hilkhot_prop }
 \cs_new_protected:Npn \__mm_section:nnn { \__mm_name:Nnnn \g__mm_section_prop }
+\cs_new_protected:Npn \__mm_commentary:nnn { \__mm_name:Nnnn \g__mm_commentary_prop }
 
 \__mm_book:nnn { genesis, gen, bereshit, bereishit } { בראשית } { Genesis }
 \__mm_book:nnn { exodus, ex, exod, shemot } { שמות } { Exodus }
@@ -383,14 +387,41 @@
 	{ \__mm_if_hebrew:TF { , \nobreakspace } { \c_colon_str } }
 
 % \tanakh{book}{reference}; the starred form leaves out the book's name
-\NewDocumentCommand \tanakh { s m m }
+% Commentaries on a verse, for \tanakh[rashi]{gen}{18:7}: רש״י על בראשית י״ח, ז׳ /
+% Rashi on Genesis 18:7. \declarecommentary{keys}{Hebrew}{English} adds more.
+\__mm_commentary:nnn { rashi } { רש״י } { Rashi }
+\__mm_commentary:nnn { ramban, nachmanides } { רמב״ן } { Ramban }
+\__mm_commentary:nnn { ibnezra } { אבן\nobreakspace עזרא } { Ibn\nobreakspace Ezra }
+\__mm_commentary:nnn { rashbam } { רשב״ם } { Rashbam }
+\__mm_commentary:nnn { radak } { רד״ק } { Radak }
+\__mm_commentary:nnn { sforno, seforno } { ספורנו } { Sforno }
+\__mm_commentary:nnn { chizkuni, hizkuni } { חזקוני } { \__mm_H: izkuni }
+\__mm_commentary:nnn { orhachaim, orhachayim, orhahayyim } { אור\nobreakspace החיים } { Or\nobreakspace ha\__mm_H: ayyim }
+\__mm_commentary:nnn { baalhaturim } { בעל\nobreakspace הטורים } { Ba'al\nobreakspace haTurim }
+\__mm_commentary:nnn { kliyakar } { כלי\nobreakspace יקר } { Kli\nobreakspace Yakar }
+\__mm_commentary:nnn { malbim } { מלבי״ם } { Malbim }
+\__mm_commentary:nnn { onkelos, targumonkelos } { תרגום\nobreakspace אונקלוס } { Targum\nobreakspace Onkelos }
+\__mm_commentary:nnn { yonatan, targumyonatan, jonathan } { תרגום\nobreakspace יונתן } { Targum\nobreakspace Yonatan }
+\NewDocumentCommand \declarecommentary { m m m }
+	{ \__mm_commentary:nnn {#1} {#2} {#3} }
+
+\NewDocumentCommand \tanakh { s o m m }
 	{
 		\group_begin:
-		\__mm_lookup:Nnn \g__mm_book_prop {#2} { }
+		\IfValueT {#2}
+			{
+				\__mm_lookup:Nnn \g__mm_commentary_prop {#2} { }
+				\__mm_if_hebrew:TF
+					{ \l__mm_he_tl \nobreakspace על }
+					{ \l__mm_en_tl \nobreakspace on }
+				\c_space_tl
+			}
+		\__mm_lookup:Nnn \g__mm_book_prop {#3} { }
 		\IfBooleanF {#1}
 			{ \__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl } \nobreakspace }
-		\__mm_tanakh_ref:n {#3}
-		\__mm_remember:n { \tanakh {#2} {#3} }
+		\__mm_tanakh_ref:n {#4}
+		% the verse itself, so that "Ibn Ezra \sham" after Rashi means the verse
+		\__mm_remember:n { \tanakh {#3} {#4} }
 		\group_end:
 	}
 
