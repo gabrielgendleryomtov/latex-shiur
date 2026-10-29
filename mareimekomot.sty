@@ -20,6 +20,7 @@
 %   \tanakh{gen}{37:18-20}   בראשית ל״ז, י״ח–כ׳ / Genesis 37:18–20
 %   \tanakh*{gen}{39:1}      the same without the book's name
 %   \bavli{menachot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
+%   \bavli*{69b}             the daf alone: ס״ט ע״ב / 69b
 %   \sham                    שם / ad loc
 % Numbers follow the usual Hebrew convention: geresh for one letter (ח׳),
 % gershayim before the last of several (ל״ח). Ranges take an en dash, the
@@ -287,8 +288,11 @@
 			}
 	}
 
-% \bavli{tractate}{daf}
-\NewDocumentCommand \bavli { m m }
+% \bavli{tractate}{daf}; \bavli*{daf} is the daf alone, which doesn't change what
+% \sham stands for
+\NewDocumentCommand \bavli { s }
+	{ \IfBooleanTF {#1} { \__mm_bavli_daf:n } { \__mm_bavli:nn } }
+\cs_new_protected:Npn \__mm_bavli:nn #1 #2
 	{
 		\group_begin:
 		\__mm_lookup:Nnn \g__mm_tractate_prop {#1} { }
@@ -298,6 +302,8 @@
 		\__mm_remember:n { \bavli {#1} {#2} }
 		\group_end:
 	}
+\cs_new_protected:Npn \__mm_bavli_daf:n #1
+	{ \group_begin: \__mm_daf:n {#1} \group_end: }
 
 %                         ************
 %                         ** AD LOC **
