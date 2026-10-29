@@ -24,7 +24,7 @@ The manual, [`doc/shiur-doc.pdf`](doc/shiur-doc.pdf), covers everything below in
 Clone the repository somewhere TeX searches, for example:
 
 ```sh
-git clone <repository-url> "$(kpsewhich -var-value TEXMFHOME)/tex/latex/shiur"
+git clone https://github.com/gabrielgendleryomtov/latex-shiur.git "$(kpsewhich -var-value TEXMFHOME)/tex/latex/shiur"
 ```
 
 ## Quick start
