@@ -338,6 +338,28 @@ When one version needs text that another doesn't, \cs{iftranslations}\verb|{A}{B
 
 \section{One body, several versions}
 
+The quickest start is the \texttt{newshiur} script in the package's \texttt{scripts} folder:
+\begin{Verbatim}
+newshiur --author "A. Teacher" wheat
+\end{Verbatim}
+makes a folder \texttt{wheat} holding
+\begin{itemize}
+\item \texttt{wheat\_body.tex}, the content, with a sample section;
+\item \texttt{wheat.tex}, the participants' handout;
+\item \texttt{wheat\_presenter\_notes.tex}, the handout with the notes;
+\item \texttt{wheat\_beamer.tex}, the slides.
+\end{itemize}
+Its options:
+\begin{description}
+\item[\texttt{--hebrew-only}, \texttt{--large-print}] add those versions of the handout;
+\item[\texttt{--title}, \texttt{--author}, \texttt{--font}] set the title, the author and the
+	Hebrew font (the title is otherwise made from the name);
+\item[\texttt{--here}] puts the files in the current folder rather than a new one.
+\end{description}
+The environment variables \texttt{SHIUR\_AUTHOR} and \texttt{SHIUR\_HEBREW\_FONT} give your
+usual author and font. Write the shiur in the body, and compile the wrappers. The rest of this
+section explains how the files fit together.
+
 Put everything from \verb|\begin{document}| to \verb|\end{document}| in a body file,
 and give each version a small file of its own. If the versions differ only in options, the
 body can hold the whole document, preamble included, and each version passes its options

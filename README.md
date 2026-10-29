@@ -121,6 +121,11 @@ and the slide wrapper uses `\documentclass{beamer}`. The body can then use
 `\mode<presentation>{...}` and `\mode<article>{...}` for material that belongs to only one
 of them. The manual has a complete example.
 
+`scripts/newshiur NAME` starts a new shiur this way: a folder with `NAME_body.tex` and wrappers
+for the participants' handout, the presenter's notes and the slides, plus, with
+`--hebrew-only` and `--large-print`, those versions too. `scripts/newshiur --help` lists its
+options. To set your own defaults, export `SHIUR_AUTHOR` and `SHIUR_HEBREW_FONT`.
+
 ## Wishlist
 
 Ideas for later versions, not yet planned in detail:
