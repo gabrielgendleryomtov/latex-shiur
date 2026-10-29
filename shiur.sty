@@ -121,7 +121,7 @@
 \RequirePackage{mareimekomot}
 \ifshiur@beamer\mareimekomotsetup{sham=full}\fi
 
-\newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
+\newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2}\ifstrempty{#3}{}{, #3}}
 
 %                         ***********
 %                         ** FONTS **
