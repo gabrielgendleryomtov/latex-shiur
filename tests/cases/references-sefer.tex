@@ -1,0 +1,27 @@
+% Works declared with \declaresefer, as the package's own Midrash and a
+% document's.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\declaresefer[english={, #S #N, Stream #N}]{chesedleavraham}{חסד לאברהם}{\Hdot esed leAvraham}{ #S #N נהר #N}
+\newcommand{\all}{\sefer{igrotmoshe}{yd}{1}{62-63} | \sefer*{igrotmoshe}{oh}{4}{10} | \sefer{tanchuma}{noach}{1} | \sefer{bereshitrabbah}{38:13} | \sefer{Sifra}{emor}{13:1} | \sefer{yalkutshimoni}{gen}{110} | \sefer{pdre}{35}}
+\begin{document}
+\all
+
+\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7} | \sefer{chesedleavraham}{Fountain}{5}{51}
+
+\begin{hebrew}\all
+
+\sefer{mekhilta}{yitro}{בחדש}{7} | \sefer{chesedleavraham}{מעין}{5}{51}\end{hebrew}
+\end{document}
+
+%! expect: Igrot Moshe, Yoreh De’ah 1:62–63 | Oraḥ Ḥayyim 4:10 | Midrash Tanḥuma, Noaḥ 1 | Bereshit Rabbah 38:13
+%! expect: Sifra Emor 13:1 | Yalkut Shimoni, Genesis 110 | Pirkei deRabbi Eliezer 35
+%! expect: Mekhilta deRabbi Yishmael, Yitro, BaḤodesh 7 | Ḥesed leAvraham, Fountain 5, Stream 51
+%! expect: אגרות משה יו״ד חלק א׳ סי׳ ס״ב–ס״ג | או״ח חלק ד׳ סי׳ י׳ | מדרש תנחומא
+%! expect: נח א׳ | בראשית רבה ל״ח
+%! expect: י״ג | ספרא אמור י״ג
+%! expect: ילקוט שמעוני בראשית רמז ק״י | פרקי דרבי אליעזר ל״ה
+%! expect: מכילתא דרבי ישמעאל יתרו
+%! expect: מסכתא דבחדש
+%! expect: פרשה ז׳ | חסד לאברהם מעין ה׳ נהר נ״א

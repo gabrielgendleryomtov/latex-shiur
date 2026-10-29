@@ -267,14 +267,64 @@ Its options are \texttt{seifkatan} for a sub-unit of \texthebrew{ס״ק} rather 
 \texthebrew{סע׳}, \texttt{subunit=} for any other (the Darkei Moshe's is \texthebrew{אות}), and
 \texttt{section=} for a work on one section only.
 
+Other works are cited with \cs{sefer}, by a key and the parts of the reference:
+\begin{center}
+\setlength{\tabcolsep}{4pt}%
+\begin{tabular}{@{}lll@{}}
+\toprule
+Command & English & Hebrew \\
+\midrule
+\verb|\sefer{bereshitrabbah}{38:13}| & \sefer{bereshitrabbah}{38:13} & \texthebrew{\sefer{bereshitrabbah}{38:13}} \\
+\verb|\sefer{tanchuma}{noach}{1}| & \sefer{tanchuma}{noach}{1} & \texthebrew{\sefer{tanchuma}{noach}{1}} \\
+\verb|\sefer{sifra}{emor}{13:1}| & \sefer{sifra}{emor}{13:1} & \texthebrew{\sefer{sifra}{emor}{13:1}} \\
+\verb|\sefer{igrotmoshe}{oh}{4}{10}| & \sefer{igrotmoshe}{oh}{4}{10} & \texthebrew{\sefer{igrotmoshe}{oh}{4}{10}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The package knows the ten Rabbot (\texttt{bereshitrabbah}, \texttt{shemotrabbah}, \ldots,
+\texttt{estherrabbah}, each by chapter and section), \texttt{tanchuma} (parashah and section),
+\texttt{sifra} (parashah, chapter and section), \texttt{sifreibamidbar} and
+\texttt{sifreidevarim} (piska), \texttt{mekhilta} (parashah, masekhta and its parashah),
+\texttt{pirkeiderabbieliezer}, \texttt{midrashtehillim}, \texttt{midrashaggadah} (book and
+chapter), \texttt{yalkutshimoni} (book and remez) and \texttt{igrotmoshe} (section, volume and
+siman). A parashah is named by a key such as \texttt{noach}, \texttt{lechlecha} or
+\texttt{vezothaberachah}. \verb|\sefer*| leaves out the name.
+
+\cs{declaresefer} declares more works, in the preamble or anywhere before they are used. It
+takes the work's keys, its Hebrew and English names, and a template for what follows the name,
+with a placeholder for each argument of \cs{sefer}, which takes them in order:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\verb|#N| & a number or range (\texttt{4}, \texttt{10-12}) \\
+\verb|#R| & a chapter and verse, as in \cs{tanach} (\texttt{38:13}) \\
+\verb|#D| & a daf (\texttt{69b}) \\
+\verb|#T| & a section of the Tur (\texttt{oh}, \texttt{yd}, \texttt{eh}, \texttt{hm}) \\
+\verb|#B|, \verb|#M|, \verb|#P| & a book of Tanakh, a tractate, a parashah, by key \\
+\verb|#S| & any text, printed as written \\
+\bottomrule
+\end{tabular}
+\end{center}
+The template is used for both languages; when English is written differently, \texttt{english=}
+gives it its own, with the same placeholders in the same order. A space before \verb|#N|,
+\verb|#R| or \verb|#D| doesn't break, so a number stays with its label. The package's Igrot Moshe
+is declared like this:
+\begin{Verbatim}[commandchars=+\(\)]
+\declaresefer[english={, #T #N:#N}]{igrotmoshe}{+texthebrew(אגרות משה)}{Igrot Moshe}
+  { #T +texthebrew(חלק) #N +texthebrew(סי׳) #N}
+\end{Verbatim}
+Text for \verb|#S| is printed as it is written, so a source's Hebrew and English headings each
+give it in their own language: \verb|\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}| gives
+\sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}.
+
 Hebrew numbers take a geresh when they are one letter and gershayim when they are more
 (\mbox{\texthebrew{ח׳, ל״ח}}), ranges take an en dash, and a reference only breaks across
 lines at its dash.
 
 \cs{sham} gives \texthebrew{שם} or ``ad loc''. On slides, where a source can be
 several slides from the one it refers to, it also gives that reference: ``Rashi ad loc
-(\bavli{menachot}{69b})''. A source whose heading has no reference of the package's (a Tur or a
-midrash, say) clears it, so \cs{sham} after it stays plain rather than pointing at the wrong
+(\bavli{menachot}{69b})''. A source whose heading has no reference of the package's (a work not
+declared, say) clears it, so \cs{sham} after it stays plain rather than pointing at the wrong
 source. A reference never hyphenates; it breaks only between the words of a long name, as in the
 Mishneh Torah's, and at the dash of a range. Two settings change the style, in any document:
 \begin{Verbatim}

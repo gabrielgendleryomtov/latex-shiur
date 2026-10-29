@@ -75,6 +75,7 @@
 \prop_new:N \g__mm_hilkhot_prop
 \prop_new:N \g__mm_section_prop
 \prop_new:N \g__mm_commentary_prop
+\prop_new:N \g__mm_parashah_prop
 % #1 property list, #2 keys, #3 Hebrew, #4 English
 % While the package loads, two of its names matching alike is an error in the
 % package; a document may redefine a name on purpose.
@@ -138,6 +139,7 @@
 \cs_new_protected:Npn \__mm_hilkhot:nnn { \__mm_name:Nnnn \g__mm_hilkhot_prop }
 \cs_new_protected:Npn \__mm_section:nnn { \__mm_name:Nnnn \g__mm_section_prop }
 \cs_new_protected:Npn \__mm_commentary:nnn { \__mm_name:Nnnn \g__mm_commentary_prop }
+\cs_new_protected:Npn \__mm_parashah:nnn { \__mm_name:Nnnn \g__mm_parashah_prop }
 
 \__mm_book:nnn { genesis, gen, bereshit, bereishit } { בראשית } { Genesis }
 \__mm_book:nnn { exodus, ex, exod, shemot } { שמות } { Exodus }
@@ -337,6 +339,61 @@
 \__mm_hilkhot:nnn { evel, avel } { אבל } { Mourning }
 \__mm_hilkhot:nnn { melachim, milchamot } { מלכים~ומלחמות } { Kings~and~Wars }
 
+% the 54 parashot of the Torah
+\__mm_parashah:nnn { bereshit, bereishit } { בראשית } { Bereshit }
+\__mm_parashah:nnn { noach } { נח } { Noa\__mm_h: }
+\__mm_parashah:nnn { lechlecha } { לך\nobreakspace לך } { Lekh\nobreakspace Lekha }
+\__mm_parashah:nnn { vayera, vayeira } { וירא } { Vayera }
+\__mm_parashah:nnn { chayeisarah, chayesarah } { חיי\nobreakspace שרה } { \__mm_H: ayyei\nobreakspace Sarah }
+\__mm_parashah:nnn { toldot, toledot } { תולדות } { Toledot }
+\__mm_parashah:nnn { vayetze, vayetzei } { ויצא } { Vayetze }
+\__mm_parashah:nnn { vayishlach } { וישלח } { Vayishla\__mm_h: }
+\__mm_parashah:nnn { vayeshev, vayeishev } { וישב } { Vayeshev }
+\__mm_parashah:nnn { miketz, mikketz } { מקץ } { Miketz }
+\__mm_parashah:nnn { vayigash } { ויגש } { Vayigash }
+\__mm_parashah:nnn { vayechi } { ויחי } { Vaye\__mm_h: i }
+\__mm_parashah:nnn { shemot } { שמות } { Shemot }
+\__mm_parashah:nnn { vaera, vaeira } { וארא } { Va'era }
+\__mm_parashah:nnn { bo } { בא } { Bo }
+\__mm_parashah:nnn { beshalach } { בשלח } { Beshala\__mm_h: }
+\__mm_parashah:nnn { yitro } { יתרו } { Yitro }
+\__mm_parashah:nnn { mishpatim } { משפטים } { Mishpatim }
+\__mm_parashah:nnn { terumah } { תרומה } { Terumah }
+\__mm_parashah:nnn { tetzaveh } { תצוה } { Tetzaveh }
+\__mm_parashah:nnn { kitisa, kisisa } { כי\nobreakspace תשא } { Ki\nobreakspace Tisa }
+\__mm_parashah:nnn { vayakhel } { ויקהל } { Vayakhel }
+\__mm_parashah:nnn { pekudei } { פקודי } { Pekudei }
+\__mm_parashah:nnn { vayikra } { ויקרא } { Vayikra }
+\__mm_parashah:nnn { tzav } { צו } { Tzav }
+\__mm_parashah:nnn { shemini } { שמיני } { Shemini }
+\__mm_parashah:nnn { tazria } { תזריע } { Tazria }
+\__mm_parashah:nnn { metzora } { מצורע } { Metzora }
+\__mm_parashah:nnn { achareimot, acharei } { אחרי\nobreakspace מות } { A\__mm_h: arei\nobreakspace Mot }
+\__mm_parashah:nnn { kedoshim } { קדושים } { Kedoshim }
+\__mm_parashah:nnn { emor } { אמור } { Emor }
+\__mm_parashah:nnn { behar } { בהר } { Behar }
+\__mm_parashah:nnn { bechukotai } { בחקתי } { Be\__mm_h: ukotai }
+\__mm_parashah:nnn { bamidbar } { במדבר } { Bamidbar }
+\__mm_parashah:nnn { naso } { נשא } { Naso }
+\__mm_parashah:nnn { behaalotecha } { בהעלתך } { Beha'alotekha }
+\__mm_parashah:nnn { shelach, shelachlecha } { שלח } { Shela\__mm_h: }
+\__mm_parashah:nnn { korach } { קרח } { Kora\__mm_h: }
+\__mm_parashah:nnn { chukat } { חקת } { \__mm_H: ukat }
+\__mm_parashah:nnn { balak } { בלק } { Balak }
+\__mm_parashah:nnn { pinchas } { פינחס } { Pin\__mm_h: as }
+\__mm_parashah:nnn { matot } { מטות } { Matot }
+\__mm_parashah:nnn { masei } { מסעי } { Masei }
+\__mm_parashah:nnn { devarim } { דברים } { Devarim }
+\__mm_parashah:nnn { vaetchanan } { ואתחנן } { Va'et\__mm_h: anan }
+\__mm_parashah:nnn { ekev, eikev } { עקב } { Ekev }
+\__mm_parashah:nnn { reeh } { ראה } { Re'eh }
+\__mm_parashah:nnn { shoftim, shofetim } { שופטים } { Shofetim }
+\__mm_parashah:nnn { kiteitzei, kitetze, kitetzei } { כי\nobreakspace תצא } { Ki\nobreakspace Tetze }
+\__mm_parashah:nnn { kitavo } { כי\nobreakspace תבוא } { Ki\nobreakspace Tavo }
+\__mm_parashah:nnn { nitzavim } { נצבים } { Nitzavim }
+\__mm_parashah:nnn { vayelech } { וילך } { Vayelekh }
+\__mm_parashah:nnn { haazinu } { האזינו } { Ha'azinu }
+\__mm_parashah:nnn { vezothaberachah, vezotabracha } { וזאת\nobreakspace הברכה } { Vezot\nobreakspace haBerakhah }
 
 %                         *************
 %                         ** NUMBERS **
@@ -720,6 +777,231 @@
 \declaretursefer[seifkatan, section=oh]{\mishnahberurah}{משנה\nobreakspace ברורה}{Mishnah\nobreakspace Berurah}
 \declaretursefer{\aruchhashulchan}{ערוך\nobreakspace השולחן}{Arukh\nobreakspace haShul\__mm_h: an}
 \declaretursefer{\arukhhashulkhan}{ערוך\nobreakspace השולחן}{Arukh\nobreakspace haShul\__mm_h: an}
+
+%                         *****************
+%                         ** OTHER WORKS **
+%                         *****************
+
+% \declaresefer[english={template}]{keys}{Hebrew name}{English name}{template}
+% declares a work cited as \sefer{key}{...}{...}. The template is what follows
+% the name, with a placeholder for each argument, taken in order:
+%   #N  a number or range (4, 10-12): ד׳ / 4
+%   #R  a chapter and verse, as in \tanach (38:13, 5:1-3): ל״ח, י״ג / 38:13
+%   #D  a daf (69b): ס״ט ע״ב / 69b
+%   #T  a section of the Tur (oh, yd, eh, chm): או״ח / Oraḥ Ḥayyim
+%   #B  a book of Tanakh, #M a tractate, #P a parashah (noach)
+%   #S  any text, printed as written
+% The template is used in both languages unless english= gives English its own,
+% with the same placeholders in the same order. A space before #N, #R or #D
+% doesn't break, which keeps a number with its label. So
+%   \declaresefer[english={, #T #N:#N}]{igrotmoshe}{אגרות משה}{Igrot Moshe}
+%     { #T חלק #N סי׳ #N}
+%   \sefer{igrotmoshe}{yd}{1}{62}   אגרות משה יו״ד חלק א׳ סי׳ ס״ב /
+%                                   Igrot Moshe, Yoreh De'ah 1:62
+% \sefer* leaves out the name, and whatever comes before the first placeholder.
+\prop_new:N \g__mm_sefer_prop
+\tl_new:N \l__mm_he_template_tl
+\tl_new:N \l__mm_en_template_tl
+\tl_new:N \l__mm_template_tl
+\str_new:N \l__mm_id_str
+\str_new:N \l__mm_he_slots_str
+\str_new:N \l__mm_en_slots_str
+\seq_new:N \l__mm_slots_seq
+\keys_define:nn { mareimekomot / sefer }
+	{ english .tl_set:N = \l__mm_en_template_tl }
+\cs_generate_variant:Nn \regex_extract_all:nnN { nV }
+\cs_generate_variant:Nn \regex_match:nnF { nV }
+\cs_generate_variant:Nn \prop_gput:Nnn { NVV }
+\cs_generate_variant:Nn \str_if_eq:nnF { VV }
+\msg_new:nnn { mareimekomot } { bad-placeholder }
+	{
+		The~template~of~`#1'~has~a~placeholder~that~isn't~one~of~
+		\iow_char:N\#N,~\iow_char:N\#R,~\iow_char:N\#D,~\iow_char:N\#T,~
+		\iow_char:N\#B,~\iow_char:N\#M,~\iow_char:N\#P~and~\iow_char:N\#S.
+	}
+\msg_new:nnn { mareimekomot } { template-mismatch }
+	{ The~English~template~of~`#1'~has~different~placeholders~from~the~Hebrew~one. }
+\NewDocumentCommand \declaresefer { O{} m m m m }
+	{
+		% no group: the work must outlive the declaration
+		\tl_set:Nn \l__mm_he_template_tl {#5}
+		\tl_set:Nn \l__mm_en_template_tl {#5}
+		\keys_set:nn { mareimekomot / sefer } {#1}
+		\__mm_template:NNn \l__mm_he_template_tl \l__mm_he_slots_str {#2}
+		\__mm_template:NNn \l__mm_en_template_tl \l__mm_en_slots_str {#2}
+		\str_if_eq:VVF \l__mm_he_slots_str \l__mm_en_slots_str
+			{ \msg_error:nnn { mareimekomot } { template-mismatch } {#2} }
+		% the work is stored under its first key, which all its keys lead to
+		\__mm_normalise:Nn \l__mm_id_str { \clist_item:nn {#2} { 1 } }
+		\clist_map_inline:nn {#2}
+			{
+				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\bool_if:NT \g__mm_loading_bool
+					{
+						\prop_get:NVNT \g__mm_sefer_prop \l__mm_key_str \l__mm_names_tl
+							{
+								\str_if_eq:VVF \l__mm_names_tl \l__mm_id_str
+									{ \msg_error:nnn { mareimekomot } { clash } {##1} }
+							}
+					}
+				\prop_gput:NVV \g__mm_sefer_prop \l__mm_key_str \l__mm_id_str
+			}
+		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _he_name_tl }
+		\tl_gset:cn { g__mm_sefer_ \l__mm_id_str _he_name_tl } {#3}
+		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _en_name_tl }
+		\tl_gset:cn { g__mm_sefer_ \l__mm_id_str _en_name_tl } {#4}
+		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _he_tl }
+		\tl_gset_eq:cN { g__mm_sefer_ \l__mm_id_str _he_tl } \l__mm_he_template_tl
+		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _en_tl }
+		\tl_gset_eq:cN { g__mm_sefer_ \l__mm_id_str _en_tl } \l__mm_en_template_tl
+		\int_gzero_new:c { g__mm_sefer_ \l__mm_id_str _int }
+		\int_gset:cn { g__mm_sefer_ \l__mm_id_str _int } { \str_count:N \l__mm_he_slots_str }
+	}
+% #1 template, which becomes text with \__mm_slot:n {N} for each #N; #2 string
+% variable for its placeholders' letters in order (NN for Igrot Moshe's); #3 keys
+\cs_new_protected:Npn \__mm_template:NNn #1 #2 #3
+	{
+		\regex_extract_all:nVN { \cP. (.) } #1 \l__mm_slots_seq
+		\str_clear:N #2
+		% each match comes as itself and then its letter
+		\int_step_inline:nnnn { 2 } { 2 } { \seq_count:N \l__mm_slots_seq }
+			{ \str_put_right:Ne #2 { \seq_item:Nn \l__mm_slots_seq {##1} } }
+		\regex_match:nVF { \A [NRDTBMPS]* \Z } #2
+			{ \msg_error:nnn { mareimekomot } { bad-placeholder } {#3} }
+		\regex_replace_all:nnN { \x20 (\cP. [NRD]) } { \c{nobreakspace} \1 } #1
+		\regex_replace_all:nnN { \cP. (.) } { \c{__mm_slot:n} \cB\{ \1 \cE\} } #1
+	}
+
+\bool_new:N \l__mm_star_bool
+\tl_new:N \l__mm_call_tl
+\tl_new:N \l__mm_arg_tl
+\seq_new:N \l__mm_args_seq
+\NewDocumentCommand \sefer { s m }
+	{
+		\group_begin:
+		\__mm_normalise:Nn \l__mm_key_str {#2}
+		\prop_get:NVNTF \g__mm_sefer_prop \l__mm_key_str \l__mm_names_tl
+			{
+				\str_set:NV \l__mm_id_str \l__mm_names_tl
+				\IfBooleanTF {#1}
+					{ \bool_set_true:N \l__mm_star_bool }
+					{ \bool_set_false:N \l__mm_star_bool }
+				\seq_clear:N \l__mm_args_seq
+				\tl_set:Nn \l__mm_call_tl { \sefer {#2} }
+				\exp_args:Ne \__mm_sefer_args:n
+					{ \int_use:c { g__mm_sefer_ \l__mm_id_str _int } }
+			}
+			{
+				\msg_error:nnn { mareimekomot } { unknown-name } {#2}
+				#2
+				\group_end:
+			}
+	}
+% #1 how many arguments are still to be read
+\cs_new_protected:Npn \__mm_sefer_args:n #1
+	{
+		\int_compare:nNnTF {#1} > 0
+			{ \__mm_sefer_arg:nn {#1} }
+			{ \__mm_sefer: }
+	}
+\cs_new_protected:Npn \__mm_sefer_arg:nn #1 #2
+	{
+		\seq_put_right:Nn \l__mm_args_seq {#2}
+		\tl_put_right:Nn \l__mm_call_tl { {#2} }
+		\exp_args:Ne \__mm_sefer_args:n { \int_eval:n { #1 - 1 } }
+	}
+\cs_new_protected:Npn \__mm_sefer:
+	{
+		\__mm_nohyphenation:
+		\tl_set_eq:Nc \l__mm_template_tl
+			{ g__mm_sefer_ \l__mm_id_str _ \__mm_if_hebrew:TF { he } { en } _tl }
+		\bool_if:NTF \l__mm_star_bool
+			{ \regex_replace_once:nnN { \A .*? (\c{__mm_slot:n}) } { \1 } \l__mm_template_tl }
+			{ \tl_use:c { g__mm_sefer_ \l__mm_id_str _ \__mm_if_hebrew:TF { he } { en } _name_tl } }
+		\l__mm_template_tl
+		\exp_args:NV \__mm_remember:n \l__mm_call_tl
+		\group_end:
+	}
+% #1 a placeholder's letter: prints the next argument
+\cs_new_protected:Npn \__mm_slot:n #1
+	{
+		\seq_pop_left:NN \l__mm_args_seq \l__mm_arg_tl
+		\str_case:nn {#1}
+			{
+				{ N } { \__mm_range:V \l__mm_arg_tl }
+				{ R } { \__mm_tanakh_ref:V \l__mm_arg_tl }
+				{ D } { \__mm_daf:V \l__mm_arg_tl }
+				{ T } { \__mm_named:NV \g__mm_section_prop \l__mm_arg_tl }
+				{ B } { \__mm_named:NV \g__mm_book_prop \l__mm_arg_tl }
+				{ M } { \__mm_named:NV \g__mm_tractate_prop \l__mm_arg_tl }
+				{ P } { \__mm_named:NV \g__mm_parashah_prop \l__mm_arg_tl }
+				{ S } { \l__mm_arg_tl }
+			}
+	}
+% #1 a number, or a range of them
+\cs_new_protected:Npn \__mm_range:n #1
+	{
+		\seq_set_split:Nnn \l__mm_range_seq { - } {#1}
+		\__mm_number:n { \seq_item:Nn \l__mm_range_seq { 1 } }
+		\int_compare:nNnT { \seq_count:N \l__mm_range_seq } > 1
+			{ \__mm_dash: \__mm_number:n { \seq_item:Nn \l__mm_range_seq { 2 } } }
+	}
+% #1 name list, #2 key: the name in the language around
+\cs_new_protected:Npn \__mm_named:Nn #1 #2
+	{
+		\__mm_lookup:Nnn #1 {#2} { }
+		\__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl }
+	}
+\cs_generate_variant:Nn \__mm_range:n { V }
+\cs_generate_variant:Nn \__mm_tanakh_ref:n { V }
+\cs_generate_variant:Nn \__mm_daf:n { V }
+\cs_generate_variant:Nn \__mm_named:Nn { NV }
+
+% Midrash
+\declaresefer{bereshitrabbah, bereishitrabbah, genesisrabbah}
+	{בראשית\nobreakspace רבה}{Bereshit\nobreakspace Rabbah}{~#R}
+\declaresefer{shemotrabbah, exodusrabbah}
+	{שמות\nobreakspace רבה}{Shemot\nobreakspace Rabbah}{~#R}
+\declaresefer{vayikrarabbah, leviticusrabbah}
+	{ויקרא\nobreakspace רבה}{Vayikra\nobreakspace Rabbah}{~#R}
+\declaresefer{bamidbarrabbah, numbersrabbah}
+	{במדבר\nobreakspace רבה}{Bamidbar\nobreakspace Rabbah}{~#R}
+\declaresefer{devarimrabbah, deuteronomyrabbah}
+	{דברים\nobreakspace רבה}{Devarim\nobreakspace Rabbah}{~#R}
+\declaresefer{shirhashirimrabbah, songofsongsrabbah}
+	{שיר\nobreakspace השירים\nobreakspace רבה}{Shir\nobreakspace haShirim\nobreakspace Rabbah}{~#R}
+\declaresefer{ruthrabbah}
+	{רות\nobreakspace רבה}{Rut\nobreakspace Rabbah}{~#R}
+\declaresefer{eichahrabbah, lamentationsrabbah}
+	{איכה\nobreakspace רבה}{Eikhah\nobreakspace Rabbah}{~#R}
+\declaresefer{koheletrabbah, ecclesiastesrabbah}
+	{קהלת\nobreakspace רבה}{Kohelet\nobreakspace Rabbah}{~#R}
+\declaresefer{estherrabbah}
+	{אסתר\nobreakspace רבה}{Esther\nobreakspace Rabbah}{~#R}
+\declaresefer{tanchuma, midrashtanchuma}
+	{מדרש\nobreakspace תנחומא}{Midrash\nobreakspace Tan\__mm_h: uma}{,~#P~#N}
+\declaresefer{sifra}{ספרא}{Sifra}{~#P~#R}
+\declaresefer{sifreibamidbar, sifreinumbers}
+	{ספרי\nobreakspace במדבר}{Sifrei\nobreakspace Bamidbar}{~#N}
+\declaresefer{sifreidevarim, sifreideuteronomy}
+	{ספרי\nobreakspace דברים}{Sifrei\nobreakspace Devarim}{~#N}
+% by parashah, masekhta (written out, in the language of the heading) and parashah
+% within it: \sefer{mekhilta}{yitro}{בחדש}{7}, \sefer{mekhilta}{yitro}{Ba\Hdot odesh}{7}
+\declaresefer[english={,~#P,~#S~#N}]{mekhilta, mekhiltaderabbiyishmael}
+	{מכילתא\nobreakspace דרבי\nobreakspace ישמעאל}{Mekhilta\nobreakspace deRabbi\nobreakspace Yishmael}
+	{~#P,~מסכתא~ד#S,~פרשה~#N}
+\declaresefer{pirkeiderabbieliezer, pirkeirabbieliezer, pdre}
+	{פרקי\nobreakspace דרבי\nobreakspace אליעזר}{Pirkei\nobreakspace deRabbi\nobreakspace Eliezer}{~#N}
+\declaresefer{midrashtehillim, midrashpsalms}
+	{מדרש\nobreakspace תהלים}{Midrash\nobreakspace Tehillim}{~#R}
+\declaresefer[english={~on~#B~#R}]{midrashaggadah}
+	{מדרש\nobreakspace אגדה}{Midrash\nobreakspace Aggadah}{~#B~#R}
+\declaresefer[english={,~#B~#N}]{yalkutshimoni}
+	{ילקוט\nobreakspace שמעוני}{Yalkut\nobreakspace Shimoni}{~#B~רמז~#N}
+
+% later works
+\declaresefer[english={,~#T~#N:#N}]{igrotmoshe, igrosmoshe}
+	{אגרות\nobreakspace משה}{Igrot\nobreakspace Moshe}{~#T~חלק~#N~סי׳~#N}
 
 %                         ************
 %                         ** AD LOC **
