@@ -1,0 +1,342 @@
+% mareimekomot: references to Tanakh and Talmud, written once and set in the
+% language of the text around them (Hebrew or English).
+% Gabriel Gendler Yom-Tov <shiurtex@thm.mozmail.com>
+%
+% Copyright 2023-2026 Gabriel Gendler Yom-Tov
+%
+% This work may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License, either version 1.3c of this license or (at
+% your option) any later version. The latest version of this license is in
+% https://www.latex-project.org/lppl.txt
+%
+% This work has the LPPL maintenance status `maintained'. The Current
+% Maintainer of this work is Gabriel Gendler Yom-Tov. This work consists of
+% the file mareimekomot.sty.
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
+\ProvidesPackage{mareimekomot}[2026/10/29 v1.0 references to Tanakh and Talmud]
+
+% Hebrew output needs polyglossia with Hebrew loaded; elsewhere the references
+% come out in English.
+%   \tanakh{gen}{37:18-20}   בראשית ל״ז, י״ח–כ׳ / Genesis 37:18–20
+%   \tanakh*{gen}{39:1}      the same without the book's name
+%   \bavli{menachot}{69b}    בבלי מנחות ס״ט ע״ב / B. Menaḥot 69b
+%   \sham                    שם / ad loc
+% Numbers follow the usual Hebrew convention: geresh for one letter (ח׳),
+% gershayim before the last of several (ל״ח). Ranges take an en dash, the
+% only place a reference can break across lines.
+
+\RequirePackage{xspace}
+
+% sham=full adds the reference \sham stands for, as "ad loc (B. Menaḥot
+% 69b)"; daf=short writes a daf as ס״ט. and ס״ט: instead of ס״ט ע״א/ב.
+\newif\ifmm@shamfull
+\newif\ifmm@dafshort
+\DeclareKeys[mareimekomot]{
+	sham .choice:,
+	sham / short .code = \mm@shamfullfalse,
+	sham / full .code = \mm@shamfulltrue,
+	daf .choice:,
+	daf / long .code = \mm@dafshortfalse,
+	daf / short .code = \mm@dafshorttrue,
+}
+\ProcessKeyOptions[mareimekomot]
+\NewDocumentCommand{\mareimekomotsetup}{m}{\SetKeys[mareimekomot]{#1}}
+
+\ExplSyntaxOn
+
+%                         ***********
+%                         ** NAMES **
+%                         ***********
+
+% Each name has a key, used in documents, and its Hebrew and English forms.
+% Keys are matched ignoring case, spaces, hyphens, dots and apostrophes, and
+% some names have more than one key.
+\prop_new:N \g__mm_book_prop
+\prop_new:N \g__mm_tractate_prop
+% #1 property list, #2 keys, #3 Hebrew, #4 English
+\cs_new_protected:Npn \__mm_name:Nnnn #1 #2 #3 #4
+	{
+		\clist_map_inline:nn {#2}
+			{
+				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\prop_gput:NVn #1 \l__mm_key_str { {#3} {#4} }
+			}
+	}
+\str_new:N \l__mm_key_str
+% #1 string variable, #2 key as written
+\cs_new_protected:Npn \__mm_normalise:Nn #1 #2
+	{
+		\str_set:Ne #1 { \str_lowercase:n {#2} }
+		\str_remove_all:Nn #1 { ~ }
+		\str_remove_all:Nn #1 { - }
+		\str_remove_all:Nn #1 { . }
+		\str_remove_all:Nn #1 { ' }
+	}
+\cs_new_protected:Npn \__mm_book:nnn { \__mm_name:Nnnn \g__mm_book_prop }
+\cs_new_protected:Npn \__mm_tractate:nnn { \__mm_name:Nnnn \g__mm_tractate_prop }
+
+\__mm_book:nnn { genesis, gen, bereshit, bereishit } { בראשית } { Genesis }
+\__mm_book:nnn { exodus, ex, exod, shemot } { שמות } { Exodus }
+\__mm_book:nnn { leviticus, lev, vayikra } { ויקרא } { Leviticus }
+\__mm_book:nnn { numbers, num, bamidbar } { במדבר } { Numbers }
+\__mm_book:nnn { deuteronomy, deut, dt, devarim } { דברים } { Deuteronomy }
+\__mm_book:nnn { joshua, josh, yehoshua } { יהושע } { Joshua }
+\__mm_book:nnn { judges, judg, shoftim } { שופטים } { Judges }
+\__mm_book:nnn { samueli, samuel1, 1samuel, isam, 1sam, sam1 } { שמואל\nobreakspace א׳ } { Samuel\nobreakspace I }
+\__mm_book:nnn { samuelii, samuel2, 2samuel, iisam, 2sam, sam2 } { שמואל\nobreakspace ב׳ } { Samuel\nobreakspace II }
+\__mm_book:nnn { kingsi, kings1, 1kings, ikgs, 1kgs, kgs1 } { מלכים\nobreakspace א׳ } { Kings\nobreakspace I }
+\__mm_book:nnn { kingsii, kings2, 2kings, iikgs, 2kgs, kgs2 } { מלכים\nobreakspace ב׳ } { Kings\nobreakspace II }
+\__mm_book:nnn { isaiah, isa, yeshayahu } { ישעיהו } { Isaiah }
+\__mm_book:nnn { jeremiah, jer, yirmiyahu } { ירמיהו } { Jeremiah }
+\__mm_book:nnn { ezekiel, ezek, yechezkel } { יחזקאל } { Ezekiel }
+\__mm_book:nnn { hosea, hos, hoshea } { הושע } { Hosea }
+\__mm_book:nnn { joel, yoel } { יואל } { Joel }
+\__mm_book:nnn { amos } { עמוס } { Amos }
+\__mm_book:nnn { obadiah, obad, ovadiah } { עובדיה } { Obadiah }
+\__mm_book:nnn { jonah, yonah } { יונה } { Jonah }
+\__mm_book:nnn { micah, mic, michah } { מיכה } { Micah }
+\__mm_book:nnn { nahum, nah, nachum } { נחום } { Nahum }
+\__mm_book:nnn { habakkuk, hab, chavakuk } { חבקוק } { Habakkuk }
+\__mm_book:nnn { zephaniah, zeph, tzefaniah } { צפניה } { Zephaniah }
+\__mm_book:nnn { haggai, hag, chaggai } { חגי } { Haggai }
+\__mm_book:nnn { zechariah, zech, zecharyah } { זכריה } { Zechariah }
+\__mm_book:nnn { malachi, mal } { מלאכי } { Malachi }
+\__mm_book:nnn { psalms, psalm, ps, tehillim } { תהלים } { Psalms }
+\__mm_book:nnn { proverbs, prov, mishlei } { משלי } { Proverbs }
+\__mm_book:nnn { job, iyov } { איוב } { Job }
+\__mm_book:nnn { songofsongs, song, shirhashirim } { שיר\nobreakspace השירים } { Song\nobreakspace of\nobreakspace Songs }
+\__mm_book:nnn { ruth, rut } { רות } { Ruth }
+\__mm_book:nnn { lamentations, lam, eichah, eicha } { איכה } { Lamentations }
+\__mm_book:nnn { ecclesiastes, eccl, kohelet } { קהלת } { Ecclesiastes }
+\__mm_book:nnn { esther, est } { אסתר } { Esther }
+\__mm_book:nnn { daniel, dan } { דניאל } { Daniel }
+\__mm_book:nnn { ezra } { עזרא } { Ezra }
+\__mm_book:nnn { nehemiah, neh, nechemiah } { נחמיה } { Nehemiah }
+\__mm_book:nnn { chroniclesi, chronicles1, 1chronicles, ichr, 1chr, chr1 } { דברי\nobreakspace הימים\nobreakspace א׳ } { Chronicles\nobreakspace I }
+\__mm_book:nnn { chroniclesii, chronicles2, 2chronicles, iichr, 2chr, chr2 } { דברי\nobreakspace הימים\nobreakspace ב׳ } { Chronicles\nobreakspace II }
+
+\__mm_tractate:nnn { brachot, berakhot, berachot } { ברכות } { Brachot }
+\__mm_tractate:nnn { shabbat } { שבת } { Shabbat }
+\__mm_tractate:nnn { eruvin } { עירובין } { Eruvin }
+\__mm_tractate:nnn { pesachim, pesahim } { פסחים } { Pesaḥim }
+\__mm_tractate:nnn { shekalim } { שקלים } { Shekalim }
+\__mm_tractate:nnn { yoma } { יומא } { Yoma }
+\__mm_tractate:nnn { sukkah, sukka } { סוכה } { Sukkah }
+\__mm_tractate:nnn { beitzah, beitza, betzah } { ביצה } { Beitzah }
+\__mm_tractate:nnn { roshhashanah, roshhashana, rh } { ראש\nobreakspace השנה } { Rosh\nobreakspace Hashanah }
+\__mm_tractate:nnn { taanit } { תענית } { Ta'anit }
+\__mm_tractate:nnn { megillah, megila, megilla } { מגילה } { Megillah }
+\__mm_tractate:nnn { moedkatan, mk } { מועד\nobreakspace קטן } { Moed\nobreakspace Katan }
+\__mm_tractate:nnn { chagigah, hagigah, chagiga } { חגיגה } { Ḥagigah }
+\__mm_tractate:nnn { yevamot } { יבמות } { Yevamot }
+\__mm_tractate:nnn { ketubot, ketuvot } { כתובות } { Ketubot }
+\__mm_tractate:nnn { nedarim } { נדרים } { Nedarim }
+\__mm_tractate:nnn { nazir } { נזיר } { Nazir }
+\__mm_tractate:nnn { sotah, sota } { סוטה } { Sotah }
+\__mm_tractate:nnn { gittin, gitin } { גיטין } { Gittin }
+\__mm_tractate:nnn { kiddushin, kidushin } { קידושין } { Kiddushin }
+\__mm_tractate:nnn { bavakamma, bavakama, bk } { בבא\nobreakspace קמא } { Bava\nobreakspace Kamma }
+\__mm_tractate:nnn { bavametzia, bavametsia, bm } { בבא\nobreakspace מציעא } { Bava\nobreakspace Metzia }
+\__mm_tractate:nnn { bavabatra, bb } { בבא\nobreakspace בתרא } { Bava\nobreakspace Batra }
+\__mm_tractate:nnn { sanhedrin } { סנהדרין } { Sanhedrin }
+\__mm_tractate:nnn { makkot, makot } { מכות } { Makkot }
+\__mm_tractate:nnn { shevuot } { שבועות } { Shevuot }
+\__mm_tractate:nnn { avodazara, avodahzarah, az } { עבודה\nobreakspace זרה } { Avoda\nobreakspace Zara }
+\__mm_tractate:nnn { horayot } { הוריות } { Horayot }
+\__mm_tractate:nnn { zevachim, zevahim } { זבחים } { Zevaḥim }
+\__mm_tractate:nnn { menachot, menahot } { מנחות } { Menaḥot }
+\__mm_tractate:nnn { chullin, hullin, chulin } { חולין } { Ḥullin }
+\__mm_tractate:nnn { bekhorot, bechorot } { בכורות } { Bekhorot }
+\__mm_tractate:nnn { arakhin, arachin } { ערכין } { Arakhin }
+\__mm_tractate:nnn { temurah, temura } { תמורה } { Temurah }
+\__mm_tractate:nnn { keritot, kritot } { כריתות } { Keritot }
+\__mm_tractate:nnn { meilah, meila } { מעילה } { Me'ilah }
+\__mm_tractate:nnn { tamid } { תמיד } { Tamid }
+\__mm_tractate:nnn { niddah, nidah, nidda } { נדה } { Niddah }
+
+%                         *************
+%                         ** NUMBERS **
+%                         *************
+
+% whether the text around is Hebrew
+\prg_new_conditional:Npnn \__mm_if_hebrew: { T, F, TF }
+	{
+		\str_if_eq:VnTF \languagename { hebrew }
+			{ \prg_return_true: } { \prg_return_false: }
+	}
+% a number in the language around: letters with geresh or gershayim in Hebrew
+\cs_new:Npn \__mm_number:n #1
+	{ \__mm_if_hebrew:TF { \Hebrewnumeral {#1} } { #1 } }
+\tl_const:Nn \c__mm_dash_tl { – }
+
+% #1 name list, #2 key; leaves the Hebrew and English names in \l__mm_he_tl
+% and \l__mm_en_tl
+\tl_new:N \l__mm_he_tl
+\tl_new:N \l__mm_en_tl
+\tl_new:N \l__mm_names_tl
+\cs_new_protected:Npn \__mm_lookup:Nnn #1 #2 #3
+	{
+		\__mm_normalise:Nn \l__mm_key_str {#2}
+		\prop_get:NVNTF #1 \l__mm_key_str \l__mm_names_tl
+			{
+				\tl_set:Ne \l__mm_he_tl { \exp_after:wN \use_i:nn \l__mm_names_tl }
+				\tl_set:Ne \l__mm_en_tl { \exp_after:wN \use_ii:nn \l__mm_names_tl }
+			}
+			{
+				\msg_error:nnn { mareimekomot } { unknown-name } {#2}
+				\tl_set:Nn \l__mm_he_tl {#2}
+				\tl_set:Nn \l__mm_en_tl {#2}
+			}
+	}
+\msg_new:nnn { mareimekomot } { unknown-name }
+	{ Unknown~name~`#1'.~See~the~lists~of~books~and~tractates~in~mareimekomot.sty. }
+\msg_new:nnn { mareimekomot } { bad-reference }
+	{ Can't~read~the~reference~`#1'. }
+
+%                         ************
+%                         ** TANAKH **
+%                         ************
+
+% the document's colon is an ordinary character, unlike expl3's
+\cs_generate_variant:Nn \seq_set_split:Nnn { Nee }
+\seq_new:N \l__mm_range_seq
+\seq_new:N \l__mm_from_seq
+\seq_new:N \l__mm_to_seq
+% #1 reference: 37, 37:18, 37:18-20, 37:18-38:2 or 37-38
+\cs_new_protected:Npn \__mm_tanakh_ref:n #1
+	{
+		\seq_set_split:Nnn \l__mm_range_seq { - } {#1}
+		\seq_set_split:Nee \l__mm_from_seq { \c_colon_str }
+			{ \seq_item:Nn \l__mm_range_seq { 1 } }
+		\int_compare:nNnTF { \seq_count:N \l__mm_range_seq } > 1
+			{
+				\seq_set_split:Nee \l__mm_to_seq { \c_colon_str }
+					{ \seq_item:Nn \l__mm_range_seq { 2 } }
+			}
+			{ \seq_clear:N \l__mm_to_seq }
+		% from: chapter, or chapter and verse
+		\__mm_number:n { \seq_item:Nn \l__mm_from_seq { 1 } }
+		\int_compare:nNnT { \seq_count:N \l__mm_from_seq } > 1
+			{ \__mm_chapter_verse_sep: \__mm_number:n { \seq_item:Nn \l__mm_from_seq { 2 } } }
+		% to: a verse in the same chapter, another chapter and verse, or a chapter
+		\seq_if_empty:NF \l__mm_to_seq
+			{
+				\c__mm_dash_tl
+				\__mm_number:n { \seq_item:Nn \l__mm_to_seq { 1 } }
+				\int_compare:nNnT { \seq_count:N \l__mm_to_seq } > 1
+					{ \__mm_chapter_verse_sep: \__mm_number:n { \seq_item:Nn \l__mm_to_seq { 2 } } }
+			}
+	}
+\cs_new:Npn \__mm_chapter_verse_sep:
+	{ \__mm_if_hebrew:TF { , \nobreakspace } { \c_colon_str } }
+
+% \tanakh{book}{reference}; the starred form leaves out the book's name
+\NewDocumentCommand \tanakh { s m m }
+	{
+		\group_begin:
+		\__mm_lookup:Nnn \g__mm_book_prop {#2} { }
+		\IfBooleanF {#1}
+			{ \__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl } \nobreakspace }
+		\__mm_tanakh_ref:n {#3}
+		\__mm_remember:n { \tanakh {#2} {#3} }
+		\group_end:
+	}
+
+%                         ************
+%                         ** TALMUD **
+%                         ************
+
+% #1 daf as 69b, 69 or 69b-70a (or 69a-b)
+\cs_new_protected:Npn \__mm_daf:n #1
+	{
+		\seq_set_split:Nnn \l__mm_range_seq { - } {#1}
+		\__mm_page:e { \seq_item:Nn \l__mm_range_seq { 1 } }
+		\int_compare:nNnT { \seq_count:N \l__mm_range_seq } > 1
+			{
+				\c__mm_dash_tl
+				\__mm_page:e { \seq_item:Nn \l__mm_range_seq { 2 } }
+			}
+	}
+% #1 one page: 69b, 69, or just b
+\cs_new_protected:Npn \__mm_page:n #1
+	{
+		\regex_extract_once:nnNTF { \A ([0-9]*) ([abAB]?) \Z } {#1} \l_tmpa_seq
+			{
+				\tl_set:Ne \l_tmpa_tl { \seq_item:Nn \l_tmpa_seq { 2 } }
+				\tl_set:Ne \l_tmpb_tl { \str_lowercase:e { \seq_item:Nn \l_tmpa_seq { 3 } } }
+				\__mm_if_hebrew:TF { \__mm_hebrew_page: } { \l_tmpa_tl \l_tmpb_tl }
+			}
+			{ \msg_error:nnn { mareimekomot } { bad-reference } {#1} #1 }
+	}
+\cs_generate_variant:Nn \__mm_page:n { e }
+\cs_generate_variant:Nn \str_lowercase:n { e }
+% the page in \l_tmpa_tl, the side (a, b or empty) in \l_tmpb_tl
+\cs_new_protected:Npn \__mm_hebrew_page:
+	{
+		\legacy_if:nTF { mm@dafshort }
+			{
+				% the traditional short form: a full stop for the first side, a colon
+				% for the second
+				\tl_if_empty:NF \l_tmpa_tl { \hebrewnumeral { \l_tmpa_tl } }
+				\str_case:Vn \l_tmpb_tl { { a } { . } { b } { : } }
+			}
+			{
+				\tl_if_empty:NF \l_tmpa_tl
+					{ \Hebrewnumeral { \l_tmpa_tl } \tl_if_empty:NF \l_tmpb_tl { \nobreakspace } }
+				\str_case:Vn \l_tmpb_tl { { a } { ע״א } { b } { ע״ב } }
+			}
+	}
+
+% \bavli{tractate}{daf}
+\NewDocumentCommand \bavli { m m }
+	{
+		\group_begin:
+		\__mm_lookup:Nnn \g__mm_tractate_prop {#1} { }
+		\__mm_if_hebrew:TF { בבלי \nobreakspace \l__mm_he_tl } { B. \nobreakspace \l__mm_en_tl }
+		\nobreakspace
+		\__mm_daf:n {#2}
+		\__mm_remember:n { \bavli {#1} {#2} }
+		\group_end:
+	}
+
+%                         ************
+%                         ** AD LOC **
+%                         ************
+
+% The last reference made, which \sham stands for. A document that says
+% "Rashi ad loc" after a source with no reference of ours would make \sham
+% wrong, so shiur clears it at each source that doesn't make one.
+\tl_new:N \g__mm_last_tl
+\bool_new:N \g__mm_referred_bool
+\cs_new_protected:Npn \__mm_remember:n #1
+	{
+		\tl_gset:Nn \g__mm_last_tl {#1}
+		\bool_gset_true:N \g__mm_referred_bool
+	}
+% for packages: forget the last reference, or note that one was made since
+\cs_new_protected:Npn \mareimekomot@forget { \tl_gclear:N \g__mm_last_tl }
+\cs_new_protected:Npn \mareimekomot@startunit { \bool_gset_false:N \g__mm_referred_bool }
+\cs_new_protected:Npn \mareimekomot@endunit
+	{ \bool_if:NF \g__mm_referred_bool { \tl_gclear:N \g__mm_last_tl } }
+
+\NewDocumentCommand \sham { }
+	{
+		\__mm_if_hebrew:TF { שם } { ad~loc }
+		\legacy_if:nT { mm@shamfull }
+			{
+				\tl_if_empty:NF \g__mm_last_tl
+					{
+						\c_space_tl (
+						\group_begin:
+						% within the parentheses, \sham's own reference doesn't change
+						\cs_set_eq:NN \__mm_remember:n \use_none:n
+						\g__mm_last_tl
+						\group_end:
+						)
+					}
+			}
+		\bool_gset_true:N \g__mm_referred_bool
+		\xspace
+	}
+
+\ExplSyntaxOff

@@ -107,6 +107,12 @@
 	\let\@@description\shiur@description
 \fi
 
+% References to Tanakh and Talmud (\tanakh, \bavli, \sham). On slides, where a
+% source's "ad loc" can be several slides from the source it refers to, \sham
+% also gives that reference.
+\RequirePackage{mareimekomot}
+\ifshiur@beamer\mareimekomotsetup{sham=full}\fi
+
 \newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2\ifstrempty{#3}{}{, #3}}}
 
 %                         ***********
@@ -288,13 +294,18 @@
 \ifbool{shiur@beamer}{
 	% #1 body
 	\newcommand{\shiur@frame}[1]{%
-		\frame{\setcounter{shiur@parts}{1}\global\shiur@hashebrewfalse\shiur@inmekortrue#1}%
+		\frame{\setcounter{shiur@parts}{1}\global\shiur@hashebrewfalse\shiur@inmekortrue
+			\mareimekomot@startunit#1\mareimekomot@endunit}%
 	}
 	\NewDocumentEnvironment{mekor}{+b}{\refstepcounter{mekor}\shiur@frame{#1}\vspace{0.5em}}{}
 	\NewDocumentEnvironment{mekor*}{+b}{\shiur@frame{#1}\vspace{0.5em}}{}
 }{
-	\NewDocumentEnvironment{mekor}{}{\refstepcounter{mekor}\global\shiur@hashebrewfalse}{\vspace{0.5em}}
-	\NewDocumentEnvironment{mekor*}{}{\global\shiur@hashebrewfalse}{\vspace{0.5em}}
+	\NewDocumentEnvironment{mekor}{}
+		{\refstepcounter{mekor}\global\shiur@hashebrewfalse\mareimekomot@startunit}
+		{\mareimekomot@endunit\vspace{0.5em}}
+	\NewDocumentEnvironment{mekor*}{}
+		{\global\shiur@hashebrewfalse\mareimekomot@startunit}
+		{\mareimekomot@endunit\vspace{0.5em}}
 }
 
 % How the heading of a mekorlang differs between articles and beamer: the
