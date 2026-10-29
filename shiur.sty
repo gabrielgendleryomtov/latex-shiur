@@ -179,6 +179,44 @@
 % #1 role: switch to its font, or stay in the hebrew font if it has none
 \newcommand{\shiur@rolefont}[1]{\ifcsdef{shiur@font@#1}{\csuse{shiur@font@#1}}{}}
 
+% A role's font may lack punctuation (Rashi fonts often have only Hebrew), so
+% punctuation the current font lacks is set in the main Hebrew font. Runs with
+% the role's font already selected. #1 role, #2 command that typesets the text,
+% #3 text
+\newcommand{\shiur@mainhebrewfont}{%
+	\ifboolexpr{bool{shiur@beamer} and test{\ifdef{\hebrewfontsf}}}{\hebrewfontsf}{\hebrewfont}%
+}
+\newcommand{\shiur@punct}[1]{{\shiur@mainhebrewfont#1}}
+\ExplSyntaxOn
+\tl_new:N \l__shiur_text_tl
+\tl_new:N \l__shiur_missing_tl
+\regex_new:N \l__shiur_missing_regex
+\cs_new_protected:Npn \shiur@withpunct #1 #2 #3
+	{
+		\tl_set:Nn \l__shiur_text_tl {#3}
+		\str_if_eq:nnF {#1} { hebrew }
+			{
+				\tl_clear:N \l__shiur_missing_tl
+				\tl_map_inline:nn { .,:;?!()"' }
+					{
+						\tex_iffontchar:D \font `##1 \scan_stop:
+						\else:
+							\tl_put_right:Nx \l__shiur_missing_tl
+								{ \exp_not:N \x { \int_to_Hex:n { `##1 } } }
+						\fi:
+					}
+				\tl_if_empty:NF \l__shiur_missing_tl
+					{
+						\exp_args:NNx \regex_set:Nn \l__shiur_missing_regex
+							{ [ \exp_not:V \l__shiur_missing_tl ] }
+						\regex_replace_all:NnN \l__shiur_missing_regex
+							{ \c{shiur@punct} \cB\{ \0 \cE\} } \l__shiur_text_tl
+					}
+			}
+		\exp_args:NV #2 \l__shiur_text_tl
+	}
+\ExplSyntaxOff
+
 % The roles are all Hebrew. #1 language, #2 if it is Hebrew, #3 if not
 \newcommand{\shiur@ifhebrew}[1]{%
 	\ifboolexpr{test{\ifstrequal{#1}{hebrew}} or test{\ifstrequal{#1}{mikra}} or test{\ifstrequal{#1}{rashi}}}%
@@ -355,17 +393,19 @@
 % #1 number, #2 subtitle, #3 title, #4 text. \shiur@bodyfont sets the text's
 % font; the heading stays in the language's main font.
 \newcommand{\shiur@bodyfont}{}
+\newcommand{\shiur@role}{hebrew}
 \newcommand{\shiur@mekorlang}[4]{%
 	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}\textbf{#3}%
 	\ifstrempty{#2}{}{\newline\shiur@subtitlefont\textit{#2}}%
 	\par\vspace{0.5em}\noindent
-	{\shiur@bodyfont\shiur@parts{#4}\par}\vspace{1em}%
+	{\shiur@bodyfont\shiur@withpunct{\shiur@role}{\shiur@parts}{#4}\par}\vspace{1em}%
 }
 
 % \begin{mekorlang}[subtitle]{language}{title}
 \NewDocumentEnvironment{mekorlang}{O{} m m +b}{%
 	\shiur@ifhebrew{#2}
 		{\global\shiur@hashebrewtrue
+		\def\shiur@role{#2}%
 		\def\shiur@bodyfont{\shiur@rolefont{#2}\ifstrequal{#2}{mikra}{\shiur@checktrop{#4}}{}}%
 		\begin{hebrew}\shiur@hebrewblock{\shiur@mekorlang{\hebrewnumeral{\themekor}}{#1}{#3}{#4}}\end{hebrew}\par}
 		{\ifboolexpr{not bool{shiur@translations} and bool{shiur@hashebrew}}
@@ -396,7 +436,7 @@
 \newcommand{\shiur@note}[2]{%
 	\ifbool{shiur@maggidshiur}{%
 		\shiur@ifhebrew{#1}
-			{\begin{hebrew}\begin{shiur@notebar}\shiur@rolefont{#1}#2\end{shiur@notebar}\end{hebrew}}
+			{\begin{hebrew}\begin{shiur@notebar}\shiur@rolefont{#1}\shiur@withpunct{#1}{\@firstofone}{#2}\end{shiur@notebar}\end{hebrew}}
 			{\begin{shiur@notebar}#2\end{shiur@notebar}}%
 	}{}%
 }
