@@ -121,10 +121,31 @@ and the slide wrapper uses `\documentclass{beamer}`. The body can then use
 `\mode<presentation>{...}` and `\mode<article>{...}` for material that belongs to only one
 of them. The manual has a complete example.
 
+### Starting a new shiur
+
 `scripts/newshiur NAME` starts a new shiur this way: a folder with `NAME_body.tex` and wrappers
 for the participants' handout, the presenter's notes and the slides, plus, with
 `--hebrew-only` and `--large-print`, those versions too. `scripts/newshiur --help` lists its
-options. To set your own defaults, export `SHIUR_AUTHOR` and `SHIUR_HEBREW_FONT`.
+options. It runs on Linux and macOS, and on Windows in Git Bash or WSL.
+
+```sh
+scripts/newshiur --title "Wheat from the clouds" --author "A. Teacher" wheat
+```
+
+To avoid typing your name and font every time, set them as environment variables, which the
+script uses as its defaults. Add these lines to your shell's startup file (`~/.bashrc` for
+bash, `~/.zshrc` for zsh, the default on macOS), then open a new terminal:
+
+```sh
+export SHIUR_AUTHOR="A. Teacher"
+export SHIUR_HEBREW_FONT="Taamey Frank CLM"
+```
+
+To run it as plain `newshiur` from anywhere, link it into a folder on your `PATH`, for example:
+
+```sh
+ln -s "$(kpsewhich -var-value TEXMFHOME)/tex/latex/shiur/scripts/newshiur" ~/.local/bin/newshiur
+```
 
 ## Wishlist
 
