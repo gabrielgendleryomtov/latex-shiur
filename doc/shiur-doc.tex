@@ -218,7 +218,11 @@ A commentary on a verse is named in the optional argument: \texttt{rashi}, \text
 \texttt{ibnezra}, \texttt{rashbam}, \texttt{radak}, \texttt{sforno}, \texttt{chizkuni},
 \texttt{orhachaim}, \texttt{baalhaturim}, \texttt{kliyakar}, \texttt{malbim}, \texttt{onkelos}
 or \texttt{yonatan}. \verb|\sham| after one stands for the verse, so ``Ibn Ezra \verb|\sham|''
-can follow it. \cs{declarecommentary} adds more, in the preamble:
+can follow it. A commentary on a daf works the same way, with \texttt{rashi}, \texttt{tosafot},
+\texttt{rif}, \texttt{rabbeinuchananel}, \texttt{ramban}, \texttt{rashba}, \texttt{ritva},
+\texttt{ran}, \texttt{meiri} or \texttt{maharsha}: \verb|\bavli[tosafot]{menachot}{69b}| gives
+\bavli[tosafot]{menachot}{69b} and \texthebrew{\bavli[tosafot]{menachot}{69b}}.
+\cs{declarecommentary} adds more, for both, in the preamble:
 \begin{Verbatim}[commandchars=+\(\)]
 \declarecommentary{haamekdavar}{+texthebrew(העמק דבר)}{Ha'amek Davar}
 \end{Verbatim}

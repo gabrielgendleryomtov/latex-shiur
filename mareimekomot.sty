@@ -337,6 +337,7 @@
 \__mm_hilkhot:nnn { evel, avel } { אבל } { Mourning }
 \__mm_hilkhot:nnn { melachim, milchamot } { מלכים~ומלחמות } { Kings~and~Wars }
 
+
 %                         *************
 %                         ** NUMBERS **
 %                         *************
@@ -433,7 +434,8 @@
 
 % \tanakh{book}{reference}; the starred form leaves out the book's name
 % Commentaries on a verse, for \tanakh[rashi]{gen}{18:7}: רש״י על בראשית י״ח, ז׳ /
-% Rashi on Genesis 18:7. \declarecommentary{keys}{Hebrew}{English} adds more.
+% Rashi on Genesis 18:7, or on a daf, for \bavli[tosafot]{menachot}{69b}.
+% \declarecommentary{keys}{Hebrew}{English} adds more, for both.
 \__mm_commentary:nnn { rashi } { רש״י } { Rashi }
 \__mm_commentary:nnn { ramban, nachmanides } { רמב״ן } { Ramban }
 \__mm_commentary:nnn { ibnezra } { אבן\nobreakspace עזרא } { Ibn\nobreakspace Ezra }
@@ -447,6 +449,14 @@
 \__mm_commentary:nnn { malbim } { מלבי״ם } { Malbim }
 \__mm_commentary:nnn { onkelos, targumonkelos } { תרגום\nobreakspace אונקלוס } { Targum\nobreakspace Onkelos }
 \__mm_commentary:nnn { yonatan, targumyonatan, jonathan } { תרגום\nobreakspace יונתן } { Targum\nobreakspace Yonatan }
+\__mm_commentary:nnn { tosafot, tosfot, tosafos, tosfos } { תוספות } { Tosafot }
+\__mm_commentary:nnn { rif } { רי״ף } { Rif }
+\__mm_commentary:nnn { rabbeinuchananel, rach } { רבנו\nobreakspace חננאל } { Rabbeinu\nobreakspace \__mm_H: ananel }
+\__mm_commentary:nnn { rashba } { רשב״א } { Rashba }
+\__mm_commentary:nnn { ritva } { ריטב״א } { Ritva }
+\__mm_commentary:nnn { ran } { ר״ן } { Ran }
+\__mm_commentary:nnn { meiri } { מאירי } { Meiri }
+\__mm_commentary:nnn { maharsha } { מהרש״א } { Maharsha }
 \NewDocumentCommand \declarecommentary { m m m }
 	{ \__mm_commentary:nnn {#1} {#2} {#3} }
 
@@ -518,21 +528,43 @@
 	}
 
 % \bavli{tractate}{daf}; \bavli*{daf} is the daf alone, which doesn't change what
-% \sham stands for
-\NewDocumentCommand \bavli { s }
-	{ \IfBooleanTF {#1} { \__mm_bavli_daf:n } { \__mm_bavli:nn } }
-\cs_new_protected:Npn \__mm_bavli:nn #1 #2
+% \sham stands for. \bavli[tosafot]{menachot}{69b}: תוספות מנחות ס״ט ע״ב /
+% Tosafot on B. Menaḥot 69b.
+\NewDocumentCommand \bavli { s o }
+	{ \IfBooleanTF {#1} { \__mm_bavli_daf:nn {#2} } { \__mm_bavli:nnn {#2} } }
+% #1 commentary or -NoValue-: "תוספות " / "Tosafot on "
+\cs_new_protected:Npn \__mm_bavli_commentary:n #1
+	{
+		\IfValueT {#1}
+			{
+				\__mm_lookup:Nnn \g__mm_commentary_prop {#1} { }
+				\__mm_if_hebrew:TF { \l__mm_he_tl } { \l__mm_en_tl \nobreakspace on }
+				\c_space_tl
+			}
+	}
+\cs_new_protected:Npn \__mm_bavli:nnn #1 #2 #3
 	{
 		\group_begin:
-		\__mm_lookup:Nnn \g__mm_tractate_prop {#1} { }
-		\__mm_if_hebrew:TF { בבלי \nobreakspace \l__mm_he_tl } { B. \nobreakspace \l__mm_en_tl }
+		\__mm_bavli_commentary:n {#1}
+		\__mm_lookup:Nnn \g__mm_tractate_prop {#2} { }
+		% a commentary is on the Bavli anyway, so Hebrew doesn't say so
+		\__mm_if_hebrew:TF
+			{ \IfValueF {#1} { בבלי \nobreakspace } \l__mm_he_tl }
+			{ B. \nobreakspace \l__mm_en_tl }
 		\nobreakspace
-		\__mm_daf:n {#2}
-		\__mm_remember:n { \bavli {#1} {#2} }
+		\__mm_daf:n {#3}
+		% the daf itself, so that "Rashi \sham" after Tosafot means the daf
+		\__mm_remember:n { \bavli {#2} {#3} }
 		\group_end:
 	}
-\cs_new_protected:Npn \__mm_bavli_daf:n #1
-	{ \group_begin: \__mm_nohyphenation: \__mm_daf:n {#1} \group_end: }
+\cs_new_protected:Npn \__mm_bavli_daf:nn #1 #2
+	{
+		\group_begin:
+		\__mm_nohyphenation:
+		\__mm_bavli_commentary:n {#1}
+		\__mm_daf:n {#2}
+		\group_end:
+	}
 
 %                         ************************************
 %                         ** MISHNAH, YERUSHALMI AND RAMBAM **

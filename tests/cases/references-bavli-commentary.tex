@@ -1,0 +1,17 @@
+% Commentaries on a daf, and \sham after one standing for the daf.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\newcommand{\rashiword}{Rashi}
+\newcommand{\all}{\bavli[tosafot]{menachot}{69b} | \bavli*[rashi]{70a} | \bavli[Tosfos]{chullin}{42a} | \rashiword{} \sham}
+\begin{document}
+\mareimekomotsetup{sham=full}
+\all
+
+\begin{hebrew}\renewcommand{\rashiword}{רש״י}\all\end{hebrew}
+\end{document}
+
+%! expect: Tosafot on B. Menaḥot 69b | Rashi on 70a | Tosafot on B. Ḥullin 42a | Rashi ad loc
+%! expect: (B. Ḥullin 42a
+%! expect: תוספות מנחות ס״ט ע״ב | רש״י ע׳ ע״א | תוספות חולין מ״ב ע״א
+%! expect: בבלי חולין מ״ב ע״א
