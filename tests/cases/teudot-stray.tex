@@ -1,0 +1,13 @@
+% \teudah outside marked text (here, hidden inside a macro, where the split
+% can't see it) is an error.
+\documentclass{article}
+\usepackage{teudot}
+\declareteudah{e}{red}
+\newcommand{\hidden}{\teudah{e} text}
+\begin{document}
+\begin{teudot}
+\hidden
+\end{teudot}
+\end{document}
+
+%! error: can only mark text in a teudot environment

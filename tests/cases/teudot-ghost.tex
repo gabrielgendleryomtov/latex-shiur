@@ -1,0 +1,26 @@
+% Ghosted and greyed strands keep their text and space, so every version of a
+% source has the same lines; only the colours differ.
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\declareteudah{e}{red}
+\declareteudah{j}{blue}
+\begin{document}
+\begin{mekor}[\tanach{exodus}{14:19-20}]
+\teudotsetup{show=j, others=ghost}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between. \teudah{j} There was cloud and darkness.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}[\tanach{exodus}{14:19-20}]
+\teudotsetup{show=j, others=grey}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between. \teudah{j} There was cloud and darkness.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: 1. Exodus 14:19–20 (14:19) The angel moved. The pillar of cloud moved. (20) It came between. There was cloud and darkness.
+%! expect: 2. Exodus 14:19–20 (14:19) The angel moved. The pillar of cloud moved. (20) It came between. There was cloud and darkness.
+%! absent: ...

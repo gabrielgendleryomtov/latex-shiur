@@ -1,0 +1,22 @@
+% On slides, a strand carries over a \mekorbreak, and the break's own ellipsis
+% stands for text left out at the cut.
+\documentclass{beamer}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\declareteudah{j}{blue}
+\declareteudah{p}{green!50!black}
+\begin{document}
+\begin{mekor}[\tanach{exodus}{14:21}]
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[14:21] \teudah{p} Moses stretched out his hand over the sea; \teudah{j} the Lord drove the sea back with a strong east wind all night, \mekorbreak and made the sea dry ground; \teudah{p} and the waters were split.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! pages: 2
+%! page 1: Exodus 14:21 (14:21) ... the Lord drove the sea back with a strong east wind all night...
+%! page 2: Exodus 14:21 ...and made the sea dry ground; ...
+%! absent: Moses
+%! absent: waters

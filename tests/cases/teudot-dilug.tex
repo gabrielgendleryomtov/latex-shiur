@@ -1,0 +1,28 @@
+% \dilug inside a strand's text: shown with its strand (in the colour around
+% the strands, like a verse number), silent when its strand is left out, and
+% never doubled with the ellipsis for a gap.
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\declareteudah{e}{red}
+\declareteudah{j}{blue}
+\begin{document}
+\begin{mekor}
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[1] \teudah{j} Alpha \dilug beta. \teudah{e} Gamma \dilug delta. \teudah{j} Epsilon.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\teudotsetup{show=e, others=ghost}
+\begin{mekorlang}{english}
+\pasuk[1] \teudah{j} Zeta \dilug eta. \teudah{e} Theta.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: (1) Alpha ... beta. ... Epsilon.
+%! absent: Gamma
+%! absent: ... ...
+%! expect: (1) Zeta ... eta. Theta.

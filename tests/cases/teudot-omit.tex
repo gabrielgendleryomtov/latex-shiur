@@ -1,0 +1,30 @@
+% Strands in a shiur source: only some shown, with verse numbers regenerated.
+% A verse shows its number only if some of it shows; "..." marks each gap,
+% after the number when the start of the verse is left out, before it when
+% whole verses (or the end of the one before) are.
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\declareteudah{e}{red}
+\declareteudah{j}{blue}
+\declareteudah{p}{green!50!black}
+\begin{document}
+\begin{mekor}[\tanach{exodus}{14:19-23}]
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between. \teudah{j} There was cloud and darkness. \pasuk \teudah{p} Moses stretched out his hand. \teudah{j} An east wind blew. \teudah{p} The waters split. \pasuk Israel went in. \pasuk \teudah{j} The Egyptians pursued.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}[\tanach{exodus}{14:19-23}]
+\teudotsetup{show=p, others=omit}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between. \teudah{j} There was cloud and darkness. \pasuk \teudah{p} Moses stretched out his hand. \teudah{j} An east wind blew. \teudah{p} The waters split. \pasuk Israel went in. \pasuk \teudah{j} The Egyptians pursued.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: (14:19) ... The pillar of cloud moved. (20) ... There was cloud and darkness. (21) ... An east wind blew. ... (23) The Egyptians pursued.
+%! expect: 2. Exodus 14:19–23 (21) Moses stretched out his hand. ... The waters split. (22) Israel went in. ...
+%! absent: angel
+%! absent: It came between

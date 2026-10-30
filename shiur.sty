@@ -368,20 +368,27 @@
 	{
 		\shiur@trimpart {#1}
 		\regex_replace_once:nnN { (?: [.,;:] | \c{dilug} | \s )+ \Z } { } \shiur@parttext
-		\shiur@parttext
+		\exp_args:NVV \shiur@teudot \shiur@partfinal \shiur@parttext
 	}
 \cs_new_protected:Npn \shiur@trimmed #1
 	{
 		\shiur@trimpart {#1}
-		\shiur@parttext
+		\exp_args:NVV \shiur@teudot \shiur@partfinal \shiur@parttext
 	}
+% A part of a mekorlang's text, through teudot when it is loaded, which colours
+% or leaves out the strands marked with \teudah. #1 true for the last part (all
+% of the text, in an article), false otherwise; #2 text
+\cs_new_protected:Npn \shiur@teudot #1 #2
+	{ \cs_if_exist:NTF \teudot@part { \teudot@part {#1} {#2} } {#2} }
+% whether the part being typeset is the last
+\tl_new:N \shiur@partfinal
 % A clean cut doesn't leave a slide ending in a comma.
 % #1 text
 \cs_new_protected:Npn \shiur@dropcomma #1
 	{
 		\shiur@trimpart {#1}
 		\regex_replace_once:nnN { [,;]+ \Z } { } \shiur@parttext
-		\shiur@parttext
+		\exp_args:NVV \shiur@teudot \shiur@partfinal \shiur@parttext
 	}
 % #1 the text after a break, #2 if the break is \mekorbreak*, #3 if not
 \cs_new_protected:Npn \shiur@ifstarred #1
@@ -405,8 +412,9 @@
 		\ifnumgreater{\value{shiur@part}}{\value{shiur@parts}}
 			{\setcounter{shiur@parts}{\value{shiur@part}}}{}%
 		\edef\shiur@before{\ifshiur@midbreak\noexpand\shiur@ellipsis\fi}%
+		\ifblank{#2}{\def\shiur@partfinal{true}}{\def\shiur@partfinal{false}}%
 		\ifblank{#2}
-			{\ifnumequal{\value{shiur@part}}{1}{#1}{\shiur@part{\shiur@trimmed{#1}}{}}}
+			{\ifnumequal{\value{shiur@part}}{1}{\shiur@teudot{true}{#1}}{\shiur@part{\shiur@trimmed{#1}}{}}}
 			{\shiur@ifstarred{#2}
 				{\shiur@part{\shiur@dropcomma{#1}}{}\shiur@midbreakfalse}
 				{\shiur@part{\shiur@dropstop{#1}}{\shiur@ellipsis}\shiur@midbreaktrue}%
@@ -418,7 +426,7 @@
 			{\shiur@before#1#2}{\setbox\z@\vbox{\shiur@before#1#2}}%
 	}
 }{
-	\let\shiur@parts\@firstofone
+	\newcommand{\shiur@parts}[1]{\shiur@teudot{true}{#1}}
 }
 
 % #1 number, #2 subtitle, #3 title, #4 text. \shiur@bodyfont sets the text's
@@ -464,7 +472,14 @@
 		\int_gzero:N \g__shiur_perek_int
 		\int_gzero:N \g__shiur_pasuk_int
 		\bool_gset_false:N \g__shiur_verses_bool
+		\cs_if_exist_use:N \teudot@reset
 	}
+% teudot: whether the text running is left out (counted but not shown), and
+% text in the colour around the strands, as verse numbers are
+\cs_new_protected:Npn \__shiur_if_silent:TF
+	{ \cs_if_exist:NTF \ifteudot@silent { \legacy_if:nTF { teudot@silent } } { \use_ii:nn } }
+\cs_new_protected:Npn \__shiur_plain:n #1
+	{ \cs_if_exist:NTF \teudot@plain { \teudot@plain {#1} } {#1} }
 \NewDocumentCommand \pasuk { s o }
 	{
 		\bool_set:Nn \l__shiur_forceskip_bool {#1}
@@ -522,15 +537,23 @@
 		\bool_if:NT \l__shiur_forceskip_bool { \bool_set_true:N \l__shiur_skip_bool }
 		\bool_if:NT \g__shiur_dilug_bool { \bool_set_false:N \l__shiur_skip_bool \c_space_tl }
 		\bool_gset_false:N \g__shiur_dilug_bool
-		\bool_if:NT \l__shiur_skip_bool { \shiur@ellipsis \c_space_tl }
+		\__shiur_plain:n
+			{
+				\bool_if:NT \l__shiur_skip_bool { \shiur@ellipsis \c_space_tl }
+				\__shiur_verse_number:nn {#1} {#2}
+			}
+		\nobreakspace
+	}
+\cs_generate_variant:Nn \__shiur_verse:nn { ne, ee }
+% #1 chapter or empty, #2 verse: (37:18), (19), (לז יח)
+\cs_new_protected:Npn \__shiur_verse_number:nn #1 #2
+	{
 		(
 		\tl_if_blank:nF {#1}
 			{ \__shiur_number:n {#1} \str_if_eq:VnTF \languagename { hebrew } { \nobreakspace } { \c_colon_str } }
 		\__shiur_number:n {#2}
 		)
-		\nobreakspace
 	}
-\cs_generate_variant:Nn \__shiur_verse:nn { ne, ee }
 \cs_new:Npn \__shiur_number:n #1
 	{ \str_if_eq:VnTF \languagename { hebrew } { \hebrewnumeral {#1} } { \int_eval:n {#1} } }
 
@@ -543,6 +566,8 @@
 % marker, a break or another \dilug has come since
 \bool_new:N \g__shiur_dilug_bool
 \NewDocumentCommand \dilug { }
+	{ \__shiur_if_silent:TF { } { \__shiur_dilug: } }
+\cs_new_protected:Npn \__shiur_dilug:
 	{
 		\bool_if:NTF \g__shiur_dilug_bool
 			{
@@ -553,7 +578,8 @@
 			{
 				\mode_leave_vertical:
 				\dim_compare:nNnT \lastskip > \c_zero_dim { \unskip \nobreakspace }
-				\shiur@ellipsis
+				% like a verse number, in the colour around teudot's strands
+				\__shiur_plain:n { \shiur@ellipsis }
 				\__shiur_dilug_next:nn { \bool_gset_true:N \g__shiur_dilug_bool } { \c_space_tl }
 			}
 	}
@@ -568,6 +594,19 @@
 							{ \peek_meaning_ignore_spaces:NTF \dilug {#1} {#2} }
 					}
 			}
+	}
+
+\AtBeginDocument
+	{
+		\@ifpackageloaded { teudot }
+			{
+				% teudot: \pasuk and \perek are verse markers, outside any strand, and
+				% text left out is marked with \dilug
+				\teudot@setmarkers
+					{ \c{pasuk} \*? (?: \[ [^\]]* \] )? | \c{perek} \*? \cB\{ [^\}]* \cE\} }
+				\cs_set_eq:NN \teudot@ellipsis \dilug
+			}
+			{ }
 	}
 % on a handout a break is ignored; it keeps a \dilug's ellipsis pending only
 % if a \dilug or verse marker follows

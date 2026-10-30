@@ -1,0 +1,27 @@
+% teudot on its own, without shiur: a legend, colours, and text left out with
+% "..." (once per gap, and at the end).
+\documentclass{article}
+\usepackage{teudot}
+\declareteudah[name=Elohist]{e}{red}
+\declareteudah[name=Yahwist]{J}{blue}
+\begin{document}
+\teudotlegend
+
+A: \begin{teudot}
+Before. \teudah{e} Alpha beta \teudah{j} gamma delta \teudah{E} epsilon zeta.
+\end{teudot}
+
+B: \begin{teudot}[show=e, others=omit]
+Before. \teudah{e} Alpha beta \teudah{j} gamma delta \teudah{e} epsilon zeta. \teudah{j} eta.
+\end{teudot}
+
+C: \begin{teudot}[show=e, others=ghost]
+Before. \teudah{e} Alpha beta \teudah{j} gamma delta \teudah{e} epsilon zeta.
+\end{teudot}
+\end{document}
+
+%! expect: E Elohist J Yahwist
+%! expect: A: Before. Alpha beta gamma delta epsilon zeta.
+%! expect: B: Before. Alpha beta ... epsilon zeta. ...
+%! absent: gamma delta epsilon zeta. eta
+%! expect: C: Before. Alpha beta gamma delta epsilon zeta.

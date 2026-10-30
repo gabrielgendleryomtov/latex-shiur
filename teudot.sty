@@ -1,0 +1,370 @@
+% teudot: colouring and isolating the sources (strands) of a text, as in the
+% documentary hypothesis (תורת התעודות).
+% Gabriel Gendler Yom-Tov <shiurtex@thm.mozmail.com>
+%
+% Copyright 2026 Gabriel Gendler Yom-Tov
+%
+% This work may be distributed and/or modified under the conditions of the
+% LaTeX Project Public License, either version 1.3c of this license or (at
+% your option) any later version. The latest version of this license is in
+% https://www.latex-project.org/lppl.txt
+%
+% This work has the LPPL maintenance status `maintained'. The Current
+% Maintainer of this work is Gabriel Gendler Yom-Tov. This work consists of
+% the file teudot.sty.
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
+\ProvidesPackage{teudot}[2026/10/30 v0.1 colouring and isolating the sources of a text]
+
+% \declareteudah[name=Elohist]{e}{red} declares a strand and its colour (any
+% xcolor colour). A text is marked with \teudah{e}, which switches strand until
+% the next marker; text before the first marker is in no strand and always
+% shows:
+%   \begin{teudot}[show={e,j}, others=ghost]
+%   \teudah{e} lorem ipsum \teudah{j} dolor sit \teudah{e} amet
+%   \end{teudot}
+% show= chooses the strands shown in their colours (all, if empty); others= is
+% what happens to the rest: show, grey, ghost (invisible but taking its space,
+% so that versions of a text overlay exactly) or omit (left out, with an
+% ellipsis where text was). \teudotsetup{...} sets the same keys for whatever
+% follows in the current group. In shiur, a mekorlang's text takes markers
+% directly, and \teudotsetup inside the mekor chooses its version.
+
+\RequirePackage{xcolor}
+
+\ExplSyntaxOn
+
+%                         **************
+%                         ** STRANDS **
+%                         **************
+
+\seq_new:N \g__teudot_keys_seq
+\prop_new:N \g__teudot_names_prop
+\tl_new:N \l__teudot_name_tl
+\keys_define:nn { teudot / declare }
+	{ name .tl_set:N = \l__teudot_name_tl }
+% #1 keys, #2 strand, #3 colour
+\NewDocumentCommand \declareteudah { O{} m m }
+	{
+		\tl_clear:N \l__teudot_name_tl
+		\keys_set:nn { teudot / declare } {#1}
+		\str_set:Ne \l_tmpa_str { \str_lowercase:n {#2} }
+		\seq_if_in:NVF \g__teudot_keys_seq \l_tmpa_str
+			{ \seq_gput_right:NV \g__teudot_keys_seq \l_tmpa_str }
+		\prop_gput:NVV \g__teudot_names_prop \l_tmpa_str \l__teudot_name_tl
+		\colorlet { teudot@ \l_tmpa_str } {#3}
+	}
+\cs_generate_variant:Nn \prop_gput:Nnn { NVV }
+\cs_generate_variant:Nn \seq_if_in:NnF { NV }
+
+% \teudotlegend: each strand's letter in its colour, with its name
+\NewDocumentCommand \teudotlegend { }
+	{
+		\seq_map_indexed_inline:Nn \g__teudot_keys_seq
+			{
+				\int_compare:nNnT {##1} > 1 { \quad }
+				\group_begin:
+				\color { teudot@ ##2 }
+				\textbf { \text_uppercase:n {##2} }
+				\prop_get:NnNT \g__teudot_names_prop {##2} \l__teudot_name_tl
+					{ \tl_if_empty:NF \l__teudot_name_tl { \nobreakspace \l__teudot_name_tl } }
+				\group_end:
+			}
+	}
+
+%                         **************
+%                         ** SETTINGS **
+%                         **************
+
+\clist_new:N \l__teudot_show_clist
+\tl_new:N \l__teudot_others_tl
+\tl_set:Nn \l__teudot_others_tl { show }
+\bool_new:N \l__teudot_colours_bool
+\bool_set_true:N \l__teudot_colours_bool
+\tl_new:N \l__teudot_ghost_tl
+\tl_new:N \l__teudot_grey_tl
+\tl_set:Nn \l__teudot_grey_tl { black!30 }
+\keys_define:nn { teudot }
+	{
+		show .code:n = \clist_set:Ne \l__teudot_show_clist { \str_lowercase:n {#1} },
+		others .choices:nn = { show, grey, ghost, omit }
+			{ \tl_set_eq:NN \l__teudot_others_tl \l_keys_choice_tl },
+		colours .bool_set:N = \l__teudot_colours_bool,
+		colors .bool_set:N = \l__teudot_colours_bool,
+		ghostcolour .tl_set:N = \l__teudot_ghost_tl,
+		ghostcolor .tl_set:N = \l__teudot_ghost_tl,
+		greycolour .tl_set:N = \l__teudot_grey_tl,
+		greycolor .tl_set:N = \l__teudot_grey_tl,
+	}
+\NewDocumentCommand \teudotsetup { m } { \keys_set:nn { teudot } {#1} }
+
+% Hidden text is set in the colour of the page, which keeps it in place across
+% line and page breaks (\phantom can't break a line, and opacity doesn't
+% survive a group under XeTeX); on slides that is the background canvas's.
+\cs_new_protected:Npn \__teudot_ghost:
+	{
+		\tl_if_empty:NTF \l__teudot_ghost_tl
+			{
+				\cs_if_exist:NTF \usebeamercolor
+					{ \usebeamercolor [bg] { background~canvas } }
+					{ \color { white } }
+			}
+			{ \color { \l__teudot_ghost_tl } }
+	}
+
+%                         *****************
+%                         ** TYPESETTING **
+%                         *****************
+
+% State that carries over from one call of \teudot@process to the next (as
+% across shiur's \mekorbreak) until \teudot@reset: the strand in force; verse
+% markers waiting for shown text (left-out text only); whether text was left out
+% before the last of them or since it; and whether any text has been shown.
+\tl_new:N \g__teudot_current_tl
+\seq_new:N \g__teudot_pending_seq
+\bool_new:N \g__teudot_gapbefore_bool
+\bool_new:N \g__teudot_gapafter_bool
+\bool_new:N \g__teudot_shown_bool
+\cs_new_protected:Npn \teudot@reset
+	{
+		\tl_gclear:N \g__teudot_current_tl
+		\seq_gclear:N \g__teudot_pending_seq
+		\bool_gset_false:N \g__teudot_gapbefore_bool
+		\bool_gset_false:N \g__teudot_gapafter_bool
+		\bool_gset_false:N \g__teudot_shown_bool
+	}
+
+% For packages:
+% - \teudot@setmarkers{regex}: what a verse marker looks like, as shiur's
+%   \pasuk[20] and \perek{38}. Markers belong to no strand: they are set in the
+%   colour around the strands, and when text is left out a marker waits for
+%   the next shown text, so that a verse shows its number only if some of it
+%   shows.
+% - \teudot@ellipsis marks text left out (shiur makes it \dilug).
+% - \teudot@plain{...} sets text in the colour around the strands.
+% - \ifteudot@silent is true while left-out text runs, in a box that is thrown
+%   away so that counters still advance.
+\regex_new:N \g__teudot_markers_regex
+\bool_new:N \g__teudot_markers_bool
+\cs_new_protected:Npn \teudot@setmarkers #1
+	{
+		\regex_gset:Nn \g__teudot_markers_regex { ( #1 ) }
+		\bool_gset_true:N \g__teudot_markers_bool
+	}
+\cs_new_protected:Npn \teudot@ellipsis
+	{
+		\mode_if_horizontal:T { \unskip \c_space_tl }
+		... \c_space_tl
+	}
+\newif \ifteudot@active
+\newif \ifteudot@silent
+\cs_new_protected:Npn \teudot@plain #1
+	{
+		\legacy_if:nTF { teudot@active }
+			{ \group_begin: \color { teudot@base } #1 \group_end: }
+			{ #1 }
+	}
+
+\seq_new:N \l__teudot_pieces_seq
+\seq_new:N \l__teudot_units_seq
+\tl_new:N \l__teudot_text_tl
+\tl_new:N \l__teudot_marker_tl
+\box_new:N \l__teudot_box
+\msg_new:nnn { teudot } { unknown }
+	{ Unknown~strand~`#1'.~Declare~it~with~\iow_char:N\\declareteudah. }
+% #1 text marked with \teudah
+\cs_new_protected:Npn \teudot@process #1
+	{
+		\group_begin:
+		\colorlet { teudot@base } { . }
+		\teudot@activetrue
+		\seq_set_split_keep_spaces:Nnn \l__teudot_pieces_seq { \teudah } {#1}
+		% the text before the first \teudah stays in the strand in force
+		\seq_pop_left:NN \l__teudot_pieces_seq \l__teudot_text_tl
+		\__teudot_piece:VV \g__teudot_current_tl \l__teudot_text_tl
+		\seq_map_inline:Nn \l__teudot_pieces_seq
+			{
+				\tl_gset:Ne \g__teudot_current_tl { \tl_head:n {##1} }
+				\tl_set:Ne \l__teudot_text_tl { \tl_tail:n {##1} }
+				\regex_replace_once:nnN { \A \s+ } { } \l__teudot_text_tl
+				\__teudot_piece:VV \g__teudot_current_tl \l__teudot_text_tl
+			}
+		\group_end:
+	}
+% #1 strand (empty for none), #2 its text, split at verse markers: text,
+% marker, text, marker...
+\cs_new_protected:Npn \__teudot_piece:nn #1 #2
+	{
+		\bool_if:NTF \g__teudot_markers_bool
+			{ \regex_split:NnN \g__teudot_markers_regex {#2} \l__teudot_units_seq }
+			{ \seq_set_from_clist:Nn \l__teudot_units_seq { {#2} } }
+		\seq_map_indexed_inline:Nn \l__teudot_units_seq
+			{
+				\int_if_odd:nTF {##1}
+					{ \tl_if_blank:nF {##2} { \__teudot_text:nn {#1} {##2} } }
+					{ \__teudot_marker:n {##2} }
+			}
+	}
+% whether text left out waits on markers (others=omit with a choice of strands)
+\prg_new_conditional:Npnn \__teudot_if_omitting: { T, F, TF }
+	{
+		\bool_lazy_and:nnTF
+			{ \str_if_eq_p:Vn \l__teudot_others_tl { omit } }
+			{ ! \clist_if_empty_p:N \l__teudot_show_clist }
+			{ \prg_return_true: } { \prg_return_false: }
+	}
+% #1 a verse marker
+\cs_new_protected:Npn \__teudot_marker:n #1
+	{
+		\__teudot_if_omitting:TF
+			{
+				\seq_gput_right:Nn \g__teudot_pending_seq {#1}
+				\bool_if:NT \g__teudot_gapafter_bool
+					{ \bool_gset_true:N \g__teudot_gapbefore_bool }
+				\bool_gset_false:N \g__teudot_gapafter_bool
+			}
+			{ #1 }
+	}
+% #1 strand (empty for none), #2 text
+\cs_new_protected:Npn \__teudot_text:nn #1 #2
+	{
+		\str_set:Ne \l_tmpa_str { \str_lowercase:n {#1} }
+		\str_if_empty:NTF \l_tmpa_str
+			{ \__teudot_show:nn { } {#2} }
+			{
+				\seq_if_in:NVTF \g__teudot_keys_seq \l_tmpa_str
+					{
+						\clist_if_empty:NTF \l__teudot_show_clist
+							{ \__teudot_show:Vn \l_tmpa_str {#2} }
+							{
+								\clist_if_in:NVTF \l__teudot_show_clist \l_tmpa_str
+									{ \__teudot_show:Vn \l_tmpa_str {#2} }
+									{ \__teudot_other:Vn \l_tmpa_str {#2} }
+							}
+					}
+					{
+						\msg_error:nne { teudot } { unknown } { \l_tmpa_str }
+						\__teudot_show:nn { } {#2}
+					}
+			}
+	}
+\cs_generate_variant:Nn \seq_if_in:NnTF { NV }
+\cs_generate_variant:Nn \clist_if_in:NnTF { NV }
+% #1 strand or empty, #2 text: shown, in the strand's colour
+\cs_new_protected:Npn \__teudot_show:nn #1 #2
+	{
+		\__teudot_flush:
+		\group_begin:
+		\bool_lazy_and:nnT { ! \tl_if_empty_p:n {#1} } { \l__teudot_colours_bool }
+			{ \color { teudot@ #1 } }
+		#2
+		\group_end:
+	}
+% #1 strand, #2 text: what others= says
+\cs_new_protected:Npn \__teudot_other:nn #1 #2
+	{
+		\str_case:Vn \l__teudot_others_tl
+			{
+				{ show } { \__teudot_show:nn {#1} {#2} }
+				{ grey } { \group_begin: \color { \l__teudot_grey_tl } #2 \group_end: }
+				{ ghost } { \group_begin: \__teudot_ghost: #2 \group_end: }
+				{ omit }
+					{
+						\__teudot_silent:n {#2}
+						\bool_gset_true:N \g__teudot_gapafter_bool
+					}
+			}
+	}
+\cs_generate_variant:Nn \__teudot_piece:nn { VV }
+\cs_generate_variant:Nn \__teudot_show:nn { V }
+\cs_generate_variant:Nn \__teudot_other:nn { V }
+\cs_new_protected:Npn \__teudot_silent:n #1
+	{ \vbox_set:Nn \l__teudot_box { \teudot@silenttrue #1 } }
+% Before shown text: the markers waiting, and an ellipsis for text left out.
+% All but the last marker run silently; "..." goes before the last if whole
+% verses, or the end of the one before, were left out (not at the start of the
+% text), and after it if the start of its verse was.
+\cs_new_protected:Npn \__teudot_flush:
+	{
+		\seq_if_empty:NTF \g__teudot_pending_seq
+			{ \bool_if:NT \g__teudot_gapafter_bool { \teudot@ellipsis } }
+			{
+				\bool_lazy_and:nnT
+					{ \g__teudot_shown_bool }
+					{
+						\bool_lazy_or_p:nn { \g__teudot_gapbefore_bool }
+							{ \int_compare_p:nNn { \seq_count:N \g__teudot_pending_seq } > 1 }
+					}
+					{ \teudot@ellipsis }
+				\seq_gpop_right:NN \g__teudot_pending_seq \l__teudot_marker_tl
+				\__teudot_silent:n { \seq_use:Nn \g__teudot_pending_seq { } }
+				\l__teudot_marker_tl
+				\bool_if:NT \g__teudot_gapafter_bool { \teudot@ellipsis }
+			}
+		\seq_gclear:N \g__teudot_pending_seq
+		\bool_gset_false:N \g__teudot_gapbefore_bool
+		\bool_gset_false:N \g__teudot_gapafter_bool
+		\bool_gset_true:N \g__teudot_shown_bool
+	}
+% At the end of the marked text: "..." if text was left out after the last
+% shown, and any markers still waiting run silently.
+\cs_new_protected:Npn \__teudot_finish:
+	{
+		\bool_if:NT \g__teudot_shown_bool
+			{
+				\bool_lazy_any:nT
+					{
+						{ \g__teudot_gapafter_bool }
+						{ \g__teudot_gapbefore_bool }
+						{ ! \seq_if_empty_p:N \g__teudot_pending_seq }
+					}
+					{ \teudot@ellipsis }
+			}
+		\__teudot_silent:n { \seq_use:Nn \g__teudot_pending_seq { } }
+		\teudot@reset
+	}
+
+% For packages that typeset marked text in parts (shiur, at \mekorbreak): #1
+% true for the last part, false otherwise, #2 a part, which may have no marker
+% but continue the strand of the part before. A part that isn't the last ends
+% without an ellipsis of its own (shiur's break has one), but markers waiting
+% carry over to the next.
+\cs_new_protected:Npn \teudot@part #1 #2
+	{
+		\tl_if_in:nnTF {#2} { \teudah }
+			{ \__teudot_part:nn {#1} {#2} }
+			{
+				\tl_if_empty:NTF \g__teudot_current_tl
+					{ #2 }
+					{ \__teudot_part:nn {#1} {#2} }
+			}
+	}
+\cs_new_protected:Npn \__teudot_part:nn #1 #2
+	{
+		\teudot@process {#2}
+		\str_if_eq:nnTF {#1} { true }
+			{ \__teudot_finish: }
+			{
+				\bool_gset_false:N \g__teudot_gapbefore_bool
+				\bool_gset_false:N \g__teudot_gapafter_bool
+			}
+	}
+
+% \teudah{strand} outside \teudot@process: only a marker, never typeset
+\NewDocumentCommand \teudah { m }
+	{ \msg_error:nn { teudot } { stray } }
+\msg_new:nnn { teudot } { stray }
+	{ \iow_char:N\\teudah~can~only~mark~text~in~a~teudot~environment~(or~a~shiur~mekorlang). }
+
+% #1 keys, #2 text
+\NewDocumentEnvironment { teudot } { O{} +b }
+	{
+		\group_begin:
+		\keys_set:nn { teudot } {#1}
+		\teudot@reset
+		\teudot@process {#2}
+		\__teudot_finish:
+		\group_end:
+	}
+	{ }
+
+\ExplSyntaxOff

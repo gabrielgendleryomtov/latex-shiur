@@ -1,0 +1,11 @@
+% A strand that wasn't declared is an error.
+\documentclass{article}
+\usepackage{teudot}
+\declareteudah{e}{red}
+\begin{document}
+\begin{teudot}
+\teudah{x} text
+\end{teudot}
+\end{document}
+
+%! error: Unknown strand `x'
