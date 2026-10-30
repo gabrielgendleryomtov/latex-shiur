@@ -9,6 +9,9 @@ A test case states what its PDF must show in comment lines starting %!:
     %! page N: TEXT    the text appears on page N
     %! not page N: TEXT  the text doesn't appear on page N
     %! error: TEXT     the document fails, with TEXT in its log
+    %! log: TEXT       the log has TEXT (a warning, say)
+    %! not log: TEXT   the log doesn't have TEXT
+    %! runs: N         compiled N times (by run.sh), for what is read from the .aux
 Text is compared with all whitespace and direction marks removed, since
 pdftotext moves spaces around punctuation next to Hebrew. It also moves full
 stops and mirrors brackets there, so a TEXT with Hebrew in it is compared
@@ -20,7 +23,7 @@ import subprocess
 import sys
 
 ident, source, pdf, log = sys.argv[1:5]
-DIRECTIVE = re.compile(r"^\s*%!\s*(expect|absent|pages|(?:not )?page (\d+)|error):\s*(.*?)\s*$")
+DIRECTIVE = re.compile(r"^\s*%!\s*(expect|absent|pages|(?:not )?page (\d+)|(?:not )?log|error|runs):\s*(.*?)\s*$")
 INVISIBLE = re.compile(r"[\s‎‏‪-‮⁦-⁩]")
 
 
@@ -49,7 +52,7 @@ with open(source, encoding="utf-8") as f:
     for line in f:
         m = DIRECTIVE.match(line)
         if m:
-            kind = "notpage" if m.group(1).startswith("not ") else m.group(1).split()[0]
+            kind = m.group(1).replace("not ", "not").split()[0]
             directives.append((kind, m.group(2), m.group(3)))
 
 try:
@@ -84,6 +87,10 @@ else:
             problems.append(f"page {page} lacks {arg!r}")
         elif kind == "notpage" and contains(pdftext("-f", page, "-l", page), arg):
             problems.append(f"page {page} has {arg!r}")
+        elif kind == "log" and squash(arg) not in squash(logtext):
+            problems.append(f"log lacks {arg!r}")
+        elif kind == "notlog" and squash(arg) in squash(logtext):
+            problems.append(f"log has {arg!r}")
         elif kind == "pages":
             if pages is None:
                 info = subprocess.run(["pdfinfo", pdf], capture_output=True, text=True).stdout

@@ -55,9 +55,13 @@ one() {
 	dir=$out/${id//\//__}
 	rm -rf "$dir"
 	mkdir -p "$dir"
-	(cd "$(dirname "$doc")" &&
-		TEXINPUTS="$repo//:" timeout 300 xelatex -interaction=nonstopmode -halt-on-error \
-			-output-directory="$dir" -jobname=doc "$(basename "$doc")" >/dev/null 2>&1)
+	# "%! runs: N" compiles N times, for what is read back from the .aux
+	runs=$(sed -n 's/^%! *runs: *\([0-9]*\).*/\1/p' "$doc" | head -1)
+	for ((run = 1; run <= ${runs:-1}; run++)); do
+		(cd "$(dirname "$doc")" &&
+			TEXINPUTS="$repo//:" timeout 300 xelatex -interaction=nonstopmode -halt-on-error \
+				-output-directory="$dir" -jobname=doc "$(basename "$doc")" >/dev/null 2>&1) || break
+	done
 	python3 -I "$repo/tests/check.py" "$id" "$doc" "$dir/doc.pdf" "$dir/doc.log"
 }
 export -f one
