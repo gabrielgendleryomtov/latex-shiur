@@ -89,7 +89,10 @@ Outside \texttt{shiur}, the marked text goes in a \texttt{teudot} environment:
 The package finds the markers by reading the text, so they must be written out in it, at its
 top level: not inside a macro, and not inside braces such as \verb|\textbf{...}|. Put them
 between words. Inside a pointed Hebrew word, a change of colour can separate a letter from its
-vowels.
+vowels. Each word is coloured on its own, because a colour that runs on over a line break comes
+out wrong in right-to-left text. A group in braces counts as one word, so in Hebrew it should
+stay on one line: if a group of several words breaks over two, the next run warns, with its
+page, and closing the braces and opening them again where the line breaks fixes it.
 
 \section{Choosing a version}
 

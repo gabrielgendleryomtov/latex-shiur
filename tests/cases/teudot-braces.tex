@@ -1,0 +1,25 @@
+% A group in braces in Hebrew strand text is coloured as one, and if it breaks
+% over two lines its colour can come out wrong (XeTeX reverses right-to-left
+% lines, colour changes included), so the next run warns. Hebrew only: English
+% isn't reversed.
+%! runs: 2
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\setshiurfont{mikra}{FreeSerif}
+\declareteudah{e}{red}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{mikra}
+\pasuk[1] \teudah{e} אאא בבב גגג דדד ההה ווו זזז חחח טטט ייי ככך ללל מממ \textbf{ננן ססס עעע פפף צצץ קקק ררר שששש תתת אאא בבב גגג דדד ההה ווו זזז חחח טטט} ייי
+\end{mekorlang}
+\begin{mekorlang}{english}
+\pasuk[1] \teudah{e} aaa bbb ccc ddd eee fff ggg hhh iii jjj kkk lll \textbf{mmm nnn ooo ppp qqq rrr sss ttt uuu vvv www xxx yyy zzz aaa bbb ccc} ddd
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! log: Package teudot Warning: A group in braces in right-to-left text
+%! log: broke over two lines
+%! expect: ננן ססס

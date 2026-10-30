@@ -1,0 +1,18 @@
+% A group in braces in Hebrew strand text that stays on one line: no warning.
+%! runs: 2
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\setshiurfont{mikra}{FreeSerif}
+\declareteudah{e}{red}
+\begin{document}
+\begin{mekor}
+\begin{mekorlang}{mikra}
+\pasuk[1] \teudah{e} אאא \textbf{בבב גגג} דדד
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! not log: teudot Warning
+%! expect: בבב גגג
