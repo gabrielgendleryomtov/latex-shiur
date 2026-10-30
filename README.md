@@ -12,7 +12,7 @@ makes:
 Each version is a small wrapper file around the shared content, so a correction made once
 shows up everywhere.
 
-The manual, [`doc/shiur-doc.pdf`](doc/shiur-doc.pdf), covers everything below in more detail; the references have their own, [`doc/mareimekomot-doc.pdf`](doc/mareimekomot-doc.pdf).
+The manual, [`doc/shiur-doc.pdf`](doc/shiur-doc.pdf), covers everything below in more detail; the references have their own, [`doc/mareimekomot-doc.pdf`](doc/mareimekomot-doc.pdf), and so does `teudot`, for colouring the sources of a text, [`doc/teudot-doc.pdf`](doc/teudot-doc.pdf).
 
 ## Requirements
 
@@ -73,6 +73,7 @@ Compile it with `xelatex` (twice, for the PDF bookmarks).
 | `mekorlang[subtitle]{language}{title}` | One language of a source; its own title, if given, replaces the mekor's heading. `hebrew`, `mikra` (Tanakh) and `rashi` are Hebrew, set right to left with Hebrew numerals, each in its own font. |
 | `\pasuk`, `\pasuk[23]`, `\pasuk[37:18]`, `\perek{38}` | Verse numbers in Tanakh: (19), (23), (37:18), (38:1), or (יט), (כג), (לז יח), (לח א) in Hebrew. A skipped verse gets "..." first; `\pasuk*`/`\perek*` force it. |
 | `\tanach` (with commentaries: `\tanach[rashi]{gen}{18:7}`; `\declarecommentary` adds more), `\bavli` (also with commentaries, and the words they open with: `\bavli[tosafot, dh=ואם תאמר, sv=ve'im tomar]{menachot}{69b}`), `\mishnah`, `\yerushalmi`, `\rambam`, `\shulchanaruch`, `\tur` (and `\beityosef`, `\darkeimoshe`, `\bach`, `\shach`, `\taz`, `\magenavraham`, `\mishnahberurah`, `\aruchhashulchan`; `\declaretursefer` adds more), `\sefer` (Midrash and other works: `\sefer{tanchuma}{noach}{1}`; `\declaresefer` adds more, from a template such as `{ #T #N:#N}`), `\sham`, `\sham[rashi]` | References, from the companion `mareimekomot` package, set in the language around them: `\tanach{gen}{37:18-20}` gives Genesis 37:18–20 / בראשית ל״ז, י״ח–כ׳; `\shulchanaruch{oh}{605:1}` gives Shulḥan Arukh, Oraḥ Ḥayyim 605:1 / שו״ע או״ח סי׳ תר״ה סע׳ א׳; `\sham` gives ad loc / שם. Keys and command names take any usual transliteration: `menachot`, `menakhot` and `menahot` are the same, as are `\tanach` and `\tanakh`. The English printed uses ḥ for ח and kh for כ. Its own manual, `doc/mareimekomot-doc.pdf`, has the details and the full lists of names. |
+| `\declareteudah{e}{red}`, `\teudah{e}`, `\teudotsetup{show=j, others=omit}` | Sources (strands) of a text, as in the documentary hypothesis, from the companion `teudot` package: mark a text once, then show every strand in its colour, some strands alone (`others=omit`, with verse numbers regenerated), or one strand with the rest invisible but keeping their space (`others=ghost`), so that versions overlay exactly. Load it with `\usepackage{teudot}`; it works without shiur too. |
 | `\dilug` | Marks text left out with "...", in any language; never doubles up with a verse marker's or a slide break's ellipsis. |
 | `\setshiurfont{role}[options]{font}` | Choose the font for `hebrew`, `mikra` or `rashi`, with `fontspec` options. Unset roles get an installed font from a built-in list. |
 | `hearah` | A note for the maggid shiur (הערה), printed only with `maggidshiur`, and never on slides. Optional argument: its language. |

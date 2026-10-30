@@ -1,0 +1,180 @@
+% Manual for the teudot package. Compile with XeLaTeX (twice).
+\documentclass[11pt]{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\usepackage{fancyvrb}
+\usepackage{booktabs}
+\setshiurfont{hebrew}{FreeSerif}
+\setshiurfont{mikra}{FreeSerif}
+\hypersetup{hidelinks}
+\newfontfamily{\codefont}{FreeMono}
+\newfontfamily{\hebrewfonttt}{FreeMono}[Script=Hebrew]
+\fvset{formatcom=\codefont\small, frame=single, framesep=2mm}
+\newcommand{\cs}[1]{\texttt{\char`\\#1}}
+\setlength{\emergencystretch}{2em}
+
+\declareteudah[name=Elohist]{e}{red!80!black}
+\declareteudah[name=Yahwist]{j}{blue}
+\declareteudah[name=Priestly]{p}{green!50!black}
+
+\title{The \texttt{teudot} package\\[0.3em]\large Colouring and isolating the sources of a text}
+\author{Gabriel Gendler Yom-Tov\\\small\texttt{shiurtex@thm.mozmail.com}}
+\date{Version 0.1, 30 October 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\texttt{teudot} (\texthebrew{תעודות}, ``documents'', as in \texthebrew{תורת התעודות}, the
+documentary hypothesis) is for teaching biblical criticism. A text is marked once with the
+sources, or strands, it is divided into, and each copy of it then chooses what to show: every
+strand in its own colour, one or two strands alone, or one strand with the others invisible but
+still taking their space, so that the versions of a text can be laid over one another.
+
+The examples in this manual use a simplified English passage from Exodus 14 and an illustrative
+division; the division of a real text is the author's.
+
+\begin{mekor}[\tanach{exodus}{14:19-23}]
+\begin{mekorlang}{english}{Every strand in its colour}
+\pasuk[14:19] \teudah{e} The angel of God moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between the camps. \teudah{j} There was cloud and darkness. \pasuk \teudah{p} Moses stretched out his hand. \teudah{j} An east wind blew all night. \teudah{p} The waters were split. \pasuk Israel went into the sea. \pasuk \teudah{j} The Egyptians pursued them.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor*}
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}{J alone}
+\pasuk[14:19] \teudah{e} The angel of God moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between the camps. \teudah{j} There was cloud and darkness. \pasuk \teudah{p} Moses stretched out his hand. \teudah{j} An east wind blew all night. \teudah{p} The waters were split. \pasuk Israel went into the sea. \pasuk \teudah{j} The Egyptians pursued them.
+\end{mekorlang}
+\end{mekor*}
+\begin{mekor*}
+\teudotsetup{show=j, others=ghost}
+\begin{mekorlang}{english}{J in its place, the rest invisible}
+\pasuk[14:19] \teudah{e} The angel of God moved. \teudah{j} The pillar of cloud moved. \pasuk \teudah{e} It came between the camps. \teudah{j} There was cloud and darkness. \pasuk \teudah{p} Moses stretched out his hand. \teudah{j} An east wind blew all night. \teudah{p} The waters were split. \pasuk Israel went into the sea. \pasuk \teudah{j} The Egyptians pursued them.
+\end{mekorlang}
+\end{mekor*}
+
+The package works in any XeLaTeX or LuaLaTeX document. With \texttt{shiur}, it marks the text
+of a \texttt{mekorlang} directly, and keeps verse numbers in place in every version (see
+``\nameref{sec:shiur}'').
+
+\section{Declaring strands}
+
+\begin{Verbatim}
+\usepackage{teudot}
+\declareteudah[name=Elohist]{e}{red!80!black}
+\declareteudah[name=Yahwist]{j}{blue}
+\declareteudah[name=Priestly]{p}{green!50!black}
+\end{Verbatim}
+\cs{declareteudah}\verb|[name=...]{key}{colour}| declares a strand. The key is any short word,
+in any case; the colour is any colour \texttt{xcolor} understands. For named colours such as
+\texttt{Mahogany}, load \texttt{xcolor} with \texttt{dvipsnames} before \texttt{teudot}. A later
+declaration of the same key replaces the earlier one.
+
+\cs{teudotlegend} prints each strand's key in its colour, with its name:
+\begin{center}
+\teudotlegend
+\end{center}
+
+\section{Marking a text}
+
+\cs{teudah}\verb|{key}| switches to a strand until the next \cs{teudah}, like \cs{color}. Text
+before the first marker belongs to no strand and always shows, in the colour around it.
+Outside \texttt{shiur}, the marked text goes in a \texttt{teudot} environment:
+\begin{Verbatim}
+\begin{teudot}[show=e, others=omit]
+\teudah{e} The angel of God moved. \teudah{j} The pillar of cloud moved.
+\end{teudot}
+\end{Verbatim}
+The package finds the markers by reading the text, so they must be written out in it, at its
+top level: not inside a macro, and not inside braces such as \verb|\textbf{...}|. Put them
+between words. Inside a pointed Hebrew word, a change of colour can separate a letter from its
+vowels.
+
+\section{Choosing a version}
+
+The environment's options, or \cs{teudotsetup}\verb|{...}| for everything after it in the
+current group, say what to show:
+\begin{description}
+\item[\texttt{show=\{e,j\}}] the strands shown in their colours; all of them, if not given.
+\item[\texttt{others=}] what happens to the rest:
+	\begin{description}
+	\item[\texttt{show}] shown in their colours too (the default);
+	\item[\texttt{grey}] in light grey, to pick out one strand against the rest;
+	\item[\texttt{ghost}] invisible, but taking their space;
+	\item[\texttt{omit}] left out, with an ellipsis where text was.
+	\end{description}
+\item[\texttt{colours=false}] sets the strands shown in the colour around them, for a plain
+	text of one strand.
+\item[\texttt{greycolour=}, \texttt{ghostcolour=}] the colours for \texttt{grey} (default
+	\texttt{black!30}) and \texttt{ghost} (default the page's: white, or on slides the
+	background's).
+\end{description}
+Each copy of a text is set the way its own options say; nothing produces versions by itself. To
+show a passage in colour and then each strand alone, include it once for each.
+
+\subsection{Overlays}
+
+With \texttt{others=ghost}, every version of a text has the same lines and the same layout, so
+an E version and a J version printed on transparencies, or shown one after the other on slides,
+lie exactly over each other. Hidden text is set in the page's colour rather than left out, which
+is what keeps the lines the same; it is still in the PDF, and copying text from the page copies
+it too.
+
+\section{With \texttt{shiur}}\label{sec:shiur}
+
+In a \texttt{shiur} document the markers go straight into a \texttt{mekorlang}'s text, and
+\cs{teudotsetup} inside the \texttt{mekor} chooses its version:
+\begin{Verbatim}
+\begin{mekor}[\tanach{exodus}{14:19-23}]
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel of God moved. \teudah{j} The pillar ...
+\end{mekorlang}
+\end{mekor}
+\end{Verbatim}
+A translation takes its own markers. On slides, \cs{mekorbreak} works as usual, and a strand
+carries on across it.
+
+Verse numbers belong to no strand: they stay in the colour of the text around them in every
+version, coloured, grey or ghosted. So do ellipses, whether teudot's own or a \cs{dilug} written
+in a strand's text: a \cs{dilug} stays visible wherever its strand's text is set, even when that text is ghosted,
+and goes with it when the strand is left out. When text is left out, a verse shows its number only if
+some of the verse shows, and an ellipsis marks each gap, after the number when the start of the
+verse is left out (``(20) \ldots{} There was''), and before it when whole verses, or the end of
+the verse before, are (``\ldots{} (23) The Egyptians''). A text that begins in the middle of
+what it shows starts at the first verse it shows. The J text above comes out as
+\begin{quote}
+(14:19) ... The pillar of cloud moved. (20) ... There was cloud and darkness. (21) ... An east
+wind blew all night. ... (23) The Egyptians pursued them.
+\end{quote}
+and the P text as
+\begin{quote}
+(21) Moses stretched out his hand. ... The waters were split. (22) Israel went into the sea.
+...
+\end{quote}
+
+\section{For package writers}
+
+A package that typesets marked text can use:
+\begin{description}
+\item[\cs{teudot@part}\texttt{\{true\}\{text\}}] typesets a text with its markers, or a part of
+	it, with \texttt{false} for every part but the last (\texttt{shiur} uses it for the parts of a
+	source split at \cs{mekorbreak}). \cs{teudot@reset} starts a new text.
+\item[\cs{teudot@setmarkers}\texttt{\{regex\}}] says what a verse marker looks like, as an
+	\texttt{l3regex} (\texttt{shiur} gives \cs{pasuk} and \cs{perek}); markers then belong to no
+	strand.
+\item[\cs{teudot@ellipsis}] marks text left out (\texttt{shiur} makes it \cs{dilug}).
+\item[\cs{teudot@plain}\texttt{\{text\}}] sets text in the colour around the strands.
+\item[\cs{ifteudot@silent}] is true while text left out runs, in a box that is thrown away so
+	that counters still advance.
+\end{description}
+
+\section{Licence}
+
+Copyright 2026 Gabriel Gendler Yom-Tov. This work may be distributed and/or modified under the
+conditions of the \LaTeX{} Project Public License, either version 1.3c of this license or (at
+your option) any later version. The latest version of this license is in
+\url{https://www.latex-project.org/lppl.txt}.
+
+\end{document}

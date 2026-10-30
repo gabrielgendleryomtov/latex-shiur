@@ -476,6 +476,22 @@ and are free:
 \end{description}
 For Rashi script, Noto Rashi Hebrew is part of Google's free Noto fonts.
 
+\section{Sources of a text}
+
+The companion package \texttt{teudot}, loaded with \verb|\usepackage{teudot}|, marks the
+sources (strands) of a text, as in the documentary hypothesis, and shows each copy of a
+\env{mekor} in colour, with some strands alone, or with the rest invisible but keeping their
+space:
+\begin{Verbatim}
+\declareteudah[name=Yahwist]{j}{blue}
+...
+\begin{mekor}[\tanach{exodus}{14:19-23}]
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[14:19] \teudah{e} The angel of God moved. \teudah{j} The pillar ...
+\end{Verbatim}
+Verse numbers stay in place in every version. Its manual, \texttt{teudot-doc.pdf}, describes it.
+
 \section{Other commands}
 
 \begin{description}
