@@ -1,0 +1,27 @@
+% Strands left out just before a verse that skips ahead: one ellipsis for both
+% the text left out and the verses skipped, not two.
+\documentclass{article}
+\usepackage{shiur}
+\usepackage{teudot}
+\setshiurfont{hebrew}{FreeSerif}
+\declareteudah{e}{red}
+\declareteudah{j}{blue}
+\begin{document}
+\begin{mekor}
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[37:35] \teudah{j} Alpha. \pasuk \teudah{e} Beta. \pasuk[39:1] \teudah{j} Gamma.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\teudotsetup{show=j, others=omit}
+\begin{mekorlang}{english}
+\pasuk[1] \teudah{j} Delta. \teudah{e} Epsilon. \pasuk[4] \teudah{j} Zeta.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: (37:35) Alpha. ... (39:1) Gamma.
+%! expect: (1) Delta. ... (4) Zeta.
+%! absent: ... ...
+%! absent: Beta

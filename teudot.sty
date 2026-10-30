@@ -279,6 +279,7 @@
 \cs_generate_variant:Nn \__teudot_other:nn { V }
 \cs_new_protected:Npn \__teudot_silent:n #1
 	{ \vbox_set:Nn \l__teudot_box { \teudot@silenttrue #1 } }
+\cs_new_protected:Npn \__teudot_before: { }
 % Before shown text: the markers waiting, and an ellipsis for text left out.
 % All but the last marker run silently; "..." goes before the last if whole
 % verses, or the end of the one before, were left out (not at the start of the
@@ -288,16 +289,19 @@
 		\seq_if_empty:NTF \g__teudot_pending_seq
 			{ \bool_if:NT \g__teudot_gapafter_bool { \teudot@ellipsis } }
 			{
-				\bool_lazy_and:nnT
+				\bool_lazy_and:nnTF
 					{ \g__teudot_shown_bool }
 					{
 						\bool_lazy_or_p:nn { \g__teudot_gapbefore_bool }
 							{ \int_compare_p:nNn { \seq_count:N \g__teudot_pending_seq } > 1 }
 					}
-					{ \teudot@ellipsis }
+					{ \cs_set_eq:NN \__teudot_before: \teudot@ellipsis }
+					{ \cs_set_eq:NN \__teudot_before: \prg_do_nothing: }
 				\seq_gpop_right:NN \g__teudot_pending_seq \l__teudot_marker_tl
 				\__teudot_silent:n { \seq_use:Nn \g__teudot_pending_seq { } }
-				\l__teudot_marker_tl
+				% the marker's own tokens straight after the ellipsis, so that shiur's
+				% \dilug sees a \pasuk and doesn't add a second one for a skipped verse
+				\exp_last_unbraced:NV \__teudot_before: \l__teudot_marker_tl
 				\bool_if:NT \g__teudot_gapafter_bool { \teudot@ellipsis }
 			}
 		\seq_gclear:N \g__teudot_pending_seq
