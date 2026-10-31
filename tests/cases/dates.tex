@@ -1,0 +1,30 @@
+% \taarich in each language, with a weekday and the full year; civil dates
+% converted (a leap year's Adars, Rosh Hashanah, a deficient year); \shanah
+% and \parashah.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\begin{document}
+A: \taarich{24}{tevet}{5779} | \taarich[shabbat]{25}{kislev}{5750} | \taarich[day=tuesday]{4}{nisan}{5704} | \taarich{1}{adar2}{5784} | \taarich{3}{Teves}{5784} | \taarich{14}{adar}{5785} | \taarich{20}{marcheshvan}{5787}
+
+B: \taarich[civil]{2019-01-01} | \taarich[civil]{2024-03-11} | \taarich[civil]{2024-03-10} | \taarich[civil]{2024-04-23} | \taarich[civil]{2024-10-03} | \taarich[civil]{2026-09-11} | \taarich[civil]{1944-03-28} | \taarich[civil]{1900-03-01}
+
+C: \parashah{vayeshev} | \parashah*{noach}
+
+\begin{hebrew}
+D: \taarich{24}{tevet}{5779} | \taarich[shabbat]{25}{kislev}{5750} | \taarich[full, day=tuesday]{4}{nisan}{5704} | \taarich{1}{adar2}{5784} | \taarich[civil]{2024-03-10}
+
+E: \shanah{5651} | \shanah*{5651} | \shanah*{5015} | \shanah{5000} | \parashah{vayeshev}
+\end{hebrew}
+\end{document}
+
+%! expect: A: 24 Tevet 5779 | Shabbat 25 Kislev 5750 | Tuesday 4 Nisan 5704 | 1 Adar II 5784 | 3 Tevet 5784 | 14 Adar 5785 | 20 Marḥeshvan 5787
+%! expect: B: 24 Tevet 5779 | 1 Adar II 5784 | 30 Adar I 5784 | 15 Nisan 5784 | 1 Tishrei 5785 | 29 Elul 5786 | 4 Nisan 5704 | 30 Adar I 5660
+%! expect: C: Parashat Vayeshev | Noaḥ
+%! expect: כ״ד טבת תשע״ט
+%! expect: שבת כ״ה כסלו תש״נ
+%! expect: יום ג׳ ד׳ ניסן ה׳תש״ד
+%! expect: א׳ אדר ב׳ תשפ״ד
+%! expect: ל׳ אדר א׳ תשפ״ד
+%! expect: ה׳תרנ״א | תרנ״א | ה׳ט״ו | ה׳ אלפים | פרשת וישב
+%! not log: mareimekomot Warning

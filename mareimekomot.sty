@@ -1091,6 +1091,389 @@
 \declaresefer[english={,~#T~#N:#N}]{igrotmoshe, igrosmoshe}
 	{אגרות\nobreakspace משה}{Igrot\nobreakspace Moshe}{~#T~חלק~#N~סי׳~#N}
 
+%                         ***********
+%                         ** DATES **
+%                         ***********
+
+% \shanah{5787} gives the year with its thousands, ה׳תשפ״ז; \shanah*{5787}
+% gives it without them, תשפ״ז (לפ״ק). Early in a millennium the short form
+% would be a bare letter or two, so for the first hundred years it keeps the
+% thousands (\shanah*{5015} gives ה׳ט״ו). A round thousand is ה׳ אלפים.
+\NewDocumentCommand \shanah { s m }
+	{ \__mm_shanah:nn { \IfBooleanTF {#1} { \c_true_bool } { \c_false_bool } } {#2} }
+% #1 boolean: without the thousands; #2 year
+\cs_new:Npn \__mm_shanah:nn #1 #2
+	{
+		\int_compare:nNnTF { \int_mod:nn {#2} { 1000 } } = 0
+			{ \Hebrewnumeral { \int_div_truncate:nn {#2} { 1000 } } \nobreakspace אלפים }
+			{
+				\bool_lazy_and:nnTF
+					{ #1 }
+					{ \int_compare_p:nNn { \int_mod:nn {#2} { 1000 } } > { 99 } }
+					{ \Hebrewnumeral { \int_mod:nn {#2} { 1000 } } }
+					{ \Hebrewnumeral {#2} }
+			}
+	}
+
+% The months, numbered from Nisan as in the Torah, so that Tishrei is 7 and
+% the Adars 12 and 13; plain adar is 0, the one Adar of an ordinary year and
+% the second of a leap year.
+\prop_new:N \g__mm_month_prop
+\prop_new:N \g__mm_monthnumber_prop
+% #1 keys, #2 Hebrew, #3 English, #4 number
+\cs_new_protected:Npn \__mm_month:nnnn #1 #2 #3 #4
+	{
+		\__mm_name:Nnnn \g__mm_month_prop {#1} {#2} {#3}
+		\clist_map_inline:nn {#1}
+			{
+				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\prop_gput:NVn \g__mm_monthnumber_prop \l__mm_key_str {#4}
+			}
+	}
+\__mm_month:nnnn { nisan } { ניסן } { Nisan } { 1 }
+\__mm_month:nnnn { iyar } { אייר } { Iyar } { 2 }
+\__mm_month:nnnn { sivan } { סיון } { Sivan } { 3 }
+\__mm_month:nnnn { tammuz } { תמוז } { Tammuz } { 4 }
+\__mm_month:nnnn { av, menachemav } { אב } { Av } { 5 }
+\__mm_month:nnnn { elul } { אלול } { Elul } { 6 }
+\__mm_month:nnnn { tishrei, tishri } { תשרי } { Tishrei } { 7 }
+\__mm_month:nnnn { cheshvan, chesvan } { חשון } { \__mm_H: eshvan } { 8 }
+\__mm_month:nnnn { marcheshvan } { מרחשון } { Mar\__mm_h: eshvan } { 8 }
+\__mm_month:nnnn { kislev } { כסלו } { Kislev } { 9 }
+\__mm_month:nnnn { tevet, teves, tebet } { טבת } { Tevet } { 10 }
+\__mm_month:nnnn { shevat, shvat, shebat } { שבט } { Shevat } { 11 }
+\__mm_month:nnnn { adar1, adarrishon, adara } { אדר~א׳ } { Adar~I } { 12 }
+\__mm_month:nnnn { adar2, adarsheni, adarbet, veadar } { אדר~ב׳ } { Adar~II } { 13 }
+\__mm_month:nnnn { adar } { אדר } { Adar } { 0 }
+% the key of month #1 (a number) in a year that is a leap year if #2 is true
+\cs_new:Npn \__mm_month_key:nn #1 #2
+	{
+		\int_case:nn {#1}
+			{
+				{ 1 } { nisan } { 2 } { iyar } { 3 } { sivan } { 4 } { tammuz } { 5 } { av }
+				{ 6 } { elul } { 7 } { tishrei } { 8 } { cheshvan } { 9 } { kislev }
+				{ 10 } { tevet } { 11 } { shevat } { 12 } { \bool_if:nTF {#2} { adar1 } { adar } }
+				{ 13 } { adar2 }
+			}
+	}
+
+% The calendar, after Reingold and Dershowitz, Calendrical Calculations: a day
+% is a number, counted from 1 January of year 1 (Gregorian), which was a Monday.
+% whether year #1 has two Adars
+\prg_new_conditional:Npnn \__mm_if_leap:n #1 { TF, p }
+	{
+		\int_compare:nNnTF { \int_mod:nn { 7 * (#1) + 1 } { 19 } } < { 7 }
+			{ \prg_return_true: } { \prg_return_false: }
+	}
+\int_new:N \l__mm_months_int
+% #1 year, #2 integer: the days from the epoch to the molad of Tishrei of year
+% #1, put off a day when it falls on Sunday, Wednesday or Friday (לא אד״ו ראש)
+\cs_new_protected:Npn \__mm_elapsed:nN #1 #2
+	{
+		\int_set:Nn \l__mm_months_int { \int_div_truncate:nn { 235 * (#1) - 234 } { 19 } }
+		\int_set:Nn #2
+			{
+				29 * \l__mm_months_int
+				+ \int_div_truncate:nn { 12084 + 13753 * \l__mm_months_int } { 25920 }
+			}
+		\int_compare:nNnT { \int_mod:nn { 3 * (#2 + 1) } { 7 } } < { 3 } { \int_incr:N #2 }
+	}
+\int_new:N \l__mm_elapsed_before_int
+\int_new:N \l__mm_elapsed_this_int
+\int_new:N \l__mm_elapsed_after_int
+% #1 year, #2 integer: the day of Rosh Hashanah, putting it off further when
+% the year would otherwise be 356 days long, or the one before it 382
+\cs_new_protected:Npn \__mm_new_year:nN #1 #2
+	{
+		\__mm_elapsed:nN { #1 - 1 } \l__mm_elapsed_before_int
+		\__mm_elapsed:nN {#1} \l__mm_elapsed_this_int
+		\__mm_elapsed:nN { #1 + 1 } \l__mm_elapsed_after_int
+		\int_set:Nn #2
+			{
+				-1373427 + \l__mm_elapsed_this_int
+				+ \int_compare:nNnTF { \l__mm_elapsed_after_int - \l__mm_elapsed_this_int } = { 356 }
+					{ 2 }
+					{
+						\int_compare:nNnTF { \l__mm_elapsed_this_int - \l__mm_elapsed_before_int } = { 382 }
+							{ 1 } { 0 }
+					}
+			}
+	}
+% #1 year: sets the year, its Rosh Hashanah and its length, for the functions
+% below
+\int_new:N \l__mm_hyear_int
+\int_new:N \l__mm_rosh_int
+\int_new:N \l__mm_length_int
+\cs_new_protected:Npn \__mm_set_year:n #1
+	{
+		\int_set:Nn \l__mm_hyear_int {#1}
+		\__mm_new_year:nN { #1 + 1 } \l__mm_length_int
+		\__mm_new_year:nN {#1} \l__mm_rosh_int
+		\int_sub:Nn \l__mm_length_int { \l__mm_rosh_int }
+	}
+% the days in month #1 of the year set
+\cs_new:Npn \__mm_month_days:n #1
+	{
+		\bool_lazy_any:nTF
+			{
+				{ \int_compare_p:n { #1 = 2 } }
+				{ \int_compare_p:n { #1 = 4 } }
+				{ \int_compare_p:n { #1 = 6 } }
+				{ \int_compare_p:n { #1 = 10 } }
+				{ \int_compare_p:n { #1 = 13 } }
+				{ \bool_lazy_and_p:nn { \int_compare_p:n { #1 = 12 } } { ! \__mm_if_leap_p:n { \l__mm_hyear_int } } }
+				% Cheshvan is long only in a full year, Kislev short only in a deficient one
+				{
+					\bool_lazy_and_p:nn { \int_compare_p:n { #1 = 8 } }
+						{ ! \int_compare_p:n { \int_mod:nn { \l__mm_length_int } { 10 } = 5 } }
+				}
+				{
+					\bool_lazy_and_p:nn { \int_compare_p:n { #1 = 9 } }
+						{ \int_compare_p:n { \int_mod:nn { \l__mm_length_int } { 10 } = 3 } }
+				}
+			}
+			{ 29 } { 30 }
+	}
+% #1 month, #2 day, #3 integer: the day number of that date in the year set
+\cs_new_protected:Npn \__mm_from_hebrew:nnN #1 #2 #3
+	{
+		\int_set:Nn #3 { \l__mm_rosh_int + #2 - 1 }
+		\int_compare:nNnTF {#1} < { 7 }
+			{
+				\int_step_inline:nnn { 7 }
+					{ \__mm_if_leap:nTF { \l__mm_hyear_int } { 13 } { 12 } }
+					{ \int_add:Nn #3 { \__mm_month_days:n {##1} } }
+				\int_step_inline:nnn { 1 } { #1 - 1 } { \int_add:Nn #3 { \__mm_month_days:n {##1} } }
+			}
+			{ \int_step_inline:nnn { 7 } { #1 - 1 } { \int_add:Nn #3 { \__mm_month_days:n {##1} } } }
+	}
+% #1 year, #2 month, #3 day, #4 integer: the day number of a civil date
+\cs_new_protected:Npn \__mm_from_civil:nnnN #1 #2 #3 #4
+	{
+		\int_set:Nn #4
+			{
+				365 * (#1 - 1) + \int_div_truncate:nn { #1 - 1 } { 4 }
+				- \int_div_truncate:nn { #1 - 1 } { 100 } + \int_div_truncate:nn { #1 - 1 } { 400 }
+				+ \int_div_truncate:nn { 367 * (#2) - 362 } { 12 } + #3
+			}
+		\int_compare:nNnT {#2} > { 2 }
+			{
+				\bool_lazy_and:nnTF
+					{ \int_compare_p:n { \int_mod:nn {#1} { 4 } = 0 } }
+					{
+						\bool_lazy_or_p:nn
+							{ \int_compare_p:n { \int_mod:nn {#1} { 100 } != 0 } }
+							{ \int_compare_p:n { \int_mod:nn {#1} { 400 } = 0 } }
+					}
+					{ \int_decr:N #4 }
+					{ \int_sub:Nn #4 { 2 } }
+			}
+	}
+% #1 a day number: sets the year (as \__mm_set_year:n does), and the month and
+% day of that day
+\int_new:N \l__mm_hmonth_int
+\int_new:N \l__mm_hday_int
+\int_new:N \l__mm_date_int
+\int_new:N \l__mm_end_int
+\cs_new_protected:Npn \__mm_month_end:
+	{
+		\__mm_from_hebrew:nnN { \l__mm_hmonth_int } { \__mm_month_days:n { \l__mm_hmonth_int } }
+			\l__mm_end_int
+	}
+\cs_new_protected:Npn \__mm_to_hebrew:n #1
+	{
+		\int_set:Nn \l__mm_date_int {#1}
+		% the year, from one before an estimate by the average year, 35975351/98496 days
+		\int_set:Nn \l__mm_hyear_int
+			{ \fp_eval:n { floor( (\l__mm_date_int + 1373427) * 98496 / 35975351 ) } }
+		\__mm_new_year:nN { \l__mm_hyear_int + 1 } \l__mm_end_int
+		\int_until_do:nNnn { \l__mm_end_int } > { \l__mm_date_int }
+			{
+				\int_incr:N \l__mm_hyear_int
+				\__mm_new_year:nN { \l__mm_hyear_int + 1 } \l__mm_end_int
+			}
+		\exp_args:NV \__mm_set_year:n \l__mm_hyear_int
+		\__mm_from_hebrew:nnN { 1 } { 1 } \l__mm_end_int
+		\int_set:Nn \l__mm_hmonth_int
+			{ \int_compare:nNnTF { \l__mm_date_int } < { \l__mm_end_int } { 7 } { 1 } }
+		% the first month that ends on or after the day
+		\__mm_month_end:
+		\int_while_do:nNnn { \l__mm_date_int } > { \l__mm_end_int }
+			{
+				\int_incr:N \l__mm_hmonth_int
+				\__mm_month_end:
+			}
+		\__mm_from_hebrew:nnN { \l__mm_hmonth_int } { 1 } \l__mm_end_int
+		\int_set:Nn \l__mm_hday_int { \l__mm_date_int - \l__mm_end_int + 1 }
+	}
+
+% \taarich{24}{tevet}{5779} gives a Hebrew date: כ״ד טבת תשע״ט / 24 Tevet 5779.
+% Months are matched loosely, like every key (teves, shvat); adar1 and adar2
+% (or adarrishon, adarsheni) are the two of a leap year. Options:
+%   shabbat, or day=sunday ... friday   the day of the week before it (checked
+%                                       against the date)
+%   full                                the Hebrew year with its thousands
+%   civil                               the date is a civil one, 2019-01-01 or
+%                                       today, given as its Hebrew date: then
+%                                       \taarich takes just the one argument
+\tl_new:N \l__mm_weekday_tl
+\bool_new:N \l__mm_full_bool
+\bool_new:N \l__mm_civil_bool
+\keys_define:nn { mareimekomot / taarich }
+	{
+		shabbat .code:n = \tl_set:Nn \l__mm_weekday_tl { 7 },
+		shabbat .value_forbidden:n = true,
+		day .choices:nn =
+			{ sunday, monday, tuesday, wednesday, thursday, friday, shabbat, saturday }
+			{ \tl_set:Ne \l__mm_weekday_tl { \int_min:nn { \l_keys_choice_int } { 7 } } },
+		full .bool_set:N = \l__mm_full_bool,
+		civil .bool_set:N = \l__mm_civil_bool,
+	}
+\NewDocumentCommand \taarich { O{} m }
+	{
+		\group_begin:
+		\__mm_nohyphenation:
+		\tl_clear:N \l__mm_weekday_tl
+		\keys_set:nn { mareimekomot / taarich } {#1}
+		\bool_if:NTF \l__mm_civil_bool
+			{ \__mm_civil:n {#2} }
+			{ \__mm_taarich:nnn {#2} }
+	}
+\msg_new:nnn { mareimekomot } { bad-date }
+	{ Can't~read~the~date~`#1'. }
+\msg_new:nnn { mareimekomot } { no-such-day }
+	{ #2~in~#3~has~only~#4~days,~so~there's~no~#1~#2. }
+\msg_new:nnn { mareimekomot } { not-leap }
+	{ #2~isn't~a~leap~year,~so~it~has~only~one~Adar. }
+\msg_new:nnn { mareimekomot } { which-adar }
+	{ #1~is~a~leap~year:~write~adar1~or~adar2~for~a~date~in~Adar. }
+\msg_new:nnn { mareimekomot } { wrong-weekday }
+	{ #1~wasn't~a~#2. }
+% #1 day, #2 month, #3 year; ends the group \taarich began
+\tl_new:N \l__mm_month_tl
+\cs_new_protected:Npn \__mm_taarich:nnn #1 #2 #3
+	{
+		\regex_match:nnTF { \A \s* [0-9]+ \s+ [0-9]+ \s* \Z } { #1 ~ #3 }
+			{
+				\__mm_set_year:n {#3}
+				\__mm_normalise:Nn \l__mm_key_str {#2}
+				\prop_get:NVNF \g__mm_monthnumber_prop \l__mm_key_str \l__mm_month_tl
+					{ \tl_set:Nn \l__mm_month_tl { 0 } }
+				% Adar: the one month of an ordinary year, the second of a leap year
+				\int_compare:nNnT { \l__mm_month_tl } = { 0 }
+					{
+						\__mm_if_leap:nTF {#3}
+							{
+								\str_if_eq:VnT \l__mm_key_str { adar }
+									{ \msg_warning:nnn { mareimekomot } { which-adar } {#3} }
+								\tl_set:Nn \l__mm_month_tl { 13 }
+							}
+							{ \tl_set:Nn \l__mm_month_tl { 12 } }
+					}
+				\bool_lazy_and:nnT
+					{ \int_compare_p:nNn { \l__mm_month_tl } = { 13 } }
+					{ ! \__mm_if_leap_p:n {#3} }
+					{
+						\msg_warning:nnnn { mareimekomot } { not-leap } {#2} {#3}
+						\tl_set:Nn \l__mm_month_tl { 12 }
+					}
+				\int_compare:nNnTF {#1} > { \__mm_month_days:n { \l__mm_month_tl } }
+					{
+						\msg_error:nnxxxx { mareimekomot } { no-such-day }
+							{#1} {#2} {#3} { \__mm_month_days:n { \l__mm_month_tl } }
+					}
+					{
+						\tl_if_empty:NF \l__mm_weekday_tl
+							{
+								\__mm_from_hebrew:nnN { \l__mm_month_tl } {#1} \l__mm_date_int
+								\int_compare:nNnF { \int_mod:nn { \l__mm_date_int } { 7 } + 1 } = { \l__mm_weekday_tl }
+									{
+										\msg_warning:nnxx { mareimekomot } { wrong-weekday } { #1~#2~#3 }
+											{ \int_case:nn { \l__mm_weekday_tl }
+												{
+													{ 1 } { Sunday } { 2 } { Monday } { 3 } { Tuesday } { 4 } { Wednesday }
+													{ 5 } { Thursday } { 6 } { Friday } { 7 } { Shabbat }
+												}
+											}
+									}
+							}
+					}
+				\__mm_print_date:nnn {#1} {#2} {#3}
+			}
+			{ \msg_error:nnn { mareimekomot } { bad-date } { #1~#2~#3 } }
+		\group_end:
+	}
+% #1 a civil date, as 2019-01-01, or today; ends the group \taarich began
+\cs_new_protected:Npn \__mm_civil:n #1
+	{
+		\str_if_eq:nnTF {#1} { today }
+			{ \seq_set_from_clist:Ne \l_tmpa_seq { 0, \int_use:N \year, \int_use:N \month, \int_use:N \day } }
+			{
+				\regex_extract_once:nnNF { \A \s* ([0-9]+) - ([0-9]+) - ([0-9]+) \s* \Z } {#1} \l_tmpa_seq
+					{
+						\seq_clear:N \l_tmpa_seq
+						\msg_error:nnn { mareimekomot } { bad-date } {#1}
+					}
+			}
+		\int_compare:nNnT { \seq_count:N \l_tmpa_seq } = { 4 }
+			{
+				\__mm_from_civil:nnnN
+					{ \seq_item:Nn \l_tmpa_seq { 2 } }
+					{ \seq_item:Nn \l_tmpa_seq { 3 } }
+					{ \seq_item:Nn \l_tmpa_seq { 4 } }
+					\l__mm_date_int
+				\exp_args:NV \__mm_to_hebrew:n \l__mm_date_int
+				\exp_args:Neee \__mm_print_date:nnn
+					{ \int_use:N \l__mm_hday_int }
+					{
+						\__mm_month_key:nn { \l__mm_hmonth_int }
+							{ \__mm_if_leap_p:n { \l__mm_hyear_int } }
+					}
+					{ \int_use:N \l__mm_hyear_int }
+			}
+		\group_end:
+	}
+\cs_generate_variant:Nn \seq_set_from_clist:Nn { Ne }
+% #1 day, #2 month key, #3 year, in the language around
+\cs_new_protected:Npn \__mm_print_date:nnn #1 #2 #3
+	{
+		\tl_if_empty:NF \l__mm_weekday_tl
+			{
+				\__mm_if_hebrew:TF
+					{
+						\int_compare:nNnTF { \l__mm_weekday_tl } = { 7 }
+							{ שבת }
+							{ יום \nobreakspace \Hebrewnumeral { \l__mm_weekday_tl } }
+					}
+					{
+						\int_case:nn { \l__mm_weekday_tl }
+							{
+								{ 1 } { Sunday } { 2 } { Monday } { 3 } { Tuesday } { 4 } { Wednesday }
+								{ 5 } { Thursday } { 6 } { Friday } { 7 } { Shabbat }
+							}
+					}
+				\c_space_tl
+			}
+		\__mm_number:n {#1}
+		\nobreakspace
+		\__mm_named:Nn \g__mm_month_prop {#2}
+		\nobreakspace
+		\__mm_if_hebrew:TF
+			{ \__mm_shanah:nn { ! \l__mm_full_bool } {#3} }
+			{ #3 }
+	}
+
+% \parashah{vayeshev} gives פרשת וישב / Parashat Vayeshev; \parashah* the name
+% alone
+\NewDocumentCommand \parashah { s m }
+	{
+		\group_begin:
+		\__mm_nohyphenation:
+		\IfBooleanF {#1} { \__mm_if_hebrew:TF { פרשת } { Parashat } \nobreakspace }
+		\__mm_named:Nn \g__mm_parashah_prop {#2}
+		\group_end:
+	}
+
 %                         ************
 %                         ** AD LOC **
 %                         ************

@@ -1,0 +1,15 @@
+% \taarich checks a date: a weekday that doesn't match, Adar in a leap year,
+% Adar II in an ordinary one, and a day the month hasn't (an error).
+\documentclass{article}
+\usepackage{shiur}
+\begin{document}
+\taarich[day=monday]{4}{nisan}{5704}
+\taarich{1}{adar}{5784}
+\taarich{1}{adar2}{5785}
+\taarich{30}{cheshvan}{5784}
+\end{document}
+
+%! log: 4 nisan 5704 wasn't a Monday
+%! log: 5784 is a leap year
+%! log: 5785 isn't a leap year
+%! error: cheshvan in 5784 has only 29 days
