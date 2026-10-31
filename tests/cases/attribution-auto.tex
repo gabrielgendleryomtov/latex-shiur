@@ -1,0 +1,57 @@
+% A source whose heading refers to a work with an author gives the author under
+% the heading, in each language, unless the mekorlang gives its own subtitle;
+% commentaries and Tur-arranged works can have authors too; attribution=off
+% stops it.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\declareauthor{sperling}{הר׳ אברהם יצחק ספרלינג}{R. Avraham Yitz\hdot ak Sperling}
+\declaresefer[author=sperling, place={לבוב}{Lvov}, year=5651]{taameihaminhagim}
+	{טעמי המנהגים}{Ta’amei haMinhagim}{ #S}
+\declarecommentary[author=rashi]{rashi}{רש״י}{Rashi}
+\declaretursefer[seifkatan, section=oh, author=chafetzchaim]{\mb}{משנה ברורה}{Mishnah Berurah}
+\begin{document}
+\begin{mekor}[\sefer{taameihaminhagim}{{דף ת״ק}{p. 500}}]
+\begin{mekorlang}{hebrew}
+טעם למנהג
+\end{mekorlang}
+\begin{mekorlang}{english}
+The reason.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}[\sefer{taameihaminhagim}{{דף ת״ק}{p. 500}}]
+\begin{mekorlang}[Its own subtitle]{english}
+Second.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}[\bavli{shabbat}{2a}]
+\begin{mekorlang}{english}
+Third, with no author.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{\tanach[rashi]{gen}{18:7}}
+Fourth.
+\end{mekorlang}
+\end{mekor}
+\begin{mekor}
+\begin{mekorlang}{english}{\mb{605:3}}
+Fifth.
+\end{mekorlang}
+\end{mekor}
+\mareimekomotsetup{attribution=off}
+\begin{mekor}
+\begin{mekorlang}{english}{\sefer{taameihaminhagim}{p. 501}}
+Sixth.
+\end{mekorlang}
+\end{mekor}
+\end{document}
+
+%! expect: 1.Ta’amei haMinhagim p. 500R. Avraham Yitzḥak Sperling, Lvov, 1891The reason.
+%! expect: לבוב, הר׳ אברהם יצחק ספרלינג
+%! expect: תרנ״א
+%! expect: 2.Ta’amei haMinhagim p. 500Its own subtitleSecond.
+%! expect: 3.B. Shabbat 2aThird
+%! expect: 4.Rashi on Genesis 18:7Rashi (1040–1105), TroyesFourth.
+%! expect: 5.Mishnah Berurah 605:3R. Yisrael Meir Kagan (1838–1933), RadinFifth.
+%! expect: 6.Ta’amei haMinhagim p. 501Sixth.

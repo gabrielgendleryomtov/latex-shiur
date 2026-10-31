@@ -1,0 +1,26 @@
+% \attribution: a declared author (with dates, either alone, a year as AM or
+% CE, a place in both languages), a built-in one, and the literal form.
+\documentclass{article}
+\usepackage{shiur}
+\setshiurfont{hebrew}{FreeSerif}
+\declareauthor[born=1932, place={ירושלים}{Jerusalem}]{asherweiss}{הר׳ אשר וייס}{R. Asher Weiss}
+\declareauthor[died=5651]{someone}{פלוני}{Someone}
+\declareauthor[born=c. 1290, died={תשי״א}{1951}, place=Here]{loose}{אלמוני}{Another}
+\begin{document}
+A: \attribution{asherweiss} | \attribution{Someone} | \attribution{loose}
+
+B: \attribution{rashi} | \attribution{chafetz chaim} | \attribution{feinstein}
+
+C: \attribution{who}{where}{when} | \attribution{who}{}{when} | \attribution{who}{where}{}
+
+\begin{hebrew}
+D: \attribution{asherweiss} | \attribution{someone} | \attribution{rashi}
+\end{hebrew}
+\end{document}
+
+%! expect: A: R. Asher Weiss (b. 1932), Jerusalem | Someone (d. 1891) | Another (c. 1290–1951), Here
+%! expect: B: Rashi (1040–1105), Troyes | R. Yisrael Meir Kagan (1838–1933), Radin | R. Moshe Feinstein (1895–1986), New York
+%! expect: C: who, where, when | who, when | who, where
+%! expect: הר׳ אשר וייס (נולד תרצ״ב
+%! expect: ירושלים | פלוני (נפטר תרנ״א) | רש״י (ד׳ת״ת–ד׳תתס״ה
+%! expect: טרואה

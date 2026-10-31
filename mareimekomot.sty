@@ -46,9 +46,15 @@
 
 % sham=full adds the reference \sham stands for, as "ad loc (B. Menaḥot
 % 69b)"; daf=short writes a daf as ס״ט. and ס״ט: instead of ס״ט ע״א/ב.
+% attribution=off stops shiur filling a source's author from its heading.
 \newif\ifmm@shamfull
 \newif\ifmm@dafshort
+\newif\ifmm@attribution
+\mm@attributiontrue
 \DeclareKeys[mareimekomot]{
+	attribution .choice:,
+	attribution / auto .code = \mm@attributiontrue,
+	attribution / off .code = \mm@attributionfalse,
 	sham .choice:,
 	sham / short .code = \mm@shamfullfalse,
 	sham / full .code = \mm@shamfulltrue,
@@ -521,7 +527,7 @@
 % \tanakh{book}{reference}; the starred form leaves out the book's name
 % Commentaries on a verse, for \tanakh[rashi]{gen}{18:7}: רש״י על בראשית י״ח, ז׳ /
 % Rashi on Genesis 18:7, or on a daf, for \bavli[tosafot]{menachot}{69b}.
-% \declarecommentary{keys}{Hebrew}{English} adds more, for both.
+% \declarecommentary[author=key]{keys}{Hebrew}{English} adds more, for both.
 \__mm_commentary:nnn { rashi } { רש״י } { Rashi }
 \__mm_commentary:nnn { ramban, nachmanides } { רמב״ן } { Ramban }
 \__mm_commentary:nnn { ibnezra } { אבן\nobreakspace עזרא } { Ibn\nobreakspace Ezra }
@@ -543,8 +549,22 @@
 \__mm_commentary:nnn { ran } { ר״ן } { Ran }
 \__mm_commentary:nnn { meiri } { מאירי } { Meiri }
 \__mm_commentary:nnn { maharsha } { מהרש״א } { Maharsha }
-\NewDocumentCommand \declarecommentary { m m m }
-	{ \__mm_commentary:nnn {#1} {#2} {#3} }
+% A commentary's author, under each of its keys
+\prop_new:N \g__mm_commentary_author_prop
+\tl_new:N \l__mm_author_tl
+\keys_define:nn { mareimekomot / declarecommentary }
+	{ author .tl_set:N = \l__mm_author_tl }
+\NewDocumentCommand \declarecommentary { O{} m m m }
+	{
+		\tl_clear:N \l__mm_author_tl
+		\keys_set:nn { mareimekomot / declarecommentary } {#1}
+		\__mm_commentary:nnn {#2} {#3} {#4}
+		\clist_map_inline:nn {#2}
+			{
+				\__mm_normalise:Nn \l__mm_key_str {##1}
+				\prop_gput:NVV \g__mm_commentary_author_prop \l__mm_key_str \l__mm_author_tl
+			}
+	}
 
 % A commentary's optional argument: its key, and the words it opens with, dh=
 % for Hebrew and sv= for English (either alone serves both): [tosafot, dh=ואם
@@ -580,6 +600,8 @@
 			{
 				\__mm_lookup:NVn \g__mm_commentary_prop \l__mm_commentary_tl { }
 				\__mm_if_hebrew:TF { \l__mm_he_tl #1 } { \l__mm_en_tl #2 }
+				\prop_get:NVNT \g__mm_commentary_author_prop \l__mm_key_str \l__mm_author_tl
+					{ \__mm_attribute:Vnn \l__mm_author_tl { } { } }
 				\c_space_tl
 			}
 	}
@@ -763,6 +785,7 @@
 %   subunit=...   any other Hebrew sub-unit, such as אות
 %   section=oh    it covers one section only: the command then takes just the
 %                 reference, and the section isn't named
+%   author=key    its author (see \declareauthor)
 % A declared command takes {section}{reference}, as \shulchanaruch{oh}{605:1},
 % or just {reference} for a one-section work, as \mishnahberurah{605:3}.
 \tl_new:N \l__mm_decl_subunit_tl
@@ -773,17 +796,21 @@
 		seifkatan .value_forbidden:n = true,
 		subunit .tl_set:N = \l__mm_decl_subunit_tl,
 		section .tl_set:N = \l__mm_decl_section_tl,
+		author .tl_set:N = \l__mm_author_tl,
 	}
 \NewDocumentCommand \declaretursefer { O{} m m m }
 	{
 		% no group: the command must outlive the declaration
 		\tl_set:Nn \l__mm_decl_subunit_tl { סע׳ }
 		\tl_clear:N \l__mm_decl_section_tl
+		\tl_clear:N \l__mm_author_tl
 		\keys_set:nn { mareimekomot / tursefer } {#1}
-		\__mm_declare:NnnVV #2 {#3} {#4} \l__mm_decl_subunit_tl \l__mm_decl_section_tl
+		\__mm_declare:NnnVVV #2 {#3} {#4} \l__mm_decl_subunit_tl \l__mm_decl_section_tl
+			\l__mm_author_tl
 	}
-% #1 command, #2 Hebrew name, #3 English name, #4 sub-unit, #5 section or empty
-\cs_new_protected:Npn \__mm_declare:Nnnnn #1 #2 #3 #4 #5
+% #1 command, #2 Hebrew name, #3 English name, #4 sub-unit, #5 section or
+% empty, #6 author or empty
+\cs_new_protected:Npn \__mm_declare:Nnnnnn #1 #2 #3 #4 #5 #6
 	{
 		\tl_if_blank:nTF {#5}
 			{
@@ -791,6 +818,7 @@
 					{
 						\__mm_code:nnnnn {#2} {#3} {#4} {##1} {##2}
 						\__mm_remember:n { #1 {##1} {##2} }
+						\__mm_attribute:nnn {#6} { } { }
 					}
 			}
 			{
@@ -798,10 +826,11 @@
 					{
 						\__mm_code:nnnnn {#2} {#3} {#4} { } {##1}
 						\__mm_remember:n { #1 {##1} }
+						\__mm_attribute:nnn {#6} { } { }
 					}
 			}
 	}
-\cs_generate_variant:Nn \__mm_declare:Nnnnn { NnnVV }
+\cs_generate_variant:Nn \__mm_declare:Nnnnnn { NnnVVV }
 
 \declaretursefer{\tur}{טור}{Tur}
 \declaretursefer{\shulchanaruch}{שו״ע}{Shul\__mm_h: an \nobreakspace Arukh}
@@ -841,6 +870,8 @@
 %   \sefer{igrotmoshe}{yd}{1}{62}   אגרות משה יו״ד חלק א׳ סי׳ ס״ב /
 %                                   Igrot Moshe, Yoreh De'ah 1:62
 % \sefer* leaves out the name, and whatever comes before the first placeholder.
+% author=key names its author (see \declareauthor), and place= and year= where
+% and when it was published; shiur then gives them under a source's heading.
 % A later declaration of a work, in a document or another package, replaces the
 % earlier one, under all of the earlier one's keys as well as its own.
 \prop_new:N \g__mm_sefer_prop
@@ -851,8 +882,15 @@
 \str_new:N \l__mm_he_slots_str
 \str_new:N \l__mm_en_slots_str
 \seq_new:N \l__mm_slots_seq
+\tl_new:N \l__mm_place_tl
+\tl_new:N \l__mm_year_tl
 \keys_define:nn { mareimekomot / sefer }
-	{ english .tl_set:N = \l__mm_en_template_tl }
+	{
+		english .tl_set:N = \l__mm_en_template_tl,
+		author .tl_set:N = \l__mm_author_tl,
+		place .tl_set:N = \l__mm_place_tl,
+		year .tl_set:N = \l__mm_year_tl,
+	}
 \cs_generate_variant:Nn \regex_extract_all:nnN { nV }
 \cs_generate_variant:Nn \regex_match:nnF { nV }
 \cs_generate_variant:Nn \prop_gput:Nnn { NVV }
@@ -865,26 +903,19 @@
 	}
 \msg_new:nnn { mareimekomot } { template-mismatch }
 	{ The~English~template~of~`#1'~has~different~placeholders~from~the~Hebrew~one. }
-\NewDocumentCommand \declaresefer { O{} m m m m }
+% #1 property list, #2 keys: sets \l__mm_id_str to the id the name is stored
+% under, which all its keys lead to: its first key, or, once the package has
+% loaded, the id of the name it replaces, so that a document's or package's
+% own Igrot Moshe takes every key of the built-in one
+\cs_new_protected:Npn \__mm_id:Nn #1 #2
 	{
-		% no group: the work must outlive the declaration
-		\tl_set:Nn \l__mm_he_template_tl {#5}
-		\tl_set:Nn \l__mm_en_template_tl {#5}
-		\keys_set:nn { mareimekomot / sefer } {#1}
-		\__mm_template:NNn \l__mm_he_template_tl \l__mm_he_slots_str {#2}
-		\__mm_template:NNn \l__mm_en_template_tl \l__mm_en_slots_str {#2}
-		\str_if_eq:VVF \l__mm_he_slots_str \l__mm_en_slots_str
-			{ \msg_error:nnn { mareimekomot } { template-mismatch } {#2} }
-		% The work is stored under an id, which all its keys lead to: its first key,
-		% or, once the package has loaded, the id of the work it replaces, so that a
-		% document's or package's own Igrot Moshe takes every key of the built-in one
 		\str_clear:N \l__mm_id_str
 		\bool_if:NF \g__mm_loading_bool
 			{
 				\clist_map_inline:nn {#2}
 					{
 						\__mm_normalise:Nn \l__mm_key_str {##1}
-						\prop_get:NVNT \g__mm_sefer_prop \l__mm_key_str \l__mm_names_tl
+						\prop_get:NVNT #1 \l__mm_key_str \l__mm_names_tl
 							{
 								\str_set:NV \l__mm_id_str \l__mm_names_tl
 								\clist_map_break:
@@ -898,14 +929,29 @@
 				\__mm_normalise:Nn \l__mm_key_str {##1}
 				\bool_if:NT \g__mm_loading_bool
 					{
-						\prop_get:NVNT \g__mm_sefer_prop \l__mm_key_str \l__mm_names_tl
+						\prop_get:NVNT #1 \l__mm_key_str \l__mm_names_tl
 							{
 								\str_if_eq:VVF \l__mm_names_tl \l__mm_id_str
 									{ \msg_error:nnn { mareimekomot } { clash } {##1} }
 							}
 					}
-				\prop_gput:NVV \g__mm_sefer_prop \l__mm_key_str \l__mm_id_str
+				\prop_gput:NVV #1 \l__mm_key_str \l__mm_id_str
 			}
+	}
+\NewDocumentCommand \declaresefer { O{} m m m m }
+	{
+		% no group: the work must outlive the declaration
+		\tl_set:Nn \l__mm_he_template_tl {#5}
+		\tl_set:Nn \l__mm_en_template_tl {#5}
+		\tl_clear:N \l__mm_author_tl
+		\tl_clear:N \l__mm_place_tl
+		\tl_clear:N \l__mm_year_tl
+		\keys_set:nn { mareimekomot / sefer } {#1}
+		\__mm_template:NNn \l__mm_he_template_tl \l__mm_he_slots_str {#2}
+		\__mm_template:NNn \l__mm_en_template_tl \l__mm_en_slots_str {#2}
+		\str_if_eq:VVF \l__mm_he_slots_str \l__mm_en_slots_str
+			{ \msg_error:nnn { mareimekomot } { template-mismatch } {#2} }
+		\__mm_id:Nn \g__mm_sefer_prop {#2}
 		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _he_name_tl }
 		\tl_gset:cn { g__mm_sefer_ \l__mm_id_str _he_name_tl } {#3}
 		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _en_name_tl }
@@ -914,6 +960,11 @@
 		\tl_gset_eq:cN { g__mm_sefer_ \l__mm_id_str _he_tl } \l__mm_he_template_tl
 		\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _en_tl }
 		\tl_gset_eq:cN { g__mm_sefer_ \l__mm_id_str _en_tl } \l__mm_en_template_tl
+		\clist_map_inline:nn { author, place, year }
+			{
+				\tl_gclear_new:c { g__mm_sefer_ \l__mm_id_str _ ##1 _tl }
+				\tl_gset_eq:cc { g__mm_sefer_ \l__mm_id_str _ ##1 _tl } { l__mm_ ##1 _tl }
+			}
 		\int_gzero_new:c { g__mm_sefer_ \l__mm_id_str _int }
 		\int_gset:cn { g__mm_sefer_ \l__mm_id_str _int } { \str_count:N \l__mm_he_slots_str }
 	}
@@ -980,6 +1031,10 @@
 			{ \tl_use:c { g__mm_sefer_ \l__mm_id_str _ \__mm_if_hebrew:TF { he } { en } _name_tl } }
 		\l__mm_template_tl
 		\exp_args:NV \__mm_remember:n \l__mm_call_tl
+		\__mm_attribute:vvv
+			{ g__mm_sefer_ \l__mm_id_str _author_tl }
+			{ g__mm_sefer_ \l__mm_id_str _place_tl }
+			{ g__mm_sefer_ \l__mm_id_str _year_tl }
 		\group_end:
 	}
 % #1 a placeholder's letter: prints the next argument
@@ -1090,6 +1145,174 @@
 % later works
 \declaresefer[english={,~#T~#N:#N}]{igrotmoshe, igrosmoshe}
 	{אגרות\nobreakspace משה}{Igrot\nobreakspace Moshe}{~#T~חלק~#N~סי׳~#N}
+
+%                         *************
+%                         ** AUTHORS **
+%                         *************
+
+% \declareauthor[born=, died=, place=]{keys}{Hebrew name}{English name}
+% declares an author, for \attribution{key} and for works declared with
+% author=key. A year is a number, AM (5651) or CE (1891): one above 3760 is
+% taken as AM. Hebrew gives the Hebrew year and English the CE year, an AM
+% year being taken as AM - 3760, which is right from January to Elul. A year
+% that isn't a number (c. 1290) is printed as written, or as {Hebrew}{English};
+% so is place=. Years from 5000 to 5999 leave out the thousands (תרנ״א); others
+% keep them (ד׳תת).
+\prop_new:N \g__mm_author_prop
+\tl_new:N \l__mm_born_tl
+\tl_new:N \l__mm_died_tl
+\keys_define:nn { mareimekomot / author }
+	{
+		born .tl_set:N = \l__mm_born_tl,
+		died .tl_set:N = \l__mm_died_tl,
+		place .tl_set:N = \l__mm_place_tl,
+	}
+\NewDocumentCommand \declareauthor { O{} m m m }
+	{
+		% no group: the author must outlive the declaration
+		\tl_clear:N \l__mm_born_tl
+		\tl_clear:N \l__mm_died_tl
+		\tl_clear:N \l__mm_place_tl
+		\keys_set:nn { mareimekomot / author } {#1}
+		\__mm_id:Nn \g__mm_author_prop {#2}
+		\tl_gclear_new:c { g__mm_author_ \l__mm_id_str _name_tl }
+		\tl_gset:cn { g__mm_author_ \l__mm_id_str _name_tl } { {#3} {#4} }
+		\clist_map_inline:nn { born, died, place }
+			{
+				\tl_gclear_new:c { g__mm_author_ \l__mm_id_str _ ##1 _tl }
+				\tl_gset_eq:cc { g__mm_author_ \l__mm_id_str _ ##1 _tl } { l__mm_ ##1 _tl }
+			}
+	}
+\msg_new:nnn { mareimekomot } { unknown-author }
+	{ Unknown~author~`#1'.~Declare~it~with~\iow_char:N\\declareauthor. }
+
+% #1 a year, in the language around
+\int_new:N \l__mm_year_int
+\cs_new_protected:Npn \__mm_year:n #1
+	{
+		\regex_match:nnTF { \A \s* [0-9]+ \s* \Z } {#1}
+			{
+				\int_set:Nn \l__mm_year_int {#1}
+				\int_compare:nNnT \l__mm_year_int < { 3761 }
+					{ \int_add:Nn \l__mm_year_int { 3760 } }
+				\__mm_if_hebrew:TF
+					{
+						\int_compare:nNnTF { \int_div_truncate:nn \l__mm_year_int { 1000 } } = 5
+							{ \exp_args:NnV \__mm_shanah:nn { \c_true_bool } \l__mm_year_int }
+							{ \exp_args:NnV \__mm_shanah:nn { \c_false_bool } \l__mm_year_int }
+					}
+					{ \int_eval:n { \l__mm_year_int - 3760 } }
+			}
+			{ \__mm_text:n {#1} }
+	}
+\cs_generate_variant:Nn \__mm_year:n { V }
+% the author's dates, in parentheses after the name: born and died (1838–1933),
+% or either alone (b. 1838 / d. 1933)
+\cs_new_protected:Npn \__mm_lifetime:
+	{
+		\bool_lazy_and:nnTF
+			{ \tl_if_blank_p:V \l__mm_born_tl } { \tl_if_blank_p:V \l__mm_died_tl }
+			{ }
+			{
+				\c_space_tl (
+				\tl_if_blank:VTF \l__mm_born_tl
+					{ \__mm_if_hebrew:TF { נפטר } { d. } \nobreakspace \__mm_year:V \l__mm_died_tl }
+					{
+						\tl_if_blank:VTF \l__mm_died_tl
+							{ \__mm_if_hebrew:TF { נולד } { b. } \nobreakspace \__mm_year:V \l__mm_born_tl }
+							{ \__mm_year:V \l__mm_born_tl \__mm_dash: \__mm_year:V \l__mm_died_tl }
+					}
+				)
+			}
+	}
+% #1 author's key, #2 place and #3 year of a work (or empty): the author's name
+% and dates, then the work's place, or the author's, and the work's year
+\cs_new_protected:Npn \__mm_attribution:nnn #1 #2 #3
+	{
+		\group_begin:
+		\__mm_normalise:Nn \l__mm_key_str {#1}
+		\prop_get:NVNTF \g__mm_author_prop \l__mm_key_str \l__mm_names_tl
+			{
+				\str_set:NV \l__mm_id_str \l__mm_names_tl
+				\clist_map_inline:nn { born, died, place }
+					{ \tl_set_eq:cc { l__mm_ ##1 _tl } { g__mm_author_ \l__mm_id_str _ ##1 _tl } }
+				\tl_if_blank:nF {#2} { \tl_set:Nn \l__mm_place_tl {#2} }
+				\__mm_text:v { g__mm_author_ \l__mm_id_str _name_tl }
+				\__mm_lifetime:
+				\tl_if_blank:VF \l__mm_place_tl { , ~ \__mm_text:V \l__mm_place_tl }
+				\tl_if_blank:nF {#3} { , ~ \__mm_year:n {#3} }
+			}
+			{
+				\msg_error:nnn { mareimekomot } { unknown-author } {#1}
+				#1
+			}
+		\group_end:
+	}
+\cs_generate_variant:Nn \__mm_text:n { v }
+\cs_generate_variant:Nn \tl_if_blank:nTF { V }
+\cs_generate_variant:Nn \tl_if_blank:nF { V }
+
+% \attribution{key} gives a declared author: Rashi (1040–1105), Troyes. \attribution{who}{where}{when} gives them as written, leaving out any
+% that is empty.
+\NewDocumentCommand \attribution { m !g !g }
+	{
+		\IfValueTF {#2}
+			{
+				#1
+				\tl_if_blank:nF {#2} { , ~ #2 }
+				\IfValueT {#3} { \tl_if_blank:nF {#3} { , ~ #3 } }
+			}
+			{ \__mm_attribution:nnn {#1} { } { } }
+	}
+
+% The author of the last reference made whose work has one, for shiur to give
+% under a source's heading: shiur clears it before the heading and asks after.
+\tl_new:N \g__mm_attribution_tl
+% #1 author's key (or empty, which leaves what was there), #2 place, #3 year
+\cs_new_protected:Npn \__mm_attribute:nnn #1 #2 #3
+	{
+		\tl_if_blank:nF {#1}
+			{ \tl_gset:Nn \g__mm_attribution_tl { \__mm_attribution:nnn {#1} {#2} {#3} } }
+	}
+\cs_generate_variant:Nn \__mm_attribute:nnn { vvv, Vnn }
+\cs_new_protected:Npn \mareimekomot@clearattribution
+	{ \tl_gclear:N \g__mm_attribution_tl }
+% #1 if there is an attribution to give, #2 if not
+\cs_new_protected:Npn \mareimekomot@ifattribution #1 #2
+	{
+		\bool_lazy_and:nnTF
+			{ \legacy_if_p:n { mm@attribution } }
+			{ ! \tl_if_empty_p:N \g__mm_attribution_tl }
+			{#1} {#2}
+	}
+\cs_new_protected:Npn \mareimekomot@attribution { \g__mm_attribution_tl }
+
+% A few authors of the works built in, for \attribution. The works themselves
+% don't name them, so headings stay as they are; a document can attach one,
+% as \declarecommentary[author=rashi]{rashi}{רש״י}{Rashi}.
+\declareauthor[born=1040, died=1105, place={טרואה}{Troyes}]{rashi}
+	{רש״י}{Rashi}
+\declareauthor[born=1194, died=1270, place={גירונה}{Girona}]{ramban, nachmanides}
+	{רמב״ן}{Ramban}
+\declareauthor[born=1138, died=1204, place={פוסטאט}{Fustat}]{rambam, maimonides}
+	{רמב״ם}{Rambam}
+\declareauthor[place={טולדו}{Toledo}]{yaakovbenasher, baalhaturim}
+	{ר׳\nobreakspace יעקב\nobreakspace בן\nobreakspace אשר}
+	{R.\nobreakspace Ya'akov\nobreakspace ben\nobreakspace Asher}
+\declareauthor[born=1488, died=1575, place={צפת}{Safed}]{yosefkaro, karo, mechaber}
+	{ר׳\nobreakspace יוסף\nobreakspace קארו}
+	{R.\nobreakspace Yosef\nobreakspace Karo}
+\declareauthor[born=1530, died=1572, place={קרקוב}{Kraków}]{rema, isserles}
+	{רמ״א}{Rema}
+\declareauthor[born=1838, died=1933, place={ראדין}{Radin}]{chafetzchaim, yisraelmeirkagan}
+	{ר׳\nobreakspace ישראל\nobreakspace מאיר\nobreakspace הכהן}
+	{R.\nobreakspace Yisrael\nobreakspace Meir\nobreakspace Kagan}
+\declareauthor[born=1829, died=1908, place={נובהרדוק}{Novogrudok}]{yechielmichelepstein, epstein}
+	{ר׳\nobreakspace יחיאל\nobreakspace מיכל\nobreakspace עפשטיין}
+	{R.\nobreakspace Ye\__mm_h: iel\nobreakspace Mikhel\nobreakspace Epstein}
+\declareauthor[born=1895, died=1986, place={ניו\nobreakspace יורק}{New\nobreakspace York}]{moshefeinstein, feinstein}
+	{ר׳\nobreakspace משה\nobreakspace פיינשטיין}
+	{R.\nobreakspace Moshe\nobreakspace Feinstein}
 
 %                         ***********
 %                         ** DATES **
@@ -1514,6 +1737,7 @@
 						\group_begin:
 						% within the parentheses, \sham's own reference doesn't change
 						\cs_set_eq:NN \__mm_remember:n \use_none:n
+						\cs_set_eq:NN \__mm_attribute:nnn \use_none:nnn
 						\g__mm_last_tl
 						\group_end:
 						)

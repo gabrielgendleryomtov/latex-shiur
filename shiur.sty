@@ -127,7 +127,6 @@
 \RequirePackage{mareimekomot}
 \ifshiur@beamer\mareimekomotsetup{sham=full}\fi
 
-\newcommand{\attribution}[3]{#1\ifstrempty{#2}{}{, #2}\ifstrempty{#3}{}{, #3}}
 
 %                         ***********
 %                         ** FONTS **
@@ -430,12 +429,17 @@
 }
 
 % #1 number, #2 subtitle, #3 title, #4 text. \shiur@bodyfont sets the text's
-% font; the heading stays in the language's main font.
+% font; the heading stays in the language's main font. Without a subtitle, a
+% title that refers to a work with a declared author gives the author.
 \newcommand{\shiur@bodyfont}{}
 \newcommand{\shiur@role}{hebrew}
 \newcommand{\shiur@mekorlang}[4]{%
-	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}\textbf{#3}%
-	\ifstrempty{#2}{}{\newline{\shiur@subtitlefont\textit{#2}}}%
+	\noindent\textbf{\shiur@number{#1.\hspace{1em}}}%
+	\mareimekomot@clearattribution\textbf{#3}%
+	\ifstrempty{#2}
+		{\mareimekomot@ifattribution
+			{\newline{\shiur@subtitlefont\textit{\mareimekomot@attribution}}}{}}
+		{\newline{\shiur@subtitlefont\textit{#2}}}%
 	\par\vspace{0.5em}\noindent
 	{\shiur@bodyfont\shiur@withpunct{\shiur@role}{\shiur@parts}{#4}\par}\vspace{1em}%
 }
