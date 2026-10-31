@@ -127,7 +127,12 @@ title, usually names the author or the translation:
 \end{Verbatim}
 
 \cs{attribution}\verb|{who}{where}{when}| joins its non-empty parts with commas, giving
-``\attribution{R. Asher Weiss}{Jerusalem}{5780}''.
+``\attribution{R. Asher Weiss}{Jerusalem}{5780}''. An author declared with \cs{declareauthor}
+is given by key, as \verb|\attribution{feinstein}|, ``\attribution{feinstein}'', in each
+language. And when the heading cites a work declared with its author
+(\verb|\declaresefer[author=...]|), a \env{mekorlang} without a subtitle gets the author as
+one, so it is written once, with the work; \verb|\mareimekomotsetup{attribution=off}| stops
+that. See ``\nameref{sec:references}''.
 
 \subsection{Verse numbers}
 
@@ -209,13 +214,18 @@ Command & English & Hebrew \\
 \verb|\mishnahberurah{605:3}| & \mishnahberurah{605:3} & \texthebrew{\mishnahberurah{605:3}} \\
 \verb|\sefer{tanchuma}{noach}{1}| & \sefer{tanchuma}{noach}{1} & \texthebrew{\sefer{tanchuma}{noach}{1}} \\
 \verb|\sham[rashi]| & \sham[rashi] & \texthebrew{\sham[rashi]} \\
+\verb|\taarich{24}{tevet}{5779}| & \taarich{24}{tevet}{5779} & \texthebrew{\taarich{24}{tevet}{5779}} \\
+\verb|\parashah{vayeshev}| & \parashah{vayeshev} & \texthebrew{\parashah{vayeshev}} \\
 \bottomrule
 \end{tabular}
 \end{center}
 Books, tractates and works are named by keys in any usual transliteration (\texttt{menachot},
 \texttt{menakhot} and \texttt{menahot} are the same). \cs{declaresefer} declares any other work
 from a template, \cs{declarecommentary} a commentary, and \cs{declaretursefer} a work arranged
-by the Tur; a document's own declaration replaces the package's. The
+by the Tur; a document's own declaration replaces the package's. \cs{declareauthor} declares an
+author, whom a work can name, with their dates; \cs{taarich} gives a Hebrew date (or a civil
+date as its Hebrew one, \verb|\taarich[civil]{2019-01-01}|), \cs{shanah} a Hebrew year and
+\cs{parashah} a parashah. The
 \texttt{mareimekomot} manual (\texttt{mareimekomot-doc.pdf}) describes all of it, with the full
 lists of names.
 

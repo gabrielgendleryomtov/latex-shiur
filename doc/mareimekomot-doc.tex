@@ -33,7 +33,8 @@
 		\texttt { \l__doc_code_str }
 	}
 % \namelist{book}: a table of the names mareimekomot.sty declares with
-% \__mm_book:nnn {keys} {Hebrew} {English}, read from the package itself
+% \__mm_book:nnn {keys} {Hebrew} {English} (or, for months, with a number
+% after them), read from the package itself
 \ior_new:N \g__doc_ior
 \seq_new:N \l__doc_match_seq
 \tl_new:N \l__doc_rows_tl
@@ -47,7 +48,7 @@
 		\ior_str_map_inline:Nn \g__doc_ior
 			{
 				\regex_extract_once:nnNT
-					{ \A \s* \\__mm_ #1 :nnn \s* \{ ([^\}]*) \} \s* \{ (.*) \} \s* \{ (.*) \} \s* \Z }
+					{ \A \s* \\__mm_ #1 :nnnn? \s* \{ ([^\}\#]*) \} \s* \{ (.*?) \} \s* \{ (.*?) \} (?: \s* \{ \s* [0-9]+ \s* \} )? \s* \Z }
 					{##1} \l__doc_match_seq
 					{
 						\tl_set_rescan:Nne \l__doc_he_tl { \ExplSyntaxOn } { \seq_item:Nn \l__doc_match_seq { 3 } }
@@ -91,8 +92,8 @@
 \section{Introduction}
 
 \texttt{mareimekomot} (\texthebrew{מראי מקומות}, ``references'') writes references to Tanakh,
-Talmud, halakhah, Midrash and later works. A reference is written once and comes out in the
-language of the text around it:
+Talmud, halakhah, Midrash and later works, and the authors and dates that go with them. A
+reference is written once and comes out in the language of the text around it:
 \begin{examples}
 \row{\tanach{gen}{37:18-20}}
 \row{\bavli{menachot}{69b}}
@@ -127,7 +128,7 @@ in English.
 
 \subsection{Options}
 
-Two settings change the style. They can be given as package options or, at any point in a
+Three settings change the style. They can be given as package options or, at any point in a
 document, with \cs{mareimekomotsetup}:
 \begin{Verbatim}
 \usepackage[sham=full, daf=short]{mareimekomot}
@@ -141,6 +142,9 @@ default is \texttt{short}.
 \texthebrew{\bavli*{69b}} (\texttt{long}, the default) or the traditional
 \texthebrew{\mareimekomotsetup{daf=short}\bavli*{69b}} with a colon for the second side and a
 full stop for the first.
+\item[\texttt{attribution=auto} or \texttt{off}] Whether a package that typesets sources, such
+as \texttt{shiur}, gives the author of a work cited in a source's heading under the heading
+(section~\ref{sec:authors}). The default is \texttt{auto}.
 \end{description}
 
 \section{Keys and spelling}\label{sec:keys}
@@ -370,6 +374,106 @@ nowhere, say) and then writes \cs{sham} would make it point at the wrong source.
 divide a document into sources can prevent that (section~\ref{sec:packages}); \texttt{shiur}
 does.
 
+\section{Authors}\label{sec:authors}
+
+\begin{Verbatim}
+\declareauthor[born=..., died=..., place=...]{keys}{Hebrew}{English}
+\end{Verbatim}
+declares an author, and \cs{attribution}\verb|{key}| gives them: their name, their dates if
+known, and where they lived.
+\begin{Verbatim}[commandchars=+\(\)]
+\declareauthor[born=1932, place={{+texthebrew(ירושלים)}{Jerusalem}}]{asherweiss}
+  {+texthebrew(הר׳ אשר וייס)}{R. Asher Weiss}
+\end{Verbatim}
+\declareauthor[born=1932, place={{ירושלים}{Jerusalem}}]{asherweiss}{הר׳ אשר וייס}{R. Asher Weiss}%
+gives ``\attribution{asherweiss}'' and \mbox{\texthebrew{\attribution{asherweiss}}}. Each key is
+optional. A year may be AM (5692) or CE (1932): one above 3760 is taken as AM. English always
+gives the CE year, and Hebrew the Hebrew one, without the thousands from 5000 to 5999
+(\texthebrew{תרצ״ב}) and with them otherwise (\texthebrew{ד׳ת״ת}). An AM year is taken as
+AM\,$-$\,3760, which is right from January to Elul. A year that isn't a number, such as
+\verb|c. 1290|, is printed as written, or given as \verb|{Hebrew}{English}|; so is a place.
+
+A few authors of the built-in works are declared, for \cs{attribution}:
+\begin{center}
+\small
+\begin{tabular}{@{} >{\raggedright\arraybackslash}p{0.27\linewidth}
+	>{\raggedright\arraybackslash}p{0.40\linewidth}
+	>{\raggedright\arraybackslash}p{0.27\linewidth} @{}}
+\toprule
+Keys & English & Hebrew \\
+\midrule
+\texttt{rashi} & \attribution{rashi} & \texthebrew{\attribution{rashi}} \\
+\texttt{ramban}, \texttt{nachmanides} & \attribution{ramban} & \texthebrew{\attribution{ramban}} \\
+\texttt{rambam}, \texttt{maimonides} & \attribution{rambam} & \texthebrew{\attribution{rambam}} \\
+\texttt{yaakovbenasher}, \texttt{baalhaturim} & \attribution{yaakovbenasher} & \texthebrew{\attribution{yaakovbenasher}} \\
+\texttt{yosefkaro}, \texttt{karo}, \texttt{mechaber} & \attribution{karo} & \texthebrew{\attribution{karo}} \\
+\texttt{rema}, \texttt{isserles} & \attribution{rema} & \texthebrew{\attribution{rema}} \\
+\texttt{chafetzchaim}, \texttt{yisraelmeirkagan} & \attribution{chafetzchaim} & \texthebrew{\attribution{chafetzchaim}} \\
+\texttt{yechielmichelepstein}, \texttt{epstein} & \attribution{epstein} & \texthebrew{\attribution{epstein}} \\
+\texttt{moshefeinstein}, \texttt{feinstein} & \attribution{feinstein} & \texthebrew{\attribution{feinstein}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+The built-in works don't name them, so citing Rashi doesn't add his dates to every heading; a
+document attaches one where it wants it (below).
+
+\cs{attribution}\verb|{who}{where}{when}|, with three arguments, gives them as written,
+leaving out any that is empty: \verb|\attribution{who}{}{when}| is ``who, when''.
+
+\subsection{Works with authors}
+
+\cs{declaresefer}, \cs{declarecommentary} and \cs{declaretursefer} take \texttt{author=}, the key
+of a declared author; \cs{declaresefer} also takes \texttt{place=} and \texttt{year=}, where and
+when the work was published, which replace the author's place:
+\begin{Verbatim}[commandchars=+\(\)]
+\declareauthor{sperling}
+  {+texthebrew(הר׳ אברהם יצחק ספרלינג)}{R. Avraham Yitz\hdot ak Sperling}
+\declaresefer[author=sperling, place={{+texthebrew(לבוב)}{Lvov}}, year=5651]
+  {taameihaminhagim}{+texthebrew(טעמי המנהגים)}{Ta'amei haMinhagim}{ #S}
+\declarecommentary[author=rashi]{rashi}{+texthebrew(רש״י)}{Rashi}
+\end{Verbatim}
+A reference to such a work remembers its author, for a package that typesets sources to give
+under the source's heading (section~\ref{sec:packages}). In \texttt{shiur}, a source whose
+heading is \verb|\sefer{taameihaminhagim}{p. 500}| is headed
+\begin{center}
+\textbf{Ta'amei haMinhagim p. 500}\\
+\textit{R. Avraham Yitzḥak Sperling, Lvov, 1891}
+\end{center}
+in English, and the same in Hebrew. A subtitle the source gives itself wins, and
+\texttt{attribution=off} turns this off.
+
+\section{Dates}\label{sec:dates}
+
+\cs{taarich}\verb|{day}{month}{year}| gives a Hebrew date in the language around:
+\begin{examples}
+\row{\taarich{24}{tevet}{5779}}
+\row{\taarich[shabbat]{25}{kislev}{5750}}
+\row{\taarich[day=tuesday]{4}{nisan}{5704}}
+\row{\taarich[full]{1}{adar2}{5784}}
+\row{\taarich[civil]{2019-01-01}}
+\end{examples}
+Months are keys like any other (\texttt{tevet}, \texttt{teves}; \texttt{cheshvan} or
+\texttt{marcheshvan}, which prints as written); a leap year's Adars are \texttt{adar1} and
+\texttt{adar2} (or \texttt{adarrishon}, \texttt{adarsheni}), and \texttt{adar} alone is the Adar
+of an ordinary year. The options are:
+\begin{description}
+\item[\texttt{shabbat}, or \texttt{day=sunday} \ldots\ \texttt{friday}] the day of the week,
+before the date;
+\item[\texttt{full}] the Hebrew year with its thousands (\texthebrew{ה׳תשע״ט});
+\item[\texttt{civil}] the date is a civil one, \texttt{2019-01-01} or \texttt{today}, given as
+its Hebrew date; \cs{taarich} then takes just that one argument.
+\end{description}
+The date is checked: a day the month hasn't (30 Ḥeshvan in a year where Ḥeshvan has 29 days) is
+an error, and a day of the week that doesn't match the date, Adar in a leap year or Adar II in
+an ordinary one is a warning. The calendar follows Reingold and Dershowitz,
+\textit{Calendrical Calculations}.
+
+\cs{shanah}\verb|{5787}| gives a Hebrew year with its thousands, \texthebrew{\shanah{5787}}, and
+\cs{shanah*} without them, \texthebrew{\shanah*{5787}}; for the first hundred years of a
+millennium \cs{shanah*} keeps them (\texthebrew{\shanah*{5015}}), and a round thousand is
+\texthebrew{\shanah{5000}}. \cs{parashah}\verb|{vayeshev}| gives ``\parashah{vayeshev}'' or
+\texthebrew{\parashah{vayeshev}}, and \cs{parashah*} the name alone.
+
 \section{Restyling and overriding}
 
 A later declaration replaces an earlier one. So a document, or a package of your own loaded
@@ -412,6 +516,14 @@ Three commands let a package that divides a document into units (sources, sectio
 A cleared \cs{sham} gives plain ``ad loc'', with nothing in parentheses, even with
 \texttt{sham=full}.
 
+Three more give the author of a work cited in a heading (section~\ref{sec:authors}):
+\begin{description}
+\item[\cs{mareimekomot@clearattribution}] before the heading;
+\item[\cs{mareimekomot@ifattribution}\texttt{\{true\}\{false\}}] after it: whether a reference
+	in it named an author, and \texttt{attribution} isn't \texttt{off};
+\item[\cs{mareimekomot@attribution}] gives that author, in the language around.
+\end{description}
+
 \clearpage
 \appendix
 \section{Lists of names}
@@ -442,6 +554,10 @@ For \verb|#P|.
 \subsection{Commentaries}
 For the optional argument of \cs{tanach} and \cs{bavli}, and \cs{sham}.
 \namelist{commentary}
+
+\subsection{Months}
+For \cs{taarich}. Plain \texttt{adar} is the Adar of an ordinary year.
+\namelist{month}
 
 \section{Licence}
 
